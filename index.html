@@ -143,8 +143,9 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 /* ============================================================
    SESSIE
    ============================================================ */
-.session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.session-header h2 { font-size: 1.4rem; font-weight: 900; }
+.session-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+input.session-name-input { flex: 1; min-width: 0; font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--text); background: transparent; border: none; border-bottom: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent); border-radius: 0; padding: 4px 2px; }
+input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow: none; }
 .progress-tag { font-family: "Orbitron", sans-serif; font-weight: 700; padding: 8px 16px; border-radius: 30px; background: rgba(0,0,0,0.4); border: 1.5px solid var(--primary); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); font-size: 0.95rem; }
 .m-name { font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); }
 .machine-card { padding: 0; }
@@ -302,7 +303,7 @@ details.tip[open] > summary::after { content: "−"; }
   <!-- ============ SESSIE ============ -->
   <section id="view-session" class="view">
     <div class="session-header">
-      <h2>De Grind</h2>
+      <input type="text" id="session-name" class="session-name-input" placeholder="Naam je sessie…" maxlength="40" />
       <div class="progress-tag" id="sess-progress">0 / 0</div>
     </div>
     <div id="machine-list"></div>
@@ -597,10 +598,11 @@ function renderHome() {
   sessions.forEach(s => s.entries.forEach(e => totalKg += (parseFloat(e.weight) || 0)));
   document.getElementById("stat-kg").textContent = Math.round(totalKg);
   const last = sessions[sessions.length - 1];
-  document.getElementById("home-last").textContent = last ? `Laatste sessie: ${fmtNice(last.date)}` : "Nog geen sessies — tijd om te beginnen!";
+  const lastLabel = last ? (last.name ? `${last.name} · ${fmtNice(last.date)}` : fmtNice(last.date)) : null;
+  document.getElementById("home-last").textContent = lastLabel ? `Laatste sessie: ${lastLabel}` : "Nog geen sessies — tijd om te beginnen!";
 }
 document.getElementById("enter-gym").addEventListener("click", () => {
-  currentSession = { id: uuid(), date: todayISO(), entries: [] };
+  currentSession = { id: uuid(), date: todayISO(), name: "", entries: [] };
   expandedMachineId = null;
   route("session");
 });
@@ -613,6 +615,9 @@ function renderSession() {
   list.innerHTML = "";
   const machines = store.machines();
   if (!currentSession) { route("home"); return; }
+  const nameInput = document.getElementById("session-name");
+  if (nameInput.value !== (currentSession.name || "")) nameInput.value = currentSession.name || "";
+  nameInput.oninput = () => { currentSession.name = nameInput.value; };
   if (machines.length === 0) { list.innerHTML = `<div class="empty-state">Nog geen apparaten. Voeg ze toe bij Instellingen.</div>`; updateProgress(); return; }
 
   const doneId = id => currentSession.entries.some(e => e.machineId === id);
@@ -693,6 +698,7 @@ function updateProgress() {
 }
 document.getElementById("finish-session").addEventListener("click", () => {
   if (!currentSession || currentSession.entries.length === 0) { alert("Rond minstens één apparaat af voordat je de sessie afsluit!"); return; }
+  if (!currentSession.name || !currentSession.name.trim()) currentSession.name = `Training ${fmtNice(currentSession.date)}`;
   const sessions = store.sessions(); sessions.push(currentSession); store.setSessions(sessions);
   currentSession = null; celebrate(); setTimeout(() => route("stats"), 700);
 });
@@ -741,12 +747,13 @@ function renderStats() { const sessions = filterSessions(); renderTotalChart(ses
 function renderTotalChart(sessions) {
   const card = document.getElementById("total-chart-card");
   if (sessions.length === 0) { card.innerHTML = `<div class="empty-state">Geen sessies in dit bereik.</div>`; return; }
-  const totals = sessions.map(s => ({ date: s.date, total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0) }));
+  const totals = sessions.map(s => ({ date: s.date, name: s.name || "", total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0) }));
   const max = Math.max(...totals.map(t => t.total), 1);
   const bars = totals.map(t => {
     const h = Math.max(6, (t.total / max) * 100);
     const md = t.date.slice(5).replace("-", "/");
-    return `<div class="wave-bar" style="height:0%" data-h="${h}"><span class="bar-val">${Math.round(t.total)}</span><span class="bar-date">${md}</span></div>`;
+    const tip = (t.name ? t.name + " · " : "") + t.date + ": " + Math.round(t.total) + " kg";
+    return `<div class="wave-bar" style="height:0%" data-h="${h}" title="${tip}"><span class="bar-val">${Math.round(t.total)}</span><span class="bar-date">${md}</span></div>`;
   }).join("");
   card.innerHTML = `<div class="wave-chart">${bars}</div>`;
   requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
