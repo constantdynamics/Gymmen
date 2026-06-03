@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>GymWave — Track your gains. Own your grind.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+/* ============================================================
+   THEME VARIABLES
+   ============================================================ */
+:root {
+  --bg: #0d0015;
+  --primary: #ff2d78;
+  --accent: #7b2fff;
+  --glow: #ff2d78;
+  --text: #f4eaff;
+  --card-bg: rgba(10, 0, 20, 0.55);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Rajdhani", sans-serif;
+  background:
+    radial-gradient(ellipse at 20% 0%, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 100%, color-mix(in srgb, var(--primary) 30%, transparent) 0%, transparent 50%),
+    linear-gradient(180deg, var(--bg) 0%, #000 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.5s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scanline overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  z-index: 9999;
+  mix-blend-mode: overlay;
+}
+
+h1, h2, h3, .orbitron, .hero-btn, .nav-label, .stat-num {
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 1px;
+}
+
+/* App shell */
+#app {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 24px 18px 120px;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   SHARED COMPONENTS
+   ============================================================ */
+.card {
+  background: var(--card-bg);
+  border: 1.5px solid color-mix(in srgb, var(--glow) 60%, transparent);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--glow) 35%, transparent),
+              inset 0 0 18px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+label { display: block; font-weight: 700; font-size: 1.05rem; margin: 12px 0 6px; opacity: 0.9; }
+
+input[type="text"], input[type="number"], input[type="date"] {
+  width: 100%;
+  padding: 13px 15px;
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 12px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 60%, transparent);
+}
+
+.btn {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  color: #fff;
+  padding: 15px 22px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 0 22px color-mix(in srgb, var(--glow) 50%, transparent);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  text-transform: uppercase;
+}
+.btn:hover { transform: scale(1.04); box-shadow: 0 0 32px color-mix(in srgb, var(--glow) 75%, transparent); }
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn.full { width: 100%; }
+.btn.ghost {
+  background: transparent;
+  border: 1.5px solid color-mix(in srgb, var(--primary) 70%, transparent);
+  box-shadow: none;
+  color: var(--primary);
+}
+.btn.warn { background: linear-gradient(135deg, #ff2e4c, #b00020); box-shadow: 0 0 22px rgba(255,46,76,0.5); }
+.btn.small { padding: 9px 14px; font-size: 0.85rem; border-radius: 10px; }
+
+.muted { opacity: 0.6; }
+.center { text-align: center; }
+
+/* ============================================================
+   VIEWS / ROUTING
+   ============================================================ */
+.view { display: none; animation: slideIn 0.4s ease; }
+.view.active { display: block; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+.welcome-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  text-align: center;
+  margin-top: 30px;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px color-mix(in srgb, var(--glow) 60%, transparent);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--glow) 50%, transparent));
+}
+.tagline { text-align: center; font-size: 1.25rem; font-weight: 600; opacity: 0.85; margin: 8px 0 28px; }
+
+.setting-name-row { margin-bottom: 8px; }
+
+.unit-toggle { display: inline-flex; gap: 0; border-radius: 12px; overflow: hidden; border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); margin-top: 6px; }
+.unit-toggle button {
+  font-family: "Orbitron", sans-serif; font-weight: 700; padding: 11px 22px; border: none; cursor: pointer;
+  background: transparent; color: var(--text); font-size: 1rem; transition: all 0.3s ease;
+}
+.unit-toggle button.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; }
+
+.machine-chip {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,0,0,0.4); border: 1px solid color-mix(in srgb, var(--glow) 50%, transparent);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 10px;
+  animation: popIn 0.4s ease;
+}
+@keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+
+/* ============================================================
+   HOME
+   ============================================================ */
+.date-big {
+  font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.7rem; text-align: center;
+  letter-spacing: 3px; margin: 18px 0 10px;
+  text-shadow: 0 0 22px color-mix(in srgb, var(--glow) 70%, transparent);
+  color: var(--primary);
+}
+.hero-wrap { text-align: center; margin: 46px 0 30px; }
+.hero-btn {
+  font-size: 1.6rem; font-weight: 900; padding: 34px 30px; width: 100%; max-width: 360px;
+  border: none; border-radius: 24px; cursor: pointer; color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  box-shadow: 0 0 40px color-mix(in srgb, var(--glow) 70%, transparent);
+  animation: pulse 2s infinite ease-in-out;
+  text-transform: uppercase; letter-spacing: 2px;
+  transition: transform 0.25s ease;
+}
+.hero-btn:hover { transform: scale(1.03); }
+.hero-btn:active { transform: scale(0.97); }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 34px color-mix(in srgb, var(--glow) 55%, transparent); transform: scale(1); }
+  50% { box-shadow: 0 0 60px color-mix(in srgb, var(--glow) 95%, transparent); transform: scale(1.025); }
+}
+.last-session { text-align: center; font-size: 1.15rem; opacity: 0.8; margin-bottom: 26px; font-weight: 600; }
+
+.stat-pills { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.pill {
+  flex: 1; min-width: 140px;
+  background: var(--card-bg); border: 1.5px solid color-mix(in srgb, var(--glow) 60%, transparent);
+  border-radius: 16px; padding: 18px; text-align: center;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--glow) 30%, transparent);
+}
+.pill .label { font-size: 0.85rem; letter-spacing: 1.5px; opacity: 0.7; font-weight: 700; }
+.stat-num { font-size: 2rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 16px color-mix(in srgb, var(--glow) 60%, transparent); }
+
+/* ============================================================
+   ACTIVE SESSION
+   ============================================================ */
+.session-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.session-header h2 { font-size: 1.5rem; font-weight: 900; }
+.progress-tag {
+  font-family: "Orbitron", sans-serif; font-weight: 700; padding: 8px 16px; border-radius: 30px;
+  background: rgba(0,0,0,0.4); border: 1.5px solid var(--primary);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); font-size: 0.95rem;
+}
+
+.machine-card .m-name { font-size: 1.4rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); margin-bottom: 14px; }
+
+.weight-ctrl { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 8px 0 14px; }
+.weight-ctrl .wbtn {
+  width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer; flex-shrink: 0;
+  font-size: 1.8rem; font-weight: 900; color: #fff; font-family: "Orbitron", sans-serif;
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 55%, transparent);
+  transition: transform 0.2s ease; display: flex; align-items: center; justify-content: center;
+}
+.weight-ctrl .wbtn:active { transform: scale(0.9); }
+.weight-display {
+  font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 2.2rem; text-align: center;
+  width: 130px; background: transparent; border: none; color: var(--text);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent);
+}
+.weight-unit { font-size: 1rem; opacity: 0.6; text-align: center; margin-top: -8px; }
+
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.settings-grid .s-item label { font-size: 0.85rem; margin: 0 0 4px; opacity: 0.7; }
+.settings-grid .s-item input { padding: 9px 12px; font-size: 1rem; }
+
+.machine-card.done {
+  opacity: 0.55; filter: grayscale(0.7);
+  border-color: rgba(120,120,140,0.4); box-shadow: none;
+  animation: flipDone 0.5s ease;
+}
+@keyframes flipDone {
+  0% { transform: rotateX(0) scale(1); }
+  50% { transform: rotateX(85deg) scale(0.95); }
+  100% { transform: rotateX(0) scale(1); }
+}
+.done-collapsed { display: flex; align-items: center; justify-content: space-between; }
+.done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
+.done-collapsed .d-name { font-weight: 900; font-family: "Orbitron", sans-serif; font-size: 1.1rem; }
+
+/* ============================================================
+   STATISTICS
+   ============================================================ */
+.filter-pills { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; justify-content: center; }
+.filter-pills button {
+  font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;
+  padding: 9px 14px; border-radius: 30px; cursor: pointer; color: var(--text);
+  background: rgba(0,0,0,0.4); border: 1.5px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  transition: all 0.3s ease;
+}
+.filter-pills button.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 55%, transparent);
+}
+
+.section-title { font-size: 1.25rem; font-weight: 900; margin: 26px 0 14px; color: var(--primary); text-shadow: 0 0 12px color-mix(in srgb, var(--glow) 45%, transparent); }
+
+.waffle { display: flex; flex-wrap: wrap; gap: 5px; max-width: 100%; }
+.waffle-cell {
+  width: 26px; height: 26px; border-radius: 6px; position: relative;
+  display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+  transition: transform 0.2s ease; box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
+.waffle-cell:hover { transform: scale(1.18); z-index: 2; }
+.waffle-cell .star { color: #fff; text-shadow: 0 0 6px #000; font-size: 0.85rem; }
+.legend { font-size: 0.95rem; opacity: 0.8; margin-top: 10px; font-weight: 600; }
+
+.wave-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 14px 6px 0; overflow-x: auto; }
+.wave-bar {
+  flex: 1; min-width: 22px; border-radius: 8px 8px 3px 3px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent);
+  position: relative; transition: height 0.8s cubic-bezier(.2,.9,.3,1.2);
+  display: flex; align-items: flex-start; justify-content: center;
+}
+.wave-bar .bar-val { font-size: 0.7rem; font-weight: 700; margin-top: -18px; white-space: nowrap; opacity: 0.85; }
+.wave-bar .bar-date { position: absolute; bottom: -22px; font-size: 0.6rem; opacity: 0.6; white-space: nowrap; }
+
+.empty-state { text-align: center; opacity: 0.6; padding: 40px 20px; font-size: 1.1rem; font-weight: 600; }
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+.theme-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.swatch {
+  border-radius: 16px; padding: 22px 14px; cursor: pointer; text-align: center;
+  font-family: "Orbitron", sans-serif; font-weight: 700; color: #fff; font-size: 1rem;
+  border: 3px solid transparent; transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative; overflow: hidden; text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+.swatch:hover { transform: scale(1.04); }
+.swatch.active { border-color: #fff; box-shadow: 0 0 26px rgba(255,255,255,0.5); }
+
+.machine-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: rgba(0,0,0,0.35); border: 1px solid color-mix(in srgb, var(--glow) 45%, transparent);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+}
+.machine-row .mr-name { font-weight: 700; font-size: 1.15rem; }
+.row-actions { display: flex; gap: 8px; }
+
+/* ============================================================
+   BOTTOM NAV
+   ============================================================ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 460px; display: flex; justify-content: space-around;
+  background: rgba(5, 0, 12, 0.85); backdrop-filter: blur(14px);
+  border-top: 1.5px solid color-mix(in srgb, var(--glow) 50%, transparent);
+  padding: 10px 0 14px; z-index: 100;
+  box-shadow: 0 -4px 26px color-mix(in srgb, var(--glow) 25%, transparent);
+}
+.nav-item {
+  background: none; border: none; cursor: pointer; color: var(--text);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  opacity: 0.55; transition: all 0.3s ease; position: relative; padding: 4px 10px;
+}
+.nav-item .nav-icon { font-size: 1.5rem; }
+.nav-item .nav-label { font-size: 0.62rem; letter-spacing: 1px; font-weight: 700; }
+.nav-item.active { opacity: 1; color: var(--primary); }
+.nav-item.active::after {
+  content: ""; position: absolute; bottom: -8px; left: 20%; right: 20%; height: 3px; border-radius: 3px;
+  background: var(--primary); box-shadow: 0 0 12px var(--glow);
+}
+.nav-item:disabled { opacity: 0.25; cursor: not-allowed; }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+}
+.modal-overlay.show { display: flex; animation: slideIn 0.3s ease; }
+.modal {
+  background: linear-gradient(160deg, #15001f, #050008); max-width: 380px; width: 100%;
+  border: 1.5px solid var(--primary); border-radius: 20px; padding: 26px;
+  box-shadow: 0 0 40px color-mix(in srgb, var(--glow) 50%, transparent); text-align: center;
+}
+.modal h3 { font-size: 1.4rem; margin-bottom: 12px; }
+.modal p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 22px; }
+.modal-actions { display: flex; gap: 12px; }
+.modal-actions .btn { flex: 1; }
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2000; }
+.confetti-piece { position: absolute; width: 10px; height: 16px; opacity: 0.95; animation: fall linear forwards; }
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.divider { height: 1px; background: color-mix(in srgb, var(--glow) 30%, transparent); margin: 20px 0; border: none; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ============ ONBOARDING ============ -->
+  <section id="view-onboarding" class="view">
+    <h1 class="welcome-title">GYMWAVE</h1>
+    <p class="tagline">Track your gains. Own your grind.</p>
+
+    <div class="card">
+      <label>Machine Name</label>
+      <input type="text" id="ob-name" placeholder="e.g. Chest Press" />
+
+      <label>How many adjustable settings? (0–6)</label>
+      <input type="number" id="ob-count" min="0" max="6" value="0" />
+
+      <div id="ob-settings"></div>
+
+      <label>Starting Weight</label>
+      <input type="number" id="ob-weight" min="0" step="2.5" value="20" />
+      <div class="unit-toggle" id="ob-unit">
+        <button class="active" data-unit="kg">KG</button>
+        <button data-unit="lbs">LBS</button>
+      </div>
+
+      <div style="margin-top:18px; display:flex; gap:10px;">
+        <button class="btn ghost full" id="ob-add">+ Add Machine</button>
+      </div>
+    </div>
+
+    <div id="ob-list"></div>
+
+    <button class="btn full" id="ob-go" disabled style="margin-top:10px;">Let's Go 🚀</button>
+  </section>
+
+  <!-- ============ HOME ============ -->
+  <section id="view-home" class="view">
+    <div class="date-big" id="home-date">—</div>
+    <div class="hero-wrap">
+      <button class="hero-btn" id="enter-gym">Enter the Gym</button>
+    </div>
+    <div class="last-session" id="home-last"></div>
+    <div class="stat-pills">
+      <div class="pill"><div class="label">TOTAL SESSIONS</div><div class="stat-num" id="stat-sessions">0</div></div>
+      <div class="pill"><div class="label">TOTAL KG LIFTED</div><div class="stat-num" id="stat-kg">0</div></div>
+    </div>
+  </section>
+
+  <!-- ============ SESSION ============ -->
+  <section id="view-session" class="view">
+    <div class="session-header">
+      <h2>The Grind</h2>
+      <div class="progress-tag" id="sess-progress">0 / 0</div>
+    </div>
+    <div id="machine-list"></div>
+    <button class="btn full" id="finish-session" style="margin-top:8px;">Finish Session 🏁</button>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section id="view-stats" class="view">
+    <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:16px;">Statistics</h2>
+    <div class="filter-pills" id="stat-filters">
+      <button data-range="week">WEEK</button>
+      <button data-range="month" class="active">MONTH</button>
+      <button data-range="3month">3 MONTHS</button>
+      <button data-range="custom">CUSTOM</button>
+    </div>
+    <div id="custom-range" style="display:none;" class="card">
+      <label>From</label><input type="date" id="range-from" />
+      <label>To</label><input type="date" id="range-to" />
+      <button class="btn small full" id="apply-range" style="margin-top:12px;">Apply</button>
+    </div>
+
+    <div class="section-title">Total Progress</div>
+    <div class="card" id="total-chart-card"></div>
+
+    <div class="section-title">Per-Machine Progress</div>
+    <div id="waffle-section"></div>
+  </section>
+
+  <!-- ============ SETTINGS ============ -->
+  <section id="view-settings" class="view">
+    <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:16px;">Settings</h2>
+
+    <div class="section-title">Theme</div>
+    <div class="theme-grid" id="theme-grid"></div>
+
+    <div class="section-title">Manage Machines</div>
+    <div id="manage-machines"></div>
+    <button class="btn ghost full small" id="add-machine-settings" style="margin-top:6px;">+ Add Machine</button>
+
+    <div class="section-title" style="color:#ff4d6a;">Danger Zone</div>
+    <button class="btn warn full" id="reset-data">Reset All Data</button>
+  </section>
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<nav class="bottom-nav" id="nav">
+  <button class="nav-item" data-view="home"><span class="nav-icon">🏠</span><span class="nav-label">HOME</span></button>
+  <button class="nav-item" data-view="session" id="nav-session"><span class="nav-icon">💪</span><span class="nav-label">SESSION</span></button>
+  <button class="nav-item" data-view="stats"><span class="nav-icon">📊</span><span class="nav-label">STATS</span></button>
+  <button class="nav-item" data-view="settings"><span class="nav-icon">⚙️</span><span class="nav-label">SETTINGS</span></button>
+</nav>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Confirm</h3>
+    <p id="modal-body">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Cancel</button>
+      <button class="btn warn" id="modal-confirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="confetti"></div>
+
+<script>
+/* ============================================================
+   THEMES
+   ============================================================ */
+const THEMES = {
+  "Synthwave":    { bg: "#0d0015", primary: "#ff2d78", accent: "#7b2fff", glow: "#ff2d78", text: "#f4eaff" },
+  "Miami Vice":   { bg: "#001a1a", primary: "#00f5d4", accent: "#ff6b35", glow: "#00f5d4", text: "#eafffb" },
+  "Cyber Sunset": { bg: "#100010", primary: "#ff6b00", accent: "#cc00ff", glow: "#ff6b00", text: "#fff0e6" },
+  "Neo Tokyo":    { bg: "#000a14", primary: "#00d4ff", accent: "#ff003c", glow: "#00d4ff", text: "#e6faff" },
+  "Pastel Wave":  { bg: "#1a0a2e", primary: "#c8a4f8", accent: "#f4a4c8", glow: "#c8a4f8", text: "#f6ecff" },
+};
+
+/* ============================================================
+   STORAGE HELPERS
+   ============================================================ */
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8); return v.toString(16);
+  }));
+
+const store = {
+  machines: () => JSON.parse(localStorage.getItem("gymwave_machines") || "[]"),
+  setMachines: (m) => localStorage.setItem("gymwave_machines", JSON.stringify(m)),
+  sessions: () => JSON.parse(localStorage.getItem("gymwave_sessions") || "[]"),
+  setSessions: (s) => localStorage.setItem("gymwave_sessions", JSON.stringify(s)),
+  theme: () => localStorage.getItem("gymwave_theme") || "Synthwave",
+  setTheme: (t) => localStorage.setItem("gymwave_theme", t),
+  setupDone: () => localStorage.getItem("gymwave_setup_done") === "true",
+  setSetupDone: (v) => localStorage.setItem("gymwave_setup_done", v ? "true" : "false"),
+};
+
+/* ============================================================
+   THEME APPLY
+   ============================================================ */
+function applyTheme(name) {
+  const t = THEMES[name] || THEMES["Synthwave"];
+  const r = document.documentElement.style;
+  r.setProperty("--bg", t.bg);
+  r.setProperty("--primary", t.primary);
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--glow", t.glow);
+  r.setProperty("--text", t.text);
+  r.setProperty("--card-bg", "rgba(0,0,0,0.5)");
+  store.setTheme(name);
+}
+
+/* ============================================================
+   ROUTING
+   ============================================================ */
+let currentSession = null; // active session object in progress
+
+function route(view) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById("view-" + view).classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n =>
+    n.classList.toggle("active", n.dataset.view === view));
+  window.scrollTo(0, 0);
+
+  if (view === "home") renderHome();
+  if (view === "session") renderSession();
+  if (view === "stats") renderStats();
+  if (view === "settings") renderSettings();
+
+  document.getElementById("nav-session").disabled = !currentSession;
+}
+
+document.querySelectorAll(".nav-item").forEach(n => {
+  n.addEventListener("click", () => {
+    if (n.disabled) return;
+    route(n.dataset.view);
+  });
+});
+
+/* ============================================================
+   DATE HELPERS
+   ============================================================ */
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function fmtBigDate(d) {
+  const days = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${days[d.getDay()]} / ${months[d.getMonth()]} ${String(d.getDate()).padStart(2,"0")} / ${d.getFullYear()}`;
+}
+function fmtNice(iso) {
+  const d = new Date(iso + "T00:00:00");
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${String(d.getDate()).padStart(2,"0")}`;
+}
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+let obMachines = [];
+let obUnit = "kg";
+
+function renderObSettings() {
+  const count = Math.max(0, Math.min(6, parseInt(document.getElementById("ob-count").value) || 0));
+  const wrap = document.getElementById("ob-settings");
+  wrap.innerHTML = "";
+  for (let i = 0; i < count; i++) {
+    const div = document.createElement("div");
+    div.className = "setting-name-row";
+    div.innerHTML = `<label>Setting ${i+1} Name</label><input type="text" class="ob-setting-name" placeholder="e.g. Seat Height" />`;
+    wrap.appendChild(div);
+  }
+}
+
+function renderObList() {
+  const list = document.getElementById("ob-list");
+  list.innerHTML = "";
+  obMachines.forEach((m, idx) => {
+    const chip = document.createElement("div");
+    chip.className = "machine-chip";
+    const sNames = m.settings.map(s => s.label).join(", ") || "no settings";
+    chip.innerHTML = `<div><strong style="font-size:1.15rem;">${m.name}</strong><br><span class="muted" style="font-size:0.9rem;">${m.lastWeight}${m.unit} · ${sNames}</span></div>`;
+    const del = document.createElement("button");
+    del.className = "btn small ghost";
+    del.textContent = "✕";
+    del.onclick = () => { obMachines.splice(idx, 1); renderObList(); updateGoBtn(); };
+    chip.appendChild(del);
+    list.appendChild(chip);
+  });
+}
+
+function updateGoBtn() {
+  document.getElementById("ob-go").disabled = obMachines.length < 1;
+}
+
+document.getElementById("ob-count").addEventListener("input", renderObSettings);
+
+document.querySelectorAll("#ob-unit button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#ob-unit button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    obUnit = b.dataset.unit;
+  });
+});
+
+document.getElementById("ob-add").addEventListener("click", () => {
+  const name = document.getElementById("ob-name").value.trim();
+  if (!name) { alert("Please enter a machine name"); return; }
+  const settings = [...document.querySelectorAll(".ob-setting-name")].map(inp => ({
+    label: inp.value.trim() || "Setting", lastValue: ""
+  }));
+  const weight = parseFloat(document.getElementById("ob-weight").value) || 0;
+  obMachines.push({ id: uuid(), name, settings, lastWeight: weight, unit: obUnit });
+  // reset form
+  document.getElementById("ob-name").value = "";
+  document.getElementById("ob-count").value = "0";
+  document.getElementById("ob-weight").value = "20";
+  renderObSettings();
+  renderObList();
+  updateGoBtn();
+});
+
+document.getElementById("ob-go").addEventListener("click", () => {
+  if (obMachines.length < 1) return;
+  store.setMachines(obMachines.map(m => ({ id: m.id, name: m.name, settings: m.settings, lastWeight: m.lastWeight, unit: m.unit })));
+  store.setSetupDone(true);
+  route("home");
+});
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function renderHome() {
+  document.getElementById("home-date").textContent = fmtBigDate(new Date());
+  const sessions = store.sessions();
+  document.getElementById("stat-sessions").textContent = sessions.length;
+  let totalKg = 0;
+  sessions.forEach(s => s.entries.forEach(e => totalKg += (parseFloat(e.weight) || 0)));
+  document.getElementById("stat-kg").textContent = Math.round(totalKg);
+
+  const last = sessions[sessions.length - 1];
+  document.getElementById("home-last").textContent = last
+    ? `Last session: ${fmtNice(last.date)}` : "No sessions yet — time to start!";
+}
+
+document.getElementById("enter-gym").addEventListener("click", () => {
+  currentSession = { id: uuid(), date: todayISO(), entries: [] };
+  route("session");
+});
+
+/* ============================================================
+   ACTIVE SESSION
+   ============================================================ */
+function renderSession() {
+  const list = document.getElementById("machine-list");
+  list.innerHTML = "";
+  const machines = store.machines();
+
+  if (!currentSession) { route("home"); return; }
+  if (machines.length === 0) {
+    list.innerHTML = `<div class="empty-state">No machines yet. Add some in Settings.</div>`;
+  }
+
+  machines.forEach(m => {
+    const done = currentSession.entries.find(e => e.machineId === m.id);
+    const card = document.createElement("div");
+    card.className = "card machine-card" + (done ? " done" : "");
+    card.dataset.id = m.id;
+
+    if (done) {
+      card.innerHTML = `<div class="done-collapsed">
+        <div><span class="d-name">${m.name}</span><br><span class="muted">${done.weight}${m.unit||'kg'}</span></div>
+        <span class="chk">✓</span></div>`;
+    } else {
+      const settingsHtml = m.settings.map((s, i) => `
+        <div class="s-item">
+          <label>${s.label}</label>
+          <input type="text" class="sess-setting" data-i="${i}" value="${s.lastValue || ''}" />
+        </div>`).join("");
+      card.innerHTML = `
+        <div class="m-name">${m.name}</div>
+        <div class="weight-ctrl">
+          <button class="wbtn" data-act="dec">−</button>
+          <div>
+            <input type="number" class="weight-display" step="2.5" value="${m.lastWeight}" />
+            <div class="weight-unit">${m.unit || 'kg'}</div>
+          </div>
+          <button class="wbtn" data-act="inc">+</button>
+        </div>
+        ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
+        <button class="btn full done-btn">DONE ✓</button>`;
+
+      const wInput = card.querySelector(".weight-display");
+      card.querySelector('[data-act="dec"]').onclick = () => { wInput.value = Math.max(0, (parseFloat(wInput.value)||0) - 2.5); };
+      card.querySelector('[data-act="inc"]').onclick = () => { wInput.value = (parseFloat(wInput.value)||0) + 2.5; };
+      card.querySelector(".done-btn").onclick = () => completeMachine(m, card);
+    }
+    list.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+function completeMachine(m, card) {
+  const weight = parseFloat(card.querySelector(".weight-display").value) || 0;
+  const settings = [...card.querySelectorAll(".sess-setting")].map((inp, i) => ({
+    label: m.settings[i].label, value: inp.value
+  }));
+  // save to session
+  currentSession.entries = currentSession.entries.filter(e => e.machineId !== m.id);
+  currentSession.entries.push({ machineId: m.id, weight, settings });
+
+  // persist machine's lastWeight + lastValues
+  const machines = store.machines();
+  const target = machines.find(x => x.id === m.id);
+  if (target) {
+    target.lastWeight = weight;
+    settings.forEach((s, i) => { if (target.settings[i]) target.settings[i].lastValue = s.value; });
+    store.setMachines(machines);
+  }
+  renderSession();
+}
+
+function updateProgress() {
+  const total = store.machines().length;
+  const done = currentSession ? currentSession.entries.length : 0;
+  document.getElementById("sess-progress").textContent = `${done} / ${total}`;
+}
+
+document.getElementById("finish-session").addEventListener("click", () => {
+  if (!currentSession || currentSession.entries.length === 0) {
+    alert("Complete at least one machine before finishing!");
+    return;
+  }
+  const sessions = store.sessions();
+  sessions.push(currentSession);
+  store.setSessions(sessions);
+  currentSession = null;
+  celebrate();
+  setTimeout(() => route("stats"), 700);
+});
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function celebrate() {
+  const c = document.getElementById("confetti");
+  const colors = [getCSS("--primary"), getCSS("--accent"), getCSS("--glow"), "#fff"];
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.top = "-20px";
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.boxShadow = `0 0 10px ${colors[Math.floor(Math.random()*colors.length)]}`;
+    p.style.animationDuration = (1.2 + Math.random() * 1.6) + "s";
+    p.style.animationDelay = (Math.random() * 0.4) + "s";
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    c.appendChild(p);
+    setTimeout(() => p.remove(), 3200);
+  }
+}
+function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+/* ============================================================
+   STATISTICS
+   ============================================================ */
+let statRange = "month";
+
+function filterSessions() {
+  const sessions = store.sessions().slice().sort((a, b) => a.date.localeCompare(b.date));
+  const now = new Date();
+  let from = null, to = null;
+  if (statRange === "week") { from = new Date(now); from.setDate(now.getDate() - 7); }
+  else if (statRange === "month") { from = new Date(now); from.setMonth(now.getMonth() - 1); }
+  else if (statRange === "3month") { from = new Date(now); from.setMonth(now.getMonth() - 3); }
+  else if (statRange === "custom") {
+    const f = document.getElementById("range-from").value;
+    const t = document.getElementById("range-to").value;
+    from = f ? new Date(f + "T00:00:00") : null;
+    to = t ? new Date(t + "T23:59:59") : null;
+  }
+  return sessions.filter(s => {
+    const d = new Date(s.date + "T12:00:00");
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
+}
+
+function renderStats() {
+  const sessions = filterSessions();
+  renderTotalChart(sessions);
+  renderWaffles(sessions);
+}
+
+function renderTotalChart(sessions) {
+  const card = document.getElementById("total-chart-card");
+  if (sessions.length === 0) {
+    card.innerHTML = `<div class="empty-state">No sessions in this range yet.</div>`;
+    return;
+  }
+  const totals = sessions.map(s => ({
+    date: s.date,
+    total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0)
+  }));
+  const max = Math.max(...totals.map(t => t.total), 1);
+  const bars = totals.map(t => {
+    const h = Math.max(6, (t.total / max) * 100);
+    const md = t.date.slice(5).replace("-", "/");
+    return `<div class="wave-bar" style="height:0%" data-h="${h}">
+      <span class="bar-val">${Math.round(t.total)}</span>
+      <span class="bar-date">${md}</span></div>`;
+  }).join("");
+  card.innerHTML = `<div class="wave-chart">${bars}</div>`;
+  // animate
+  requestAnimationFrame(() => {
+    card.querySelectorAll(".wave-bar").forEach((b, i) => {
+      setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60);
+    });
+  });
+}
+
+function renderWaffles(sessions) {
+  const wrap = document.getElementById("waffle-section");
+  wrap.innerHTML = "";
+  const machines = store.machines();
+
+  if (machines.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">No machines yet.</div>`;
+    return;
+  }
+
+  machines.forEach(m => {
+    // gather this machine's entries across filtered sessions, chronological
+    const points = [];
+    sessions.forEach(s => {
+      const e = s.entries.find(en => en.machineId === m.id);
+      if (e) points.push({ date: s.date, weight: parseFloat(e.weight) || 0 });
+    });
+
+    const block = document.createElement("div");
+    block.className = "card";
+
+    if (points.length === 0) {
+      block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${m.name}</div>
+        <div class="muted">No data in this range yet.</div>`;
+      wrap.appendChild(block);
+      return;
+    }
+
+    const pb = Math.max(...points.map(p => p.weight));
+    const minW = Math.min(...points.map(p => p.weight));
+    const startW = points[0].weight;
+    const milestoneStep = Math.max(5, startW * 0.1);
+
+    let prevMilestone = startW;
+    const cells = points.map((p, i) => {
+      // intensity 0..1 relative to PB
+      const ratio = pb > minW ? (p.weight - minW) / (pb - minW) : 1;
+      const intensity = 0.35 + ratio * 0.65;
+      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity*100)}%, var(--accent))`;
+      // milestone: weight crossed +milestoneStep over previous milestone
+      let star = "";
+      if (p.weight >= prevMilestone + milestoneStep) {
+        star = `<span class="star">★</span>`;
+        prevMilestone = p.weight;
+      }
+      const glow = `0 0 ${Math.round(intensity*14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity*70)}%, transparent)`;
+      return `<div class="waffle-cell" title="${p.date}: ${p.weight}${m.unit||'kg'}"
+        style="background:${color}; box-shadow:${glow};">${star}</div>`;
+    }).join("");
+
+    block.innerHTML = `
+      <div class="m-name" style="font-size:1.2rem;">${m.name}</div>
+      <div class="waffle">${cells}</div>
+      <div class="legend">★ = +${milestoneStep % 1 === 0 ? milestoneStep : milestoneStep.toFixed(1)}${m.unit||'kg'} milestone · PB: ${pb}${m.unit||'kg'}</div>`;
+    wrap.appendChild(block);
+  });
+}
+
+document.querySelectorAll("#stat-filters button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#stat-filters button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    statRange = b.dataset.range;
+    document.getElementById("custom-range").style.display = statRange === "custom" ? "block" : "none";
+    if (statRange !== "custom") renderStats();
+  });
+});
+document.getElementById("apply-range").addEventListener("click", renderStats);
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function renderSettings() {
+  renderThemeGrid();
+  renderManageMachines();
+}
+
+function renderThemeGrid() {
+  const grid = document.getElementById("theme-grid");
+  const active = store.theme();
+  grid.innerHTML = "";
+  Object.entries(THEMES).forEach(([name, t]) => {
+    const sw = document.createElement("div");
+    sw.className = "swatch" + (name === active ? " active" : "");
+    sw.style.background = `linear-gradient(135deg, ${t.primary}, ${t.accent})`;
+    sw.style.boxShadow = name === active ? `0 0 26px ${t.glow}` : `0 0 14px ${t.glow}66`;
+    sw.textContent = name;
+    sw.onclick = () => { applyTheme(name); renderThemeGrid(); };
+    grid.appendChild(sw);
+  });
+}
+
+function renderManageMachines() {
+  const wrap = document.getElementById("manage-machines");
+  wrap.innerHTML = "";
+  const machines = store.machines();
+  if (machines.length === 0) {
+    wrap.innerHTML = `<div class="muted" style="margin-bottom:10px;">No machines yet.</div>`;
+  }
+  machines.forEach(m => {
+    const row = document.createElement("div");
+    row.className = "machine-row";
+    row.innerHTML = `<span class="mr-name">${m.name}</span>`;
+    const actions = document.createElement("div");
+    actions.className = "row-actions";
+    const edit = document.createElement("button");
+    edit.className = "btn small ghost"; edit.textContent = "Edit";
+    edit.onclick = () => openEditMachine(m.id);
+    const del = document.createElement("button");
+    del.className = "btn small warn"; del.textContent = "Delete";
+    del.onclick = () => showModal("Delete Machine?", `Remove "${m.name}"? Session history stays intact.`, () => {
+      store.setMachines(store.machines().filter(x => x.id !== m.id));
+      renderManageMachines();
+    });
+    actions.append(edit, del);
+    row.appendChild(actions);
+    wrap.appendChild(row);
+
+    if (m._editing) wrap.appendChild(buildEditForm(m));
+  });
+}
+
+function openEditMachine(id) {
+  const machines = store.machines();
+  machines.forEach(m => m._editing = m.id === id ? !m._editing : false);
+  store.setMachines(machines);
+  renderManageMachines();
+}
+
+function buildEditForm(m) {
+  const form = document.createElement("div");
+  form.className = "card";
+  const settingsRows = m.settings.map((s, i) => `
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+      <input type="text" class="edit-setting" data-i="${i}" value="${s.label}" />
+      <button class="btn small warn" data-del="${i}">✕</button>
+    </div>`).join("");
+  form.innerHTML = `
+    <label>Machine Name</label>
+    <input type="text" class="edit-name" value="${m.name}" />
+    <label>Settings</label>
+    <div class="edit-settings-wrap">${settingsRows}</div>
+    <button class="btn small ghost full add-setting">+ Add Setting</button>
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button class="btn full save-edit">Save</button>
+    </div>`;
+
+  form.querySelectorAll("[data-del]").forEach(btn => {
+    btn.onclick = () => {
+      const machines = store.machines();
+      const target = machines.find(x => x.id === m.id);
+      target.settings.splice(parseInt(btn.dataset.del), 1);
+      store.setMachines(machines);
+      renderManageMachines();
+    };
+  });
+  form.querySelector(".add-setting").onclick = () => {
+    const machines = store.machines();
+    const target = machines.find(x => x.id === m.id);
+    target.settings.push({ label: "New Setting", lastValue: "" });
+    store.setMachines(machines);
+    renderManageMachines();
+  };
+  form.querySelector(".save-edit").onclick = () => {
+    const machines = store.machines();
+    const target = machines.find(x => x.id === m.id);
+    target.name = form.querySelector(".edit-name").value.trim() || target.name;
+    form.querySelectorAll(".edit-setting").forEach(inp => {
+      const i = parseInt(inp.dataset.i);
+      if (target.settings[i]) target.settings[i].label = inp.value.trim() || target.settings[i].label;
+    });
+    target._editing = false;
+    store.setMachines(machines);
+    renderManageMachines();
+  };
+  return form;
+}
+
+document.getElementById("add-machine-settings").addEventListener("click", () => {
+  const machines = store.machines();
+  machines.push({ id: uuid(), name: "New Machine", settings: [], lastWeight: 20, unit: "kg", _editing: true });
+  store.setMachines(machines);
+  renderManageMachines();
+});
+
+document.getElementById("reset-data").addEventListener("click", () => {
+  showModal("Reset All Data?", "This permanently deletes all machines, sessions, and settings. This cannot be undone.", () => {
+    localStorage.removeItem("gymwave_machines");
+    localStorage.removeItem("gymwave_sessions");
+    localStorage.removeItem("gymwave_setup_done");
+    localStorage.removeItem("gymwave_theme");
+    currentSession = null;
+    obMachines = [];
+    applyTheme("Synthwave");
+    boot();
+  });
+});
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+let modalConfirmCb = null;
+function showModal(title, body, onConfirm) {
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-body").textContent = body;
+  modalConfirmCb = onConfirm;
+  document.getElementById("modal").classList.add("show");
+}
+document.getElementById("modal-cancel").onclick = () => document.getElementById("modal").classList.remove("show");
+document.getElementById("modal-confirm").onclick = () => {
+  document.getElementById("modal").classList.remove("show");
+  if (modalConfirmCb) modalConfirmCb();
+};
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+function boot() {
+  applyTheme(store.theme());
+  renderObSettings();
+  // strip transient _editing flags on load
+  const machines = store.machines();
+  if (machines.some(m => m._editing)) {
+    machines.forEach(m => delete m._editing);
+    store.setMachines(machines);
+  }
+  if (store.setupDone() && store.machines().length > 0) {
+    route("home");
+  } else {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById("view-onboarding").classList.add("active");
+  }
+}
+boot();
+</script>
+</body>
+</html>
