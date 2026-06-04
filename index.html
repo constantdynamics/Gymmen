@@ -6,7 +6,7 @@
 <title>GymWave — Train je gains. Pak je grind.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Audiowide&family=Russo+One&family=Chakra+Petch:wght@600;700&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet" />
 <style>
 /* ============================================================
    THEMA-VARIABELEN
@@ -26,6 +26,8 @@
   --scan-opacity: 0.03;
   --head-spacing: 1px;
   --head-transform: none;
+  --head-font: "Orbitron", sans-serif;
+  --waffle-radius: 6px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -54,7 +56,7 @@ body::after {
   z-index: 9999; mix-blend-mode: overlay;
 }
 
-h1, h2, h3, .orbitron, .hero-btn, .nav-label, .stat-num { font-family: "Orbitron", sans-serif; letter-spacing: var(--head-spacing); }
+h1, h2, h3, .orbitron, .hero-btn, .nav-label, .stat-num { font-family: var(--head-font); letter-spacing: var(--head-spacing); }
 h2, .section-title, .m-name, .mc-header .m-name { text-transform: var(--head-transform); }
 
 #app { max-width: 460px; margin: 0 auto; padding: 24px 18px 130px; position: relative; min-height: 100vh; }
@@ -190,7 +192,7 @@ input.weight-display { width: 150px; padding: 12px 8px; font-family: "Orbitron",
 .filter-pills button.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 55%, transparent); }
 .section-title { font-size: 1.25rem; font-weight: 900; margin: 26px 0 14px; color: var(--primary); text-shadow: 0 0 12px color-mix(in srgb, var(--glow) 45%, transparent); }
 .waffle { display: flex; flex-wrap: wrap; gap: 5px; }
-.waffle-cell { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: transform 0.2s ease; box-shadow: 0 0 8px rgba(0,0,0,0.4); }
+.waffle-cell { width: 26px; height: 26px; border-radius: var(--waffle-radius); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: transform 0.2s ease; box-shadow: 0 0 8px rgba(0,0,0,0.4); }
 .waffle-cell:hover { transform: scale(1.18); z-index: 2; }
 .waffle-cell .star { color: #fff; text-shadow: 0 0 6px #000; font-size: 0.85rem; }
 .legend { font-size: 0.95rem; opacity: 0.8; margin-top: 10px; font-weight: 600; }
@@ -294,8 +296,63 @@ details.tip[open] > summary::after { content: "−"; }
 :root[data-theme="Pastel Wave"] .check-item { box-shadow: 0 0 14px color-mix(in srgb, var(--glow) 18%, transparent); }
 :root[data-theme="Pastel Wave"] .btn { box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 30%, transparent); }
 
-/* Miami Vice — dikke afgeronde pill-accenten in de nav */
-:root[data-theme="Miami Vice"] .nav-item.active::after { height: 4px; border-radius: 4px; left: 22%; right: 22%; }
+/* Display-lettertype per thema doorgevoerd op veel elementen */
+.welcome-title, h1, h2, h3, .section-title, .date-big, .stat-num, .pill .label,
+.btn, .hero-btn, .progress-tag, .m-name, .mc-header .m-name, .filter-pills button,
+.swatch, .nav-label, input.session-name-input, input.weight-display, .weight-unit,
+.unit-toggle button, details.tip > summary {
+  font-family: var(--head-font);
+}
+
+/* ----- Eigen achtergrond per thema ----- */
+:root[data-theme="Miami Vice"] body {
+  background:
+    linear-gradient(180deg, transparent 54%, color-mix(in srgb, var(--accent) 30%, transparent) 56%, color-mix(in srgb, var(--accent) 30%, transparent) 58%, transparent 60%),
+    radial-gradient(circle at 50% 118%, color-mix(in srgb, var(--primary) 45%, transparent), transparent 58%),
+    linear-gradient(180deg, var(--bg) 0%, #000 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="Cyber Sunset"] body {
+  background:
+    radial-gradient(circle at 50% 102%, color-mix(in srgb, var(--primary) 50%, transparent), transparent 52%),
+    radial-gradient(circle at 50% -5%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 48%),
+    linear-gradient(180deg, var(--bg) 0%, #000 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="Neo Tokyo"] body {
+  background:
+    linear-gradient(color-mix(in srgb, var(--primary) 9%, transparent) 1px, transparent 1px) 0 0 / 42px 42px,
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 9%, transparent) 1px, transparent 1px) 0 0 / 42px 42px,
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 50%),
+    linear-gradient(180deg, var(--bg) 0%, #000 100%);
+  background-attachment: fixed;
+}
+:root[data-theme="Pastel Wave"] body {
+  background:
+    radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 42%),
+    radial-gradient(circle at 86% 82%, color-mix(in srgb, var(--primary) 30%, transparent), transparent 46%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, #000 100%);
+  background-attachment: fixed;
+}
+
+/* ----- Navigatiebalk per thema ----- */
+/* Miami Vice & Pastel Wave — zwevende, afgeronde nav met actieve pil */
+:root[data-theme="Miami Vice"] .bottom-nav,
+:root[data-theme="Pastel Wave"] .bottom-nav {
+  width: calc(100% - 24px); max-width: 436px; bottom: 12px;
+  border: var(--border-w) solid color-mix(in srgb, var(--glow) 50%, transparent);
+  border-radius: var(--radius);
+}
+:root[data-theme="Miami Vice"] .nav-item.active,
+:root[data-theme="Pastel Wave"] .nav-item.active {
+  background: color-mix(in srgb, var(--glow) 20%, transparent);
+  border-radius: calc(var(--radius) - 6px); padding: 4px 10px;
+}
+:root[data-theme="Miami Vice"] .nav-item.active::after,
+:root[data-theme="Pastel Wave"] .nav-item.active::after { display: none; }
+/* Cyber Sunset — felle gloeiende bovenrand */
+:root[data-theme="Cyber Sunset"] .bottom-nav { border-top-width: 2.5px; box-shadow: 0 -6px 30px color-mix(in srgb, var(--glow) 45%, transparent); }
 </style>
 </head>
 <body>
@@ -433,17 +490,22 @@ details.tip[open] > summary::after { content: "−"; }
    THEMA'S
    ============================================================ */
 const THEMES = {
-  // kleur + eigen vormtaal (hoeken, randen, scanlines, typografie)
+  // kleur + eigen vormtaal (hoeken, randen, scanlines, typografie, font, achtergrond)
   "Synthwave":    { bg: "#0d0015", primary: "#ff2d78", accent: "#7b2fff", glow: "#ff2d78", text: "#f4eaff",
-    radius:"16px", btnRadius:"14px", fieldRadius:"12px", borderW:"1.5px", borderStyle:"solid", scan:"0.04", spacing:"1px", transform:"none" },
+    radius:"16px", btnRadius:"14px", fieldRadius:"12px", borderW:"1.5px", borderStyle:"solid", scan:"0.04", spacing:"1px", transform:"none",
+    font:'"Orbitron", sans-serif', waffle:"6px", cardBg:"rgba(0,0,0,0.5)" },
   "Miami Vice":   { bg: "#001a1a", primary: "#00f5d4", accent: "#ff6b35", glow: "#00f5d4", text: "#eafffb",
-    radius:"26px", btnRadius:"40px", fieldRadius:"18px", borderW:"2px", borderStyle:"solid", scan:"0.02", spacing:"1.5px", transform:"none" },
+    radius:"26px", btnRadius:"40px", fieldRadius:"18px", borderW:"2px", borderStyle:"solid", scan:"0.02", spacing:"1.5px", transform:"none",
+    font:'"Audiowide", sans-serif', waffle:"9px", cardBg:"rgba(0,22,22,0.5)" },
   "Cyber Sunset": { bg: "#100010", primary: "#ff6b00", accent: "#cc00ff", glow: "#ff6b00", text: "#fff0e6",
-    radius:"6px", btnRadius:"6px", fieldRadius:"4px", borderW:"2px", borderStyle:"solid", scan:"0.06", spacing:"2px", transform:"uppercase" },
+    radius:"6px", btnRadius:"6px", fieldRadius:"4px", borderW:"2px", borderStyle:"solid", scan:"0.06", spacing:"2px", transform:"uppercase",
+    font:'"Russo One", sans-serif', waffle:"1px", cardBg:"rgba(12,0,14,0.62)" },
   "Neo Tokyo":    { bg: "#000a14", primary: "#00d4ff", accent: "#ff003c", glow: "#00d4ff", text: "#e6faff",
-    radius:"2px", btnRadius:"2px", fieldRadius:"2px", borderW:"1px", borderStyle:"solid", scan:"0.085", spacing:"3px", transform:"uppercase" },
+    radius:"2px", btnRadius:"2px", fieldRadius:"2px", borderW:"1px", borderStyle:"solid", scan:"0.085", spacing:"3px", transform:"uppercase",
+    font:'"Chakra Petch", sans-serif', waffle:"0px", cardBg:"rgba(0,10,20,0.55)" },
   "Pastel Wave":  { bg: "#1a0a2e", primary: "#c8a4f8", accent: "#f4a4c8", glow: "#c8a4f8", text: "#f6ecff",
-    radius:"30px", btnRadius:"30px", fieldRadius:"20px", borderW:"1.5px", borderStyle:"solid", scan:"0.012", spacing:"0.5px", transform:"none" },
+    radius:"30px", btnRadius:"30px", fieldRadius:"20px", borderW:"1.5px", borderStyle:"solid", scan:"0.012", spacing:"0.5px", transform:"none",
+    font:'"Comfortaa", sans-serif', waffle:"50%", cardBg:"rgba(44,22,66,0.42)" },
 };
 
 /* ============================================================
@@ -548,11 +610,12 @@ function applyTheme(name) {
   const r = document.documentElement.style;
   r.setProperty("--bg", t.bg); r.setProperty("--primary", t.primary);
   r.setProperty("--accent", t.accent); r.setProperty("--glow", t.glow);
-  r.setProperty("--text", t.text); r.setProperty("--card-bg", "rgba(0,0,0,0.5)");
+  r.setProperty("--text", t.text); r.setProperty("--card-bg", t.cardBg || "rgba(0,0,0,0.5)");
   r.setProperty("--radius", t.radius); r.setProperty("--btn-radius", t.btnRadius);
   r.setProperty("--field-radius", t.fieldRadius); r.setProperty("--border-w", t.borderW);
   r.setProperty("--card-border-style", t.borderStyle); r.setProperty("--scan-opacity", t.scan);
   r.setProperty("--head-spacing", t.spacing); r.setProperty("--head-transform", t.transform);
+  r.setProperty("--head-font", t.font || '"Orbitron", sans-serif'); r.setProperty("--waffle-radius", t.waffle || "6px");
   document.documentElement.setAttribute("data-theme", name);
   store.setTheme(name);
 }
@@ -918,6 +981,8 @@ function renderThemeGrid() {
     sw.className = "swatch" + (name === active ? " active" : "");
     sw.style.background = `linear-gradient(135deg, ${t.primary}, ${t.accent})`;
     sw.style.boxShadow = name === active ? `0 0 26px ${t.glow}` : `0 0 14px ${t.glow}66`;
+    sw.style.fontFamily = t.font || '"Orbitron", sans-serif';
+    sw.style.borderRadius = t.radius;
     sw.textContent = name;
     sw.onclick = () => { applyTheme(name); renderThemeGrid(); };
     grid.appendChild(sw);
