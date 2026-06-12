@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Audiowide&family=Russo+One&family=Chakra+Petch:wght@600;700&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ============================================================
    THEMA-VARIABELEN
@@ -460,6 +461,8 @@ details.tip[open] > summary::after { content: "−"; }
     <button class="btn ghost full small" id="export-data">⬇️ Data exporteren (back-up)</button>
     <button class="btn ghost full small" id="import-data" style="margin-top:8px;">⬆️ Data importeren</button>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none;" />
+    <div class="section-title">Cloud-sync</div>
+    <div id="cloud-box"></div>
     <div class="section-title" style="color:#ff4d6a;">Gevarenzone</div>
     <button class="btn warn full" id="reset-data">Alle data wissen</button>
   </section>
@@ -587,18 +590,18 @@ const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
 
 const store = {
   machines: () => JSON.parse(localStorage.getItem("gymwave_machines") || "[]"),
-  setMachines: (m) => localStorage.setItem("gymwave_machines", JSON.stringify(m)),
+  setMachines: (m) => { localStorage.setItem("gymwave_machines", JSON.stringify(m)); touch(); },
   sessions: () => JSON.parse(localStorage.getItem("gymwave_sessions") || "[]"),
-  setSessions: (s) => localStorage.setItem("gymwave_sessions", JSON.stringify(s)),
+  setSessions: (s) => { localStorage.setItem("gymwave_sessions", JSON.stringify(s)); touch(); },
   theme: () => localStorage.getItem("gymwave_theme") || "Synthwave",
-  setTheme: (t) => localStorage.setItem("gymwave_theme", t),
+  setTheme: (t) => { localStorage.setItem("gymwave_theme", t); touch(); },
   setupDone: () => localStorage.getItem("gymwave_setup_done") === "true",
-  setSetupDone: (v) => localStorage.setItem("gymwave_setup_done", v ? "true" : "false"),
+  setSetupDone: (v) => { localStorage.setItem("gymwave_setup_done", v ? "true" : "false"); touch(); },
   checklist: () => JSON.parse(localStorage.getItem("gymwave_checklist") || "null"),
-  setChecklist: (c) => localStorage.setItem("gymwave_checklist", JSON.stringify(c)),
+  setChecklist: (c) => { localStorage.setItem("gymwave_checklist", JSON.stringify(c)); touch(); },
   currentSession: () => JSON.parse(localStorage.getItem("gymwave_current_session") || "null"),
-  setCurrentSession: (s) => localStorage.setItem("gymwave_current_session", JSON.stringify(s)),
-  clearCurrentSession: () => localStorage.removeItem("gymwave_current_session"),
+  setCurrentSession: (s) => { localStorage.setItem("gymwave_current_session", JSON.stringify(s)); touch(); },
+  clearCurrentSession: () => { localStorage.removeItem("gymwave_current_session"); touch(); },
 };
 
 // bewaar de lopende sessie zodat verversen niets vergeet
@@ -1008,7 +1011,7 @@ document.getElementById("reset-checklist").addEventListener("click", () => {
 /* ============================================================
    INSTELLINGEN
    ============================================================ */
-function renderSettings() { renderThemeGrid(); renderManageMachines(); }
+function renderSettings() { renderThemeGrid(); renderManageMachines(); renderCloud(); }
 function renderThemeGrid() {
   const grid = document.getElementById("theme-grid");
   const active = store.theme();
@@ -1169,6 +1172,145 @@ document.getElementById("modal-confirm").onclick = () => {
 };
 
 /* ============================================================
+   CLOUD-SYNC (Supabase, via sync-code)
+   ============================================================ */
+const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
+const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session"];
+
+const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
+
+function lastModified() { return parseInt(localStorage.getItem("gymwave_last_modified") || "0") || 0; }
+function touch() {
+  if (cloudState.applyingRemote) return;
+  localStorage.setItem("gymwave_last_modified", String(Date.now()));
+  cloud.schedulePush();
+}
+
+function genSyncCode() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // zonder verwarrende tekens
+  const rnd = (n) => Array.from({length:n}, () => alphabet[Math.floor(Math.random()*alphabet.length)]).join("");
+  return `${rnd(4)}-${rnd(4)}-${rnd(4)}-${rnd(4)}`;
+}
+
+const cloud = {
+  available() { return typeof window.supabase !== "undefined" && !SUPABASE_KEY.startsWith("__"); },
+  syncId() { return localStorage.getItem("gymwave_sync_id") || ""; },
+  enabled() { return !!this.syncId() && this.available(); },
+  init() {
+    if (this.client || !this.available()) return this.client;
+    this.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return this.client;
+  },
+  collectState() {
+    const data = { lastModified: lastModified() };
+    SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) data[k] = v; });
+    return data;
+  },
+  applyState(data) {
+    if (!data) return;
+    cloudState.applyingRemote = true;
+    SYNC_KEYS.forEach(k => {
+      if (data[k] !== undefined && data[k] !== null) localStorage.setItem(k, data[k]);
+      else localStorage.removeItem(k);
+    });
+    if (data.lastModified) localStorage.setItem("gymwave_last_modified", String(data.lastModified));
+    cloudState.applyingRemote = false;
+  },
+  async push() {
+    if (!this.enabled()) return;
+    this.init();
+    try {
+      const { error } = await this.client.rpc("gymwave_push", { p_sync_id: this.syncId(), p_data: this.collectState() });
+      if (error) throw error;
+      cloudState.lastStatus = "Gesynchroniseerd ✓ " + new Date().toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"});
+    } catch (e) { cloudState.lastStatus = "Synchroniseren mislukt: " + (e.message || e); }
+    if (isView("settings")) renderCloud();
+  },
+  schedulePush() {
+    if (!this.enabled()) return;
+    clearTimeout(cloudState.pushTimer);
+    cloudState.pushTimer = setTimeout(() => this.push(), 1500);
+  },
+  async pull() {
+    if (!this.enabled()) return null;
+    this.init();
+    const { data, error } = await this.client.rpc("gymwave_pull", { p_sync_id: this.syncId() });
+    if (error) throw error;
+    return data; // jsonb of null
+  },
+  // koppel dit apparaat aan een (nieuwe of bestaande) code en synchroniseer slim samen
+  async connect(code) {
+    const newCode = (code || genSyncCode()).trim().toUpperCase();
+    localStorage.setItem("gymwave_sync_id", newCode);
+    this.init();
+    try {
+      const remote = await this.pull();
+      if (remote && (remote.lastModified || 0) >= lastModified()) {
+        this.applyState(remote);                 // cloud is nieuwer → overnemen
+        currentSession = null; expandedMachineId = null; boot();
+      } else {
+        await this.push();                        // lokaal is nieuwer (of leeg in cloud) → uploaden
+      }
+      cloudState.lastStatus = "Cloud-sync actief ✓";
+    } catch (e) { cloudState.lastStatus = "Verbinden mislukt: " + (e.message || e); }
+    if (isView("settings")) renderCloud();
+  },
+  disable() { localStorage.removeItem("gymwave_sync_id"); cloudState.lastStatus = "Cloud-sync uit"; },
+  async initialSync() {
+    if (!this.enabled()) return;
+    try {
+      const remote = await this.pull();
+      if (remote && (remote.lastModified || 0) > lastModified()) {
+        this.applyState(remote);
+        currentSession = null; expandedMachineId = null; boot();
+      } else if (!remote || (remote.lastModified || 0) < lastModified()) {
+        await this.push();
+      }
+    } catch (e) { cloudState.lastStatus = "Sync bij opstarten mislukt: " + (e.message || e); }
+    if (isView("settings")) renderCloud();
+  },
+};
+window.__cloud = cloud;
+function isView(v) { const el = document.getElementById("view-" + v); return el && el.classList.contains("active"); }
+
+function renderCloud() {
+  const box = document.getElementById("cloud-box");
+  if (!box) return;
+  if (!cloud.available()) {
+    box.innerHTML = `<div class="muted" style="font-weight:600;">Cloud-sync is nog niet geconfigureerd (sleutel ontbreekt of offline).</div>`;
+    return;
+  }
+  if (cloud.enabled()) {
+    box.innerHTML = `
+      <div class="card" style="margin-bottom:10px;">
+        <div style="font-weight:700; opacity:0.75; font-size:0.95rem;">Je sync-code (voer deze in op je andere apparaten):</div>
+        <div style="font-family:var(--head-font); font-size:1.4rem; letter-spacing:2px; margin:8px 0; color:var(--primary); word-break:break-all;">${cloud.syncId()}</div>
+        <div class="muted" style="font-size:0.9rem;">${cloudState.lastStatus || "Cloud-sync actief"}</div>
+      </div>
+      <button class="btn ghost full small" id="cloud-copy">📋 Code kopiëren</button>
+      <button class="btn ghost full small" id="cloud-sync-now" style="margin-top:8px;">↻ Nu synchroniseren</button>
+      <button class="btn ghost full small" id="cloud-disable" style="margin-top:8px;">Cloud-sync uitschakelen</button>`;
+    box.querySelector("#cloud-copy").onclick = async () => {
+      try { await navigator.clipboard.writeText(cloud.syncId()); cloudState.lastStatus = "Code gekopieerd ✓"; renderCloud(); } catch { alert(cloud.syncId()); }
+    };
+    box.querySelector("#cloud-sync-now").onclick = () => cloud.push();
+    box.querySelector("#cloud-disable").onclick = () => showModal("Cloud-sync uitschakelen?", "Je data blijft lokaal op dit apparaat staan, maar wordt niet meer naar de cloud gesynct.", () => { cloud.disable(); renderCloud(); });
+  } else {
+    box.innerHTML = `
+      <div class="muted" style="font-weight:600; margin-bottom:10px;">Bewaar je data in de cloud en gebruik 'm op meerdere apparaten met één sync-code.</div>
+      <button class="btn full small" id="cloud-enable">☁️ Cloud-sync aanzetten</button>
+      <button class="btn ghost full small" id="cloud-join" style="margin-top:8px;">🔗 Bestaande code invoeren</button>
+      ${cloudState.lastStatus ? `<div class="muted" style="font-size:0.9rem; margin-top:10px;">${cloudState.lastStatus}</div>` : ""}`;
+    box.querySelector("#cloud-enable").onclick = () => cloud.connect();
+    box.querySelector("#cloud-join").onclick = () => {
+      const code = prompt("Voer je sync-code in (van je andere apparaat):");
+      if (code && code.trim()) cloud.connect(code);
+    };
+  }
+}
+
+/* ============================================================
    BOOT
    ============================================================ */
 function boot() {
@@ -1184,6 +1326,8 @@ function boot() {
   else { document.querySelectorAll(".view").forEach(v => v.classList.remove("active")); document.getElementById("view-onboarding").classList.add("active"); }
 }
 boot();
+// na het opstarten: cloud-sync ophalen als die aanstaat
+if (window.__cloud && window.__cloud.enabled()) window.__cloud.initialSync();
 </script>
 </body>
 </html>
