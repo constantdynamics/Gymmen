@@ -173,6 +173,9 @@ input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow
 .wcol { display: flex; flex-direction: column; align-items: center; }
 input.weight-display { width: 150px; padding: 12px 8px; font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 2rem; text-align: center; color: var(--text); background: rgba(0,0,0,0.45); border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: var(--field-radius); text-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); }
 .weight-unit { margin-top: 7px; font-family: "Orbitron", sans-serif; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.55; text-align: center; }
+.weight-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 12px; border-radius: 999px; margin: 4px 0 16px; outline: none; cursor: pointer; background: linear-gradient(90deg, var(--primary), var(--accent)); box-shadow: 0 0 14px color-mix(in srgb, var(--glow) 45%, transparent); }
+.weight-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 4px solid var(--primary); box-shadow: 0 0 16px var(--glow); cursor: pointer; }
+.weight-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 4px solid var(--primary); box-shadow: 0 0 16px var(--glow); cursor: pointer; }
 
 .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
 .settings-grid .s-item label { font-size: 0.85rem; margin: 0 0 4px; opacity: 0.75; }
@@ -227,6 +230,7 @@ details.tip[open] > summary::after { content: "−"; }
 .check-item.checked .ci-label { text-decoration: line-through; }
 .ci-label { font-size: 1.2rem; font-weight: 700; }
 .reset-note { font-size: 0.95rem; opacity: 0.6; text-align: center; margin: 4px 0 18px; font-weight: 600; }
+.goodtogo { font-family: var(--head-font); font-weight: 700; font-size: 1.4rem; text-align: center; padding: 20px; margin-bottom: 16px; border-radius: var(--radius); color: #fff; background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: 0 0 32px color-mix(in srgb, var(--glow) 70%, transparent); animation: popIn 0.4s ease, pulse 2s infinite ease-in-out; }
 
 /* ============================================================
    INSTELLINGEN
@@ -592,7 +596,13 @@ const store = {
   setSetupDone: (v) => localStorage.setItem("gymwave_setup_done", v ? "true" : "false"),
   checklist: () => JSON.parse(localStorage.getItem("gymwave_checklist") || "null"),
   setChecklist: (c) => localStorage.setItem("gymwave_checklist", JSON.stringify(c)),
+  currentSession: () => JSON.parse(localStorage.getItem("gymwave_current_session") || "null"),
+  setCurrentSession: (s) => localStorage.setItem("gymwave_current_session", JSON.stringify(s)),
+  clearCurrentSession: () => localStorage.removeItem("gymwave_current_session"),
 };
+
+// bewaar de lopende sessie zodat verversen niets vergeet
+function persistCurrent() { if (currentSession) store.setCurrentSession(currentSession); else store.clearCurrentSession(); }
 
 function loadPreset() {
   store.setMachines(PRESET_SCHEMA.map(m => ({
@@ -724,6 +734,7 @@ function renderHome() {
 document.getElementById("enter-gym").addEventListener("click", () => {
   currentSession = { id: uuid(), date: todayISO(), name: "", entries: [] };
   expandedMachineId = null;
+  persistCurrent();
   route("session");
 });
 
@@ -737,59 +748,69 @@ function renderSession() {
   if (!currentSession) { route("home"); return; }
   const nameInput = document.getElementById("session-name");
   if (nameInput.value !== (currentSession.name || "")) nameInput.value = currentSession.name || "";
-  nameInput.oninput = () => { currentSession.name = nameInput.value; };
+  nameInput.oninput = () => { currentSession.name = nameInput.value; persistCurrent(); };
   if (machines.length === 0) { list.innerHTML = `<div class="empty-state">Nog geen apparaten. Voeg ze toe bij Instellingen.</div>`; updateProgress(); return; }
 
-  const doneId = id => currentSession.entries.some(e => e.machineId === id);
+  const entryOf = id => currentSession.entries.find(e => e.machineId === id);
   // niet-afgevinkt eerst (oorspronkelijke volgorde), afgevinkt onderaan
-  const ordered = [...machines.filter(m => !doneId(m.id)), ...machines.filter(m => doneId(m.id))];
+  const ordered = [...machines.filter(m => !entryOf(m.id)), ...machines.filter(m => entryOf(m.id))];
 
   ordered.forEach(m => {
-    const done = currentSession.entries.find(e => e.machineId === m.id);
-    const expanded = !done && expandedMachineId === m.id;
+    const entry = entryOf(m.id);
+    const done = !!entry;
+    const expanded = expandedMachineId === m.id;       // ook afgevinkte kun je heropenen
     const card = document.createElement("div");
-    card.className = "card machine-card" + (done ? " done" : "") + (expanded ? " open" : "");
+    card.className = "card machine-card" + (done && !expanded ? " done" : "") + (expanded ? " open" : "");
     card.dataset.id = m.id;
 
     const hint = done
-      ? `<span class="chk">✓</span>`
-      : `${m.cardio ? "" : `<span>${m.lastWeight}${m.unit||'kg'}</span>`}<span class="chev">▾</span>`;
+      ? (expanded ? `<span class="chev">▾</span>` : `<span class="chk">✓</span>`)
+      : `${m.cardio ? "" : `<span>${Math.round(m.lastWeight)}${m.unit||'kg'}</span>`}<span class="chev">▾</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
     header.innerHTML = `<div class="m-name">${m.name}</div><div class="m-hint">${hint}</div>`;
     card.appendChild(header);
 
-    if (!done) {
-      header.onclick = () => {
-        // accordion: alleen deze open, rest dicht
-        expandedMachineId = (expandedMachineId === m.id) ? null : m.id;
-        renderSession();
-      };
-    }
+    header.onclick = () => {
+      expandedMachineId = (expandedMachineId === m.id) ? null : m.id; // accordion
+      renderSession();
+    };
 
     if (expanded) {
+      // bij heropenen vooraf invullen met wat al was ingevoerd (hele kilo's)
+      const startWeight = Math.round(entry && !m.cardio ? entry.weight : m.lastWeight);
+      const sliderMax = Math.max(200, Math.ceil((startWeight + 20) / 5) * 5);
+      const valueFor = (i) => entry && entry.settings[i] ? entry.settings[i].value : (m.settings[i].lastValue || '');
       const body = document.createElement("div");
       body.className = "mc-body";
       const settingsHtml = m.settings.map((s, i) => `
-        <div class="s-item"><label>${s.label}</label><input type="text" class="sess-setting" data-i="${i}" value="${s.lastValue || ''}" /></div>`).join("");
+        <div class="s-item"><label>${s.label}</label><input type="text" class="sess-setting" data-i="${i}" value="${valueFor(i)}" /></div>`).join("");
       const weightHtml = m.cardio ? "" : `
         <div class="weight-ctrl">
           <button class="wbtn" data-act="dec">−</button>
-          <div class="wcol"><input type="number" class="weight-display" step="2.5" value="${m.lastWeight}" /><div class="weight-unit">${m.unit || 'kg'}</div></div>
+          <div class="wcol"><input type="number" class="weight-display" step="1" inputmode="numeric" value="${startWeight}" /><div class="weight-unit">${m.unit || 'kg'}</div></div>
           <button class="wbtn" data-act="inc">+</button>
-        </div>`;
+        </div>
+        <input type="range" class="weight-slider" min="0" max="${sliderMax}" step="1" value="${startWeight}" />`;
       body.innerHTML = `
         ${m.note ? `<div class="m-note">${m.note}</div>` : ""}
         ${weightHtml}
         ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
-        <button class="btn full done-btn">KLAAR ✓</button>`;
+        <button class="btn full done-btn">${done ? "OPSLAAN ✓" : "KLAAR ✓"}</button>
+        ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:8px;">↩ Heropenen (vink uit)</button>` : ""}`;
       card.appendChild(body);
       if (!m.cardio) {
         const wInput = body.querySelector(".weight-display");
-        body.querySelector('[data-act="dec"]').onclick = () => { wInput.value = Math.max(0, (parseFloat(wInput.value)||0) - 2.5); };
-        body.querySelector('[data-act="inc"]').onclick = () => { wInput.value = (parseFloat(wInput.value)||0) + 2.5; };
+        const slider = body.querySelector(".weight-slider");
+        const setVal = (v) => { v = Math.max(0, Math.round(v || 0)); wInput.value = v; if (slider) slider.value = Math.min(v, +slider.max); };
+        body.querySelector('[data-act="dec"]').onclick = () => setVal((parseFloat(wInput.value) || 0) - 1);
+        body.querySelector('[data-act="inc"]').onclick = () => setVal((parseFloat(wInput.value) || 0) + 1);
+        if (slider) slider.oninput = () => { wInput.value = slider.value; };
+        wInput.oninput = () => { if (slider) slider.value = Math.min(Math.max(0, Math.round(parseFloat(wInput.value) || 0)), +slider.max); };
       }
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
+      const undo = body.querySelector(".undo-btn");
+      if (undo) undo.onclick = () => undoMachine(m);
     }
     list.appendChild(card);
   });
@@ -797,7 +818,7 @@ function renderSession() {
 }
 function completeMachine(m, body) {
   const wEl = body.querySelector(".weight-display");
-  const weight = m.cardio ? 0 : (parseFloat(wEl && wEl.value) || 0);
+  const weight = m.cardio ? 0 : Math.max(0, Math.round(parseFloat(wEl && wEl.value) || 0));
   const settings = [...body.querySelectorAll(".sess-setting")].map((inp, i) => ({ label: m.settings[i].label, value: inp.value }));
   currentSession.entries = currentSession.entries.filter(e => e.machineId !== m.id);
   currentSession.entries.push({ machineId: m.id, weight, settings });
@@ -809,6 +830,14 @@ function completeMachine(m, body) {
     store.setMachines(machines);
   }
   expandedMachineId = null; // klap in en schuif naar onderen
+  persistCurrent();
+  renderSession();
+}
+function undoMachine(m) {
+  // haal het apparaat terug uit "afgevinkt" zodat je opnieuw kunt invoeren
+  currentSession.entries = currentSession.entries.filter(e => e.machineId !== m.id);
+  expandedMachineId = m.id; // blijf open als actieve oefening
+  persistCurrent();
   renderSession();
 }
 function updateProgress() {
@@ -820,7 +849,7 @@ document.getElementById("finish-session").addEventListener("click", () => {
   if (!currentSession || currentSession.entries.length === 0) { alert("Rond minstens één apparaat af voordat je de sessie afsluit!"); return; }
   if (!currentSession.name || !currentSession.name.trim()) currentSession.name = `Training ${fmtNice(currentSession.date)}`;
   const sessions = store.sessions(); sessions.push(currentSession); store.setSessions(sessions);
-  currentSession = null; celebrate(); setTimeout(() => route("stats"), 700);
+  currentSession = null; store.clearCurrentSession(); celebrate(); setTimeout(() => route("stats"), 700);
 });
 
 /* ============================================================
@@ -944,6 +973,14 @@ function renderChecklist() {
   const state = getChecklistState();
   const wrap = document.getElementById("checklist-content");
   wrap.innerHTML = "";
+  const allItems = Object.values(CHECKLIST).flat();
+  const allDone = allItems.every(i => state.checked[i]);
+  if (allDone) {
+    const banner = document.createElement("div");
+    banner.className = "goodtogo";
+    banner.textContent = "You're good to go! 🎒💪";
+    wrap.appendChild(banner);
+  }
   Object.entries(CHECKLIST).forEach(([group, items]) => {
     const title = document.createElement("div");
     title.className = "section-title"; title.textContent = group;
@@ -1026,6 +1063,7 @@ function buildEditForm(m) {
     </div>`).join("");
   form.innerHTML = `
     <label>Naam apparaat</label><input type="text" class="edit-name" value="${m.name}" />
+    ${m.cardio ? "" : `<label>Standaard gewicht (${m.unit || 'kg'})</label><input type="number" class="edit-weight" step="1" inputmode="numeric" value="${Math.round(m.lastWeight)}" />`}
     <label>Notitie / techniek</label><textarea class="edit-note" rows="3" placeholder="bijv. ellebogen naar voren…">${m.note || ""}</textarea>
     <label>Instellingen</label><div class="edit-settings-wrap">${settingsRows}</div>
     <button class="btn small ghost full add-setting">+ Instelling toevoegen</button>
@@ -1042,6 +1080,8 @@ function buildEditForm(m) {
     const machines = store.machines(); const target = machines.find(x => x.id === m.id);
     target.name = form.querySelector(".edit-name").value.trim() || target.name;
     target.note = form.querySelector(".edit-note").value;
+    const wEl = form.querySelector(".edit-weight");
+    if (wEl) target.lastWeight = Math.max(0, Math.round(parseFloat(wEl.value) || 0));
     form.querySelectorAll(".edit-setting").forEach(inp => {
       const i = parseInt(inp.dataset.i);
       if (target.settings[i]) target.settings[i].label = inp.value.trim() || target.settings[i].label;
@@ -1096,7 +1136,7 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       if (data.checklist) store.setChecklist(data.checklist);
       if (data.theme && THEMES[data.theme]) applyTheme(data.theme);
       store.setSetupDone(true);
-      currentSession = null; expandedMachineId = null;
+      currentSession = null; expandedMachineId = null; store.clearCurrentSession();
       boot();
     });
   };
@@ -1107,8 +1147,8 @@ document.getElementById("reset-data").addEventListener("click", () => {
   showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies en instellingen. Dit kan niet ongedaan worden gemaakt.", () => {
     localStorage.removeItem("gymwave_machines"); localStorage.removeItem("gymwave_sessions");
     localStorage.removeItem("gymwave_setup_done"); localStorage.removeItem("gymwave_theme");
-    localStorage.removeItem("gymwave_checklist");
-    currentSession = null; obMachines = []; applyTheme("Synthwave"); boot();
+    localStorage.removeItem("gymwave_checklist"); store.clearCurrentSession();
+    currentSession = null; expandedMachineId = null; obMachines = []; applyTheme("Synthwave"); boot();
   });
 });
 
@@ -1136,7 +1176,11 @@ function boot() {
   renderObSettings();
   const machines = store.machines();
   if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); store.setMachines(machines); }
-  if (store.setupDone() && store.machines().length > 0) route("home");
+  // herstel een lopende sessie zodat verversen niets vergeet
+  const saved = store.currentSession();
+  currentSession = (saved && Array.isArray(saved.entries)) ? saved : null;
+  expandedMachineId = null;
+  if (store.setupDone() && store.machines().length > 0) route(currentSession ? "session" : "home");
   else { document.querySelectorAll(".view").forEach(v => v.classList.remove("active")); document.getElementById("view-onboarding").classList.add("active"); }
 }
 boot();
