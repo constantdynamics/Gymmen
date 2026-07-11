@@ -549,7 +549,7 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <!-- ============ HOME ============ -->
   <section id="view-home" class="view">
     <div class="date-big" id="home-date">—</div>
-    <div class="hero-wrap"><button class="hero-btn" id="enter-gym">De Gym In</button></div>
+    <div class="hero-wrap"><button class="hero-btn" id="enter-gym">De Gym In</button><div id="hero-extra" style="margin-top:12px;"></div></div>
     <div class="last-session" id="home-last"></div>
     <div class="stat-pills">
       <div class="pill"><div class="label">SESSIES TOTAAL</div><div class="stat-num" id="stat-sessions">0</div></div>
@@ -654,6 +654,7 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <div class="section-title">Thema</div>
     <div class="theme-grid" id="theme-grid"></div>
     <div class="section-title">Apparaten beheren</div>
+    <div id="machine-questions"></div>
     <div id="manage-machines"></div>
     <button class="btn ghost full small" id="add-machine-settings" style="margin-top:6px;">+ Apparaat toevoegen</button>
     <button class="btn ghost full small" id="load-preset-settings" style="margin-top:8px;">↺ Standaardschema (her)laden</button>
@@ -802,12 +803,39 @@ let REHAB_TIPS = ["Bouw rustig op: begin met licht gewicht en weinig herhalingen
 /*__CONTENT_V1_END__*/
 
 /*__CONTENT_V2__*/
-let UNILATERAL = [{"name":"Leg Press — 1 been","machineName":"Seated Leg Press","approach":"Stel de machine in zoals je gewend bent, maar zet één voet midden op het plateau. Neem als startpunt ongeveer 50–60% van het gewicht dat je met twee benen gebruikt — eenbenig kun je per been net iets meer dan de helft aan, maar begin aan de lage kant. Start altijd met je linker (zwakkere) been en tel hoeveel nette herhalingen je haalt; met rechts doe je daarna precies evenveel, ook als rechts meer zou kunnen. Zo trek je het verschil langzaam recht in plaats van het groter te maken.","tips":["Zet je voet iets richting het midden van het plateau, zodat je recht naar voren duwt en niet scheef.","Duw vanuit je hak, met je hele voet op het plateau — net als bij de tweebenige versie.","Beweeg rustig: 2 tellen duwen, 3 tellen gecontroleerd terug. Juist het remmen maakt links sterker.","Houd je bekken en onderrug tegen de leuning; laat je heup niet meedraaien met het duwende been.","2 à 3 sets van 8–12 herhalingen per been is ruim voldoende."],"watchFor":["Je knie blijft in lijn met je tenen — laat hem niet naar binnen zakken.","Strek je knie bovenaan niet helemaal op slot; houd een klein knikje.","Voel je iets anders dan gewone spiervermoeidheid (scherpe pijn in kuit of rond de achillespees), stop dan en overleg met je fysio."],"mistakes":["Te zwaar starten — de helft van je tweebenige gewicht is echt een prima begin.","Met rechts extra herhalingen doen 'omdat het kan'; daarmee houd je het links-rechts-verschil juist in stand.","Het gewicht laten terugvallen in plaats van rustig af te remmen.","Je bekken laten kantelen of met je handen op je knie duwen om te helpen."]},{"name":"Leg Extension — 1 been","machineName":"Seated Leg Extension","approach":"Zelfde instellingen als normaal, maar je werkt met één been onder het kussen. Neem ongeveer 50% van je tweebenige gewicht — eenzijdig voelt deze machine al snel zwaar, dus liever iets te licht dan te zwaar. Begin met links en laat het aantal nette herhalingen van links bepalen hoeveel je daarna met rechts doet. Houd hetzelfde bewegingsbereik aan als bij je tweebenige versie.","tips":["Strek rustig en houd bovenaan 1–2 tellen vast; zak dan in 2–3 tellen terug.","Houd je voet neutraal en ontspannen — niet krampachtig je tenen optrekken of strekken.","Houd de handgrepen vast zodat je stevig in de stoel blijft zitten.","Eenbenig zie je meteen of links 'trilt' of hapert waar rechts soepel loopt — dat is nuttige informatie over je voortgang."],"watchFor":["Je heup blijft op de stoel; komt hij los, dan is het gewicht te zwaar.","Het been beweegt strak omhoog en omlaag, zonder zijwaarts te zwabberen.","Scherpe pijn in of rond de knie (anders dan spiervermoeidheid) is een teken om lichter te gaan of het met je fysio te bespreken."],"mistakes":["Hetzelfde gewicht laten staan als bij twee benen.","Zwaaien of momentum gebruiken om het gewicht omhoog te krijgen.","Het been laten terugvallen in plaats van te remmen.","Rechts als maatstaf nemen in plaats van links het tempo en het aantal te laten bepalen."]},{"name":"Leg Curl — 1 been","machineName":"Leg Curl","approach":"Gebruik je normale instellingen (stoel, benen, knie, dij), maar haak één been achter het kussen. Start met ongeveer 50% van je tweebenige gewicht. Begin met links, tel de nette herhalingen, en doe met rechts exact hetzelfde aantal — niet meer. Je hamstring werkt hier samen met een deel van je kuitspier, dus rustig opbouwen past goed bij je herstel.","tips":["Buig rustig in (2 tellen) en laat het been nog rustiger terugkomen (3 tellen).","Houd je bovenbeen stevig tegen het kussen; de beweging komt puur uit je knie.","Houd je voet losjes en ontspannen — als je je tenen actief strekt, gaat je kuit te veel meedoen.","2 à 3 sets van 8–12 rustige herhalingen per been."],"watchFor":["Je bekken blijft stil; komt je heup omhoog of trek je met je bovenlichaam, dan is het te zwaar.","Kramp of trillen in de kuit betekent dat die het overneemt: iets lichter en je voet meer ontspannen.","Gebruik voor beide benen exact dezelfde instellingen, zodat je links en rechts eerlijk kunt vergelijken."],"mistakes":["Te zwaar kiezen waardoor je heup loskomt van de stoel.","Het gewicht laten terugschieten in plaats van gecontroleerd strekken.","Half bewegingsbereik draaien omdat het gewicht te hoog staat.","Het aantal herhalingen van je sterke been als uitgangspunt nemen."]},{"name":"Calf raises — 2 benen","machineName":"thuis","approach":"Ga rechtop staan, eventueel met de ballen van je voeten op een traptrede zodat je hakken vrij hangen — of gewoon op de vlakke vloer om te beginnen. Duw jezelf rustig zo hoog mogelijk op je tenen en zak in 3 tellen weer terug. Doe 2–3 sets van 12–15 herhalingen en verdeel je gewicht bewust 50/50 over beide benen. Gaat dit soepel en zonder klachten links, dan is dit je opstap naar de eenbenige versie.","tips":["Houd lichte steun vast (muur, trapleuning) zodat balans je niet beperkt.","Check in een spiegel of op gevoel of je links even hoog komt als rechts.","Gebruik het volledige bereik: bovenaan even vasthouden, onderaan rustig laten zakken.","Op een trede mag je hak iets voorbij de rand zakken voor extra rek — alleen zolang dat comfortabel voelt.","Rustig tempo: 2 tellen omhoog, 1 tel vast, 3 tellen terug."],"watchFor":["Zet je niet ongemerkt vooral met rechts af? Dit is dé plek waar je sterke been stiekem het werk overneemt.","De rek onderin hoort licht aan te voelen, niet scherp of pijnlijk in de achillespees.","Knieën gestrekt maar niet op slot."],"mistakes":["Veren of stuiteren in plaats van gecontroleerd bewegen.","Klein en snel bewegen: half omhoog telt niet als een herhaling.","Bijna al je gewicht op het sterke been zetten zonder het door te hebben.","Onderin diep doorzakken in de rek terwijl de pees daar nog niet aan toe is."]},{"name":"Calf raises — 1 been","machineName":"thuis","approach":"Dezelfde oefening, maar op één been; houd met één of twee vingers de muur of leuning vast voor balans. Begin met links en tel hoeveel nette, volledige herhalingen je haalt — dat aantal doe je daarna ook met rechts. Een flink verschil in aantal of hoogte tussen links en rechts is normaal na je blessure; dat verschil week na week zien slinken is precies waar je het voor doet. Twijfel je of je hieraan toe bent, check het even bij je fysio.","tips":["Begin op de vlakke vloer; pas als dat vlot gaat, verhuis je naar een traptrede voor meer bereik.","Langzaam is belangrijker dan veel: vooral het rustig zakken (3–4 tellen) maakt kuit en pees sterker.","Kom je met links niet meer omhoog? Duw dan op met twee benen en zak op alleen links terug — zo train je toch het zware, remmende deel.","Houd je aantal herhalingen links bij: dat getal is je beste voortgangsmeter.","Doe deze oefening liever om de dag dan elke dag voluit — sterker worden gebeurt in het herstel."],"watchFor":["Je hak gaat recht omhoog en omlaag, zonder naar binnen of buiten weg te draaien.","Lichte kuitstijfheid een dag later is prima; toenemende pijn ín de pees zelf is een signaal om terug te schakelen en het met je fysio te bespreken.","De steun is voor je balans, niet om aan mee te trekken."],"mistakes":["Op een trede beginnen terwijl de vlakke vloer nog niet goed lukt.","Omhoog 'wippen' met een sprongetje in plaats van rustig opdrukken.","Half je gewicht op je vingers aan de leuning laten rusten.","Alleen rechts trainen op het niveau dat links (nog) niet aankan — links bepaalt het aantal.","Elke dag maximaal willen gaan zonder rustdag ertussen."]},{"name":"Single-leg balance / balansoefening","machineName":"thuis","approach":"Ga op één been staan met een licht gebogen knie en houd dat 30–60 seconden vol. Begin met links; hoe lang links het volhoudt, bepaalt de tijd die je daarna ook op rechts staat. Dit mag dagelijks — tijdens tandenpoetsen of koffiezetten bijvoorbeeld. Maak het stap voor stap moeilijker: ogen dicht, op een kussen, of langzaam je hoofd of vrije been bewegen.","tips":["Oefen naast een muur of aanrecht, zodat je altijd kunt bijpakken.","Verdeel de druk over je hele voet: grote teen, kleine teen en hak allemaal aan de grond.","Kleine correcties vanuit je enkel zijn precies de bedoeling — dat wiebelen ís de training.","Bouw op in stapjes: eerst ogen dicht, dan een zachte ondergrond (kussen of opgevouwen handdoek), dan bewegen met armen of vrije been.","Doe 3 rondes per been per dag; het kost amper tijd en doet veel voor je enkelstabiliteit."],"watchFor":["Knie licht gebogen en recht boven je voet — niet naar binnen laten zakken.","Heupen horizontaal houden: niet 'uithangen' op één heup.","Oefen met ogen dicht alleen op een veilige plek, weg van scherpe randen en obstakels."],"mistakes":["De knie op slot zetten en passief in het gewricht 'hangen' in plaats van actief te balanceren.","Je tenen krampachtig in de vloer klauwen.","Te snel te moeilijk maken, waardoor je constant moet bijstappen en er weinig traint.","Rechts overslaan: balans train je op beide benen, en alleen door beide te meten zie je het verschil kleiner worden."]}];
+let UNILATERAL = [{"name":"Leg Press — 1 been","machineName":"Seated Leg Press","approach":"Stel de machine in zoals je gewend bent, maar zet één voet midden op het plateau. Neem als startpunt ongeveer 50–60% van het gewicht dat je met twee benen gebruikt — eenbenig kun je per been net iets meer dan de helft aan, maar begin aan de lage kant. Start altijd met je linker (zwakkere) been en tel hoeveel nette herhalingen je haalt; met rechts doe je daarna precies evenveel, ook als rechts meer zou kunnen. Zo trek je het verschil langzaam recht in plaats van het groter te maken.","tips":["Zet je voet iets richting het midden van het plateau, zodat je recht naar voren duwt en niet scheef.","Duw vanuit je hak, met je hele voet op het plateau — net als bij de tweebenige versie.","Beweeg rustig: 2 tellen duwen, 3 tellen gecontroleerd terug. Juist het remmen maakt links sterker.","Houd je bekken en onderrug tegen de leuning; laat je heup niet meedraaien met het duwende been.","2 à 3 sets van 8–12 herhalingen per been is ruim voldoende."],"watchFor":["Je knie blijft in lijn met je tenen — laat hem niet naar binnen zakken.","Strek je knie bovenaan niet helemaal op slot; houd een klein knikje.","Voel je iets anders dan gewone spiervermoeidheid (scherpe pijn in kuit of rond de achillespees), stop dan en overleg met je fysio."],"mistakes":["Te zwaar starten — de helft van je tweebenige gewicht is echt een prima begin.","Met rechts extra herhalingen doen 'omdat het kan'; daarmee houd je het links-rechts-verschil juist in stand.","Het gewicht laten terugvallen in plaats van rustig af te remmen.","Je bekken laten kantelen of met je handen op je knie duwen om te helpen."]},{"name":"Leg Extension — 1 been","machineName":"Seated Leg Extension","approach":"Zelfde instellingen als normaal, maar je werkt met één been onder het kussen. Neem ongeveer 50% van je tweebenige gewicht — eenzijdig voelt deze machine al snel zwaar, dus liever iets te licht dan te zwaar. Begin met links en laat het aantal nette herhalingen van links bepalen hoeveel je daarna met rechts doet. Houd hetzelfde bewegingsbereik aan als bij je tweebenige versie.","tips":["Strek rustig en houd bovenaan 1–2 tellen vast; zak dan in 2–3 tellen terug.","Houd je voet neutraal en ontspannen — niet krampachtig je tenen optrekken of strekken.","Houd de handgrepen vast zodat je stevig in de stoel blijft zitten.","Eenbenig zie je meteen of links 'trilt' of hapert waar rechts soepel loopt — dat is nuttige informatie over je voortgang."],"watchFor":["Je heup blijft op de stoel; komt hij los, dan is het gewicht te zwaar.","Het been beweegt strak omhoog en omlaag, zonder zijwaarts te zwabberen.","Scherpe pijn in of rond de knie (anders dan spiervermoeidheid) is een teken om lichter te gaan of het met je fysio te bespreken."],"mistakes":["Hetzelfde gewicht laten staan als bij twee benen.","Zwaaien of momentum gebruiken om het gewicht omhoog te krijgen.","Het been laten terugvallen in plaats van te remmen.","Rechts als maatstaf nemen in plaats van links het tempo en het aantal te laten bepalen."]},{"name":"Leg Curl — 1 been","machineName":"Leg Curl","approach":"Gebruik je normale instellingen (stoel, knie, been, dij), maar haak één been achter het kussen. Start met ongeveer 50% van je tweebenige gewicht. Begin met links, tel de nette herhalingen, en doe met rechts exact hetzelfde aantal — niet meer. Je hamstring werkt hier samen met een deel van je kuitspier, dus rustig opbouwen past goed bij je herstel.","tips":["Buig rustig in (2 tellen) en laat het been nog rustiger terugkomen (3 tellen).","Houd je bovenbeen stevig tegen het kussen; de beweging komt puur uit je knie.","Houd je voet losjes en ontspannen — als je je tenen actief strekt, gaat je kuit te veel meedoen.","2 à 3 sets van 8–12 rustige herhalingen per been."],"watchFor":["Je bekken blijft stil; komt je heup omhoog of trek je met je bovenlichaam, dan is het te zwaar.","Kramp of trillen in de kuit betekent dat die het overneemt: iets lichter en je voet meer ontspannen.","Gebruik voor beide benen exact dezelfde instellingen, zodat je links en rechts eerlijk kunt vergelijken."],"mistakes":["Te zwaar kiezen waardoor je heup loskomt van de stoel.","Het gewicht laten terugschieten in plaats van gecontroleerd strekken.","Half bewegingsbereik draaien omdat het gewicht te hoog staat.","Het aantal herhalingen van je sterke been als uitgangspunt nemen."]},{"name":"Calf raises — 2 benen","machineName":"thuis","approach":"Ga rechtop staan, eventueel met de ballen van je voeten op een traptrede zodat je hakken vrij hangen — of gewoon op de vlakke vloer om te beginnen. Duw jezelf rustig zo hoog mogelijk op je tenen en zak in 3 tellen weer terug. Doe 2–3 sets van 12–15 herhalingen en verdeel je gewicht bewust 50/50 over beide benen. Gaat dit soepel en zonder klachten links, dan is dit je opstap naar de eenbenige versie.","tips":["Houd lichte steun vast (muur, trapleuning) zodat balans je niet beperkt.","Check in een spiegel of op gevoel of je links even hoog komt als rechts.","Gebruik het volledige bereik: bovenaan even vasthouden, onderaan rustig laten zakken.","Op een trede mag je hak iets voorbij de rand zakken voor extra rek — alleen zolang dat comfortabel voelt.","Rustig tempo: 2 tellen omhoog, 1 tel vast, 3 tellen terug."],"watchFor":["Zet je niet ongemerkt vooral met rechts af? Dit is dé plek waar je sterke been stiekem het werk overneemt.","De rek onderin hoort licht aan te voelen, niet scherp of pijnlijk in de achillespees.","Knieën gestrekt maar niet op slot."],"mistakes":["Veren of stuiteren in plaats van gecontroleerd bewegen.","Klein en snel bewegen: half omhoog telt niet als een herhaling.","Bijna al je gewicht op het sterke been zetten zonder het door te hebben.","Onderin diep doorzakken in de rek terwijl de pees daar nog niet aan toe is."]},{"name":"Calf raises — 1 been","machineName":"thuis","approach":"Dezelfde oefening, maar op één been; houd met één of twee vingers de muur of leuning vast voor balans. Begin met links en tel hoeveel nette, volledige herhalingen je haalt — dat aantal doe je daarna ook met rechts. Een flink verschil in aantal of hoogte tussen links en rechts is normaal na je blessure; dat verschil week na week zien slinken is precies waar je het voor doet. Twijfel je of je hieraan toe bent, check het even bij je fysio.","tips":["Begin op de vlakke vloer; pas als dat vlot gaat, verhuis je naar een traptrede voor meer bereik.","Langzaam is belangrijker dan veel: vooral het rustig zakken (3–4 tellen) maakt kuit en pees sterker.","Kom je met links niet meer omhoog? Duw dan op met twee benen en zak op alleen links terug — zo train je toch het zware, remmende deel.","Houd je aantal herhalingen links bij: dat getal is je beste voortgangsmeter.","Doe deze oefening liever om de dag dan elke dag voluit — sterker worden gebeurt in het herstel."],"watchFor":["Je hak gaat recht omhoog en omlaag, zonder naar binnen of buiten weg te draaien.","Lichte kuitstijfheid een dag later is prima; toenemende pijn ín de pees zelf is een signaal om terug te schakelen en het met je fysio te bespreken.","De steun is voor je balans, niet om aan mee te trekken."],"mistakes":["Op een trede beginnen terwijl de vlakke vloer nog niet goed lukt.","Omhoog 'wippen' met een sprongetje in plaats van rustig opdrukken.","Half je gewicht op je vingers aan de leuning laten rusten.","Alleen rechts trainen op het niveau dat links (nog) niet aankan — links bepaalt het aantal.","Elke dag maximaal willen gaan zonder rustdag ertussen."]},{"name":"Single-leg balance / balansoefening","machineName":"thuis","approach":"Ga op één been staan met een licht gebogen knie en houd dat 30–60 seconden vol. Begin met links; hoe lang links het volhoudt, bepaalt de tijd die je daarna ook op rechts staat. Dit mag dagelijks — tijdens tandenpoetsen of koffiezetten bijvoorbeeld. Maak het stap voor stap moeilijker: ogen dicht, op een kussen, of langzaam je hoofd of vrije been bewegen.","tips":["Oefen naast een muur of aanrecht, zodat je altijd kunt bijpakken.","Verdeel de druk over je hele voet: grote teen, kleine teen en hak allemaal aan de grond.","Kleine correcties vanuit je enkel zijn precies de bedoeling — dat wiebelen ís de training.","Bouw op in stapjes: eerst ogen dicht, dan een zachte ondergrond (kussen of opgevouwen handdoek), dan bewegen met armen of vrije been.","Doe 3 rondes per been per dag; het kost amper tijd en doet veel voor je enkelstabiliteit."],"watchFor":["Knie licht gebogen en recht boven je voet — niet naar binnen laten zakken.","Heupen horizontaal houden: niet 'uithangen' op één heup.","Oefen met ogen dicht alleen op een veilige plek, weg van scherpe randen en obstakels."],"mistakes":["De knie op slot zetten en passief in het gewricht 'hangen' in plaats van actief te balanceren.","Je tenen krampachtig in de vloer klauwen.","Te snel te moeilijk maken, waardoor je constant moet bijstappen en er weinig traint.","Rechts overslaan: balans train je op beide benen, en alleen door beide te meten zie je het verschil kleiner worden."]}];
 let SNACK_POOL = [{"name":"Staande calf raise (twee benen)","equipment":"geen","minutes":3,"dose":"3×15","description":"Ga rechtop staan met je voeten op heupbreedte, eventueel met je vingertoppen tegen de muur voor balans. Duw jezelf rustig omhoog op je tenen en zak gecontroleerd weer terug.","tips":["Duw bewust ook door je grote teen omhoog, niet alleen over de buitenkant van je voet","Houd het tempo rustig: 2 seconden omhoog, 2 seconden omlaag","Perfecte basisoefening om je linker kuit dagelijks wat werk te geven"],"mistakes":["Te snel op-en-neer veren zonder controle","Niet helemaal doorkomen tot op de tenen","Knieën op slot gooien in plaats van ze zacht gestrekt te houden"],"focus":"kuiten","achillesSafe":true},{"name":"Excentrische calf raise op een traptrede","equipment":"stoel/verhoging","minutes":4,"dose":"3×10 per kant","description":"Sta met je voorvoeten op een traptrede of stevige verhoging, hiel vrij. Duw jezelf met twee benen omhoog, til je rechtervoet op en zak op alleen je linkerbeen in 3-4 seconden langzaam tot je hiel iets onder het trapniveau komt.","tips":["Het langzame zakken is het belangrijkste deel: dit is de klassieke opbouwoefening voor de achillespees","Houd je ergens aan vast voor balans, zodat al je aandacht naar de kuit gaat","Stem de diepte en het aantal herhalingen af met je fysio"],"mistakes":["Te snel laten zakken waardoor het excentrische effect verdwijnt","Doorzakken tot in de pijn in plaats van tot een licht rekgevoel","Ook omhoog duwen op één been terwijl je nog in de opbouwfase zit"],"focus":"kuiten","achillesSafe":true},{"name":"Single-leg calf raise","equipment":"geen","minutes":3,"dose":"3×8 per been","description":"Sta op één been, vingertoppen tegen de muur voor balans, en duw jezelf gecontroleerd omhoog op je tenen. Zak rustig terug en wissel na de set van been.","tips":["Begin met je sterke been zodat je een referentie hebt voor links","Lukt het links nog niet volledig? Help dan licht mee met je andere voet en zak op één been","Bouw het aantal herhalingen links geleidelijk op"],"mistakes":["Zwikken naar de buitenkant van de voet","Met de romp zwaaien om hoogte te winnen","Links even zwaar willen belasten als rechts terwijl het verschil er nog is"],"focus":"kuiten","achillesSafe":true},{"name":"Seated calf raise met kettlebell","equipment":"kettlebell","minutes":3,"dose":"3×15","description":"Ga op een stoel zitten met je voorvoeten op een boek of drempel en zet de kettlebell op je knieën. Duw je hielen zo hoog mogelijk omhoog en zak langzaam terug.","tips":["Met gebogen knie train je vooral de soleus, de diepe kuitspier die veel doet voor je achillespees","Leg een handdoek onder de kettlebell voor comfort","Wil je extra focus op links? Zet de kettlebell alleen op je linkerknie"],"mistakes":["Een te kleine beweging maken doordat de voorvoet niet verhoogd staat","Het gewicht omhoog wippen in plaats van rustig duwen","De hielen niet volledig laten zakken tussen herhalingen"],"focus":"kuiten","achillesSafe":true},{"name":"Calf raise met dumbbells","equipment":"dumbbells","minutes":3,"dose":"3×12","description":"Sta rechtop met in elke hand een dumbbell langs je lichaam. Duw jezelf op je tenen omhoog en zak in 2-3 seconden gecontroleerd terug.","tips":["Kies een gewicht waarmee de laatste herhalingen zwaar maar netjes blijven","Verdeel je gewicht gelijk over beide benen, ook al voelt links zwakker","Een mooie opstap tussen lichaamsgewicht en de apparaten in de gym"],"mistakes":["Voorover leunen waardoor de kuiten minder werk doen","Stuiteren onderin de beweging","Ongemerkt meer op het rechterbeen leunen"],"focus":"kuiten","achillesSafe":true},{"name":"Squat (lichaamsgewicht)","equipment":"geen","minutes":3,"dose":"3×15","description":"Zet je voeten op schouderbreedte, zak met je heupen naar achteren en beneden alsof je op een stoel gaat zitten, en kom krachtig weer omhoog. Houd je borst trots vooruit.","tips":["Houd je hielen de hele beweging plat op de grond","Zak zo diep als comfortabel gaat, liefst tot je bovenbenen horizontaal zijn","Strek je armen naar voren als tegenwicht voor balans"],"mistakes":["Knieën die naar binnen zakken","Hielen die van de vloer komen","Alleen de knieën buigen in plaats van eerst de heupen naar achteren te sturen"],"focus":"benen","achillesSafe":true},{"name":"Goblet squat","equipment":"kettlebell","minutes":3,"dose":"3×10","description":"Houd de kettlebell met twee handen tegen je borst, ellebogen naar beneden. Zak in een diepe squat met rechte rug en duw jezelf door je hele voet weer omhoog.","tips":["Het gewicht voor je borst helpt je rechtop te blijven en dieper te zakken","Duw je knieën licht naar buiten, in lijn met je tenen","Adem in tijdens het zakken, uit tijdens het omhoog duwen"],"mistakes":["De kettlebell van je lichaam af laten hangen waardoor je rug rond trekt","Te snel zakken zonder spanning","Hielen die loskomen bij het diepste punt"],"focus":"benen","achillesSafe":true},{"name":"Reverse lunge met dumbbells","equipment":"dumbbells","minutes":4,"dose":"3×8 per been","description":"Sta rechtop met dumbbells langs je lichaam en stap ruim naar achteren. Zak tot beide knieën ongeveer 90 graden gebogen zijn en duw jezelf via je voorste been terug omhoog.","tips":["De achterwaartse stap is vriendelijker voor je achillespees dan een uitvalspas naar voren","Houd je romp rechtop en je voorste knie boven je middenvoet","Begin desnoods zonder gewicht om de balans te vinden"],"mistakes":["Een te korte stap waardoor de voorste knie ver over de tenen schiet","Afzetten met de achterste voet in plaats van duwen met het voorste been","Wiebelen doordat de voeten op één lijn staan in plaats van heupbreed"],"focus":"benen","achillesSafe":true},{"name":"Glute bridge","equipment":"mat","minutes":3,"dose":"3×12","description":"Ga op je rug liggen met gebogen knieën en je voeten plat op de mat. Duw je heupen omhoog tot je lichaam een rechte lijn vormt van knieën tot schouders, knijp je billen samen en zak rustig terug.","tips":["Houd bovenin een seconde vast en span je bilspieren bewust aan","Duw door je hielen, niet door je tenen","Te makkelijk? Doe hem op één been"],"mistakes":["Te hoog duwen waardoor je onderrug hol trekt","De beweging uit je onderrug halen in plaats van uit je billen","Voeten te ver van je billen plaatsen"],"focus":"benen","achillesSafe":true},{"name":"Step-up","equipment":"stoel/verhoging","minutes":4,"dose":"3×10 per been","description":"Zet je linkervoet volledig op een stevige verhoging of traptrede en duw jezelf gecontroleerd omhoog tot je gestrekt staat. Stap rustig terug naar beneden en herhaal.","tips":["Duw echt vanuit het been dat op de verhoging staat, dat is waar het werk zit","Begin met een lage trede en bouw de hoogte op","Extra aandacht voor links: doe daar eventueel een setje meer"],"mistakes":["Afzetten met het onderste been waardoor het bovenste been weinig doet","Neerploffen bij het afstappen in plaats van gecontroleerd zakken","Een wiebelige stoel gebruiken in plaats van een stabiele verhoging"],"focus":"benen","achillesSafe":true},{"name":"Wall sit","equipment":"geen","minutes":3,"dose":"3×30-45 sec","description":"Zak met je rug tegen de muur tot je knieën ongeveer 90 graden gebogen zijn, alsof je op een onzichtbare stoel zit. Houd deze positie vast en blijf rustig doorademen.","tips":["Verdeel je gewicht gelijk over beide voeten","Houd je hele rug en achterhoofd tegen de muur","Bouw de tijd per week iets op"],"mistakes":["Handen op de bovenbenen laten steunen","Te hoog blijven hangen waardoor de spanning verdwijnt","Adem inhouden"],"focus":"benen","achillesSafe":true},{"name":"Zijwaartse bandwandeling (monster walk)","equipment":"weerstandsband","minutes":3,"dose":"3×10 stappen per kant","description":"Doe een weerstandsband om je benen net boven de knieën en zak in een kwart squat. Stap zijwaarts terwijl je spanning op de band houdt, en wandel daarna dezelfde afstand terug.","tips":["Blijf laag zitten tijdens alle stappen, kom niet tussendoor omhoog","Houd je tenen naar voren wijzen, niet naar buiten","Sterke heupen stabiliseren je hele been, ook je enkel"],"mistakes":["De voeten naar elkaar toe laten slepen waardoor de band spanning verliest","Te grote stappen waardoor je romp gaat zwaaien","Rechtop komen tussen de stappen"],"focus":"benen","achillesSafe":true},{"name":"Plank","equipment":"mat","minutes":3,"dose":"3×30 sec","description":"Steun op je onderarmen en tenen met je lichaam in één rechte lijn van hoofd tot hielen. Span je buik en billen aan en houd de positie vast.","tips":["Duw je ellebogen recht onder je schouders","Kantel je bekken licht naar achteren zodat je onderrug niet doorzakt","Liever 3 korte, strakke planks dan één lange slordige"],"mistakes":["Heupen die doorzakken of juist omhoog steken","Adem inhouden","Hoofd laten hangen of juist omhoog kijken"],"focus":"core","achillesSafe":true},{"name":"Dead bug","equipment":"mat","minutes":3,"dose":"3×10 per kant","description":"Lig op je rug met armen recht omhoog en knieën gebogen boven je heupen. Strek langzaam je rechterarm en linkerbeen richting de vloer, kom terug en wissel van kant.","tips":["Druk je onderrug de hele oefening zachtjes in de mat","Beweeg traag: hoe langzamer, hoe effectiever","Adem uit terwijl je arm en been strekt"],"mistakes":["Onderrug die hol trekt van de mat","Te snel en zwaaiend bewegen","Arm en been van dezelfde kant bewegen"],"focus":"core","achillesSafe":true},{"name":"Side plank","equipment":"mat","minutes":3,"dose":"2×20-30 sec per kant","description":"Lig op je zij, steun op je onderarm met je elleboog onder je schouder en til je heupen op tot je lichaam een rechte lijn vormt. Houd vast en wissel daarna van kant.","tips":["Duw je heup actief omhoog richting het plafond","Te zwaar? Steun op je knieën in plaats van je voeten","Kijk recht vooruit om je nek neutraal te houden"],"mistakes":["Heup die naar de mat zakt","Naar voren of achteren kantelen met de romp","Schouder die richting het oor kruipt"],"focus":"core","achillesSafe":true},{"name":"Pallof press","equipment":"weerstandsband","minutes":3,"dose":"3×10 per kant","description":"Bevestig een weerstandsband op borsthoogte aan bijvoorbeeld een deurklink en ga er haaks naast staan. Houd de band met twee handen voor je borst en druk hem recht naar voren uit terwijl je rotatie van je romp tegenhoudt.","tips":["Sta stevig met licht gebogen knieën en span je buik aan voordat je drukt","Hoe verder je van het bevestigingspunt staat, hoe zwaarder het wordt","Beweeg langzaam heen en terug"],"mistakes":["De romp mee laten draaien met de band","Te dicht bij het ankerpunt staan waardoor er geen spanning is","De schouders optrekken tijdens het drukken"],"focus":"core","achillesSafe":true},{"name":"Suitcase carry","equipment":"kettlebell","minutes":3,"dose":"3×30 sec per kant","description":"Pak de kettlebell in één hand als een koffer en loop rustig door de kamer terwijl je kaarsrecht blijft staan. Wissel na elke ronde van hand.","tips":["Stel je voor dat er een boek op je hoofd ligt: lang en rechtop lopen","Span de zij zonder gewicht aan om niet scheef te hangen","Rustige, bewuste stappen zijn ook fijn looptraining voor je herstellende been"],"mistakes":["Naar de kant van het gewicht overhellen","Te snel lopen waardoor je gaat zwaaien","De schouder van de draagkant laten hangen"],"focus":"core","achillesSafe":true},{"name":"Band pull-apart","equipment":"weerstandsband","minutes":2,"dose":"3×15","description":"Houd een weerstandsband op schouderhoogte met gestrekte armen voor je. Trek de band uit elkaar tot hij je borst raakt door je schouderbladen naar elkaar te knijpen, en keer rustig terug.","tips":["Eindig elke herhaling met een bewuste knijp tussen je schouderbladen","Houd je schouders laag, weg van je oren","Ideale mini-pauze na een dag achter het bureau"],"mistakes":["Ellebogen buigen waardoor het een armoefening wordt","De band laten terugschieten in plaats van gecontroleerd terugkeren","Een te zware band pakken waardoor de beweging klein blijft"],"focus":"rug","achillesSafe":true},{"name":"Row met weerstandsband","equipment":"weerstandsband","minutes":3,"dose":"3×12","description":"Ga zitten met gestrekte benen en sla de band om je voetzolen, of bevestig hem aan een deurklink. Trek de uiteinden naar je middenrif terwijl je schouderbladen naar elkaar toe bewegen, en laat rustig terugkomen.","tips":["Denk aan dezelfde techniek als op de horizontal row in de gym: borst vooruit, ellebogen langs het lichaam","Trek in 1 seconde naar je toe, laat in 2-3 seconden terugkomen","Houd je polsen recht in het verlengde van je onderarm"],"mistakes":["Ver naar achteren leunen om de trekkracht te vergroten","Schouders optrekken richting de oren","Momentum gebruiken in plaats van spierkracht"],"focus":"rug","achillesSafe":true},{"name":"Bent-over dumbbell row","equipment":"dumbbells","minutes":3,"dose":"3×10","description":"Buig met licht gebogen knieën voorover vanuit je heupen tot je romp bijna horizontaal is, rug recht. Trek de dumbbells naar je onderste ribben en laat ze gecontroleerd zakken.","tips":["Houd je rug als een plank: recht van hoofd tot stuit","Trek met je ellebogen langs je lichaam, niet wijd naar buiten","Steun eventueel met één hand op een stoel voor extra stabiliteit"],"mistakes":["Een bolle onderrug tijdens het vooroverbuigen","De gewichten omhoog zwaaien met een rukje","Te rechtop staan waardoor de rug nauwelijks werkt"],"focus":"rug","achillesSafe":true},{"name":"Superman","equipment":"geen","minutes":3,"dose":"3×12","description":"Ga op je buik liggen met je armen naar voren gestrekt. Til tegelijk je armen, borst en benen een stukje van de vloer, houd 2 seconden vast en zak rustig terug.","tips":["Een kleine, gecontroleerde lift is genoeg; het hoeft geen hoge zwaan te worden","Houd je blik naar de vloer gericht zodat je nek neutraal blijft","Adem uit terwijl je omhoog komt"],"mistakes":["De nek ver naar achteren trekken","Wippen op de buik in plaats van vasthouden","Alleen de benen of alleen de armen optillen"],"focus":"rug","achillesSafe":true},{"name":"Staande dumbbell shoulder press","equipment":"dumbbells","minutes":3,"dose":"3×10","description":"Sta rechtop met de dumbbells op schouderhoogte, handpalmen naar voren. Druk ze recht boven je hoofd uit tot je armen gestrekt zijn en laat gecontroleerd zakken.","tips":["Span je buik en billen aan zodat je onderrug niet hol trekt","Dezelfde beweging als de shoulder press in de gym, maar nu doet je core het stabilisatiewerk","Druk de dumbbells iets naar elkaar toe bovenin"],"mistakes":["Achterover leunen tijdens het drukken","De ellebogen niet volledig strekken bovenin","Met de benen meeveren om het gewicht omhoog te krijgen"],"focus":"schouders/armen","achillesSafe":true},{"name":"Side raise + front raise combo","equipment":"dumbbells","minutes":3,"dose":"2×10+10","description":"Til lichte dumbbells eerst 10 keer zijwaarts tot schouderhoogte, en aansluitend 10 keer recht naar voren. Laat ze steeds rustig zakken zonder te zwaaien.","tips":["Pak lichter dan je denkt: dit zijn oefeningen waar techniek boven gewicht gaat","Houd een minimale buiging in je ellebogen","Je kent deze al uit de gym; thuis is het perfecte onderhoud"],"mistakes":["Zwaaien met de romp om de gewichten omhoog te krijgen","Hoger tillen dan schouderhoogte","De schouders optrekken tijdens het heffen"],"focus":"schouders/armen","achillesSafe":true},{"name":"Incline push-up","equipment":"stoel/verhoging","minutes":3,"dose":"3×10","description":"Zet je handen iets breder dan schouderbreedte op een stabiele verhoging zoals een aanrecht of stoelzitting. Zak met een strak lichaam tot je borst bijna de rand raakt en duw jezelf terug omhoog.","tips":["Hoe hoger de steun, hoe lichter de oefening; bouw af naar een lagere rand","Houd je lichaam als één rechte plank van hoofd tot hielen","Fijne aanvulling op de seated chest press uit je gymschema"],"mistakes":["Heupen die doorzakken","Ellebogen wijd uitsteken in plaats van rond de 45 graden","Een halve beweging maken door niet diep genoeg te zakken"],"focus":"schouders/armen","achillesSafe":true},{"name":"Biceps curl met weerstandsband","equipment":"weerstandsband","minutes":2,"dose":"3×12","description":"Ga op het midden van de band staan en pak de uiteinden vast met je handpalmen naar voren. Krul je handen richting je schouders terwijl je ellebogen tegen je zij blijven, en laat langzaam terugzakken.","tips":["Sta met beide voeten op de band voor meer weerstand","Laat juist het terugzakken lekker traag gaan","Houd je polsen recht gedurende de hele beweging"],"mistakes":["Ellebogen naar voren laten komen tijdens het krullen","Meezwaaien met de rug","De band laten terugschieten"],"focus":"schouders/armen","achillesSafe":true},{"name":"Kettlebell deadlift","equipment":"kettlebell","minutes":3,"dose":"3×10","description":"Zet de kettlebell tussen je voeten en buig met rechte rug vanuit je heupen om hem vast te pakken. Kom krachtig rechtop door je heupen naar voren te duwen, en zet hem gecontroleerd weer terug.","tips":["Denk 'heupen naar achteren' in plaats van 'bukken'","Houd de kettlebell dicht bij je lichaam","Eindig rechtop met aangespannen billen, zonder achterover te leunen"],"mistakes":["Een bolle onderrug bij het oppakken","De beweging uit de knieën halen alsof het een squat is","Het gewicht optillen met de armen in plaats van met heupen en benen"],"focus":"full body","achillesSafe":true},{"name":"Dumbbell thruster","equipment":"dumbbells","minutes":3,"dose":"3×8","description":"Houd de dumbbells op schouderhoogte en zak in een squat. Kom in één vloeiende beweging omhoog en druk de gewichten meteen boven je hoofd uit; laat ze terugzakken naar je schouders en herhaal.","tips":["Gebruik de vaart uit je benen om de druk boven het hoofd te maken","Kies een licht gewicht en focus op het ritme","Blijf met beide voeten plat op de grond: krachtig, maar zonder sprong"],"mistakes":["De squat en de press als twee losse bewegingen uitvoeren","Op de tenen komen of hupjes maken bij het omhoog drukken","Hol trekken van de onderrug bovenin"],"focus":"full body","achillesSafe":true},{"name":"Halve Turkish get-up","equipment":"kettlebell","minutes":5,"dose":"2×3 per kant","description":"Lig op je rug met de kettlebell in één arm gestrekt boven je borst, de knie aan die kant gebogen. Rol via je vrije elleboog en hand omhoog tot een steun op je gestrekte arm, kom rustig terug en herhaal.","tips":["Houd je ogen de hele tijd op de kettlebell gericht","Oefen de beweging eerst zonder gewicht of met een schoen op je vuist","Neem de tijd: dit is een controleoefening, geen race"],"mistakes":["De arm met het gewicht laten buigen","Fases overslaan en omhoog rukken","Te zwaar beginnen"],"focus":"full body","achillesSafe":true},{"name":"Marcheren met hoge knieën","equipment":"geen","minutes":3,"dose":"3×45 sec","description":"Marcheer stevig op de plaats en til je knieën afwisselend tot heuphoogte, terwijl je armen actief meezwaaien. Houd een tempo aan waarbij je hartslag voelbaar omhoog gaat.","tips":["Zet je voet steeds rustig neer in plaats van te stampen","Beweeg je armen groot mee voor extra intensiteit","Prima cardiosnack zonder sprongimpact op je achillespees"],"mistakes":["Achterover leunen bij het heffen van de knie","De armen stil laten hangen","Overgaan in rennen of huppen terwijl je juist voor de veilige variant koos"],"focus":"cardio","achillesSafe":true},{"name":"Jumping jacks","equipment":"geen","minutes":2,"dose":"3×30 sec","description":"Spring vanuit stand je benen zijwaarts uit elkaar terwijl je armen boven je hoofd samenkomen, en spring direct weer terug. Houd een vlot, ritmisch tempo aan.","tips":["Land zacht op je voorvoeten met licht gebogen knieën","Houd je buikspieren licht aangespannen voor een stabiele landing","Pas weer oppakken als je fysio groen licht geeft voor sprongwerk"],"mistakes":["Landen op vlakke voeten met gestrekte knieën","De armen maar half omhoog bewegen","Te lang doorgaan waardoor de vorm inzakt"],"focus":"cardio","achillesSafe":false},{"name":"Schaduwboksen","equipment":"geen","minutes":4,"dose":"3×60 sec","description":"Sta licht verend in een bokshouding en stoot afwisselend je vuisten naar voren: jabs, stoten en hoeken. Blijf lichtvoetig bewegen en varieer je combinaties.","tips":["Draai je heup en romp mee met elke stoot voor meer effect","Houd je handen tussen de stoten hoog bij je kin","Blijf verplaatsen met kleine schuifstapjes in plaats van sprongetjes"],"mistakes":["Alleen met de armen stoten zonder de romp te gebruiken","De armen volledig op slot strekken","Adem inhouden tijdens de combinaties"],"focus":"cardio","achillesSafe":true},{"name":"Knee-to-wall enkelmobilisatie","equipment":"geen","minutes":3,"dose":"2×10 per kant","description":"Sta met je gezicht naar de muur en zet één voet een handbreedte ervandaan. Beweeg je knie rustig naar voren tot hij de muur raakt terwijl je hiel op de grond blijft, en keer terug.","tips":["Goede enkelmobiliteit ondersteunt je squat, traplopen en het herstel van je linker onderbeen","Lukt het makkelijk? Schuif je voet een stukje verder van de muur","Houd je hiel echt op de grond, dat is de hele oefening"],"mistakes":["De hiel laten loskomen van de vloer","De knie naar binnen laten wijzen in plaats van over de tweede teen","Doorduwen tot in een scherp of pijnlijk gevoel"],"focus":"mobiliteit","achillesSafe":true},{"name":"Kuitstretch tegen de muur","equipment":"geen","minutes":4,"dose":"2×30 sec per variant per been","description":"Zet je handen tegen de muur, stap één been naar achteren en duw de hiel in de grond met een gestrekte knie tot je rek in de kuit voelt. Doe daarna dezelfde stretch met een licht gebogen achterste knie voor de diepere kuitspier.","tips":["De variant met gebogen knie rekt de soleus, belangrijk bij achillespeesherstel","Zoek een mild rekgevoel, geen pijn","Rustig blijven doorademen tijdens het rekken"],"mistakes":["Veren tijdens de stretch in plaats van stil houden","De achterste voet naar buiten draaien","De hiel van de grond laten komen"],"focus":"mobiliteit","achillesSafe":true},{"name":"World's greatest stretch","equipment":"geen","minutes":4,"dose":"2×5 per kant","description":"Stap in een diepe uitvalspositie met je handen aan weerszijden van je voorste voet. Draai je binnenste arm naar het plafond terwijl je je romp opent, kom terug en wissel na de herhalingen van kant.","tips":["Beweeg langzaam en volg je draaiende hand met je ogen","Houd je achterste been actief gestrekt","Heerlijk als warming-up voor een thuisworkout of na lang zitten"],"mistakes":["De voorste hiel van de grond laten komen","Door de beweging heen haasten","De heupen laten zakken zonder spanning in de romp"],"focus":"mobiliteit","achillesSafe":true}];
 let PLAN_ADVICE = {"intro":"Ideaal is een full-body apparatenschema dat je consequent volhoudt: liever elke week hetzelfde ritme dan af en toe een marathonsessie. Begin altijd met een rustige warming-up op een cardio-apparaat zodat je kuit en achillespees goed doorbloed raken, bouw het gewicht op de beenapparaten geleidelijk op en plan tussen zware beensessies minstens één rustdag. Zo wordt je linker onderbeen stap voor stap sterker zonder de pees te overvragen. Twijfel je of iets goed voelt rond je achillespees, overleg dan even met je fysio.","frequency":[{"days":1,"advice":"Met één dag per week doe je het volledige full-body schema in één sessie: alle acht apparaten, 2-3 sets per oefening, met extra aandacht voor de Leg Press, Leg Extension en Leg Curl voor je linker onderbeen. Kies een vast moment in de week, zodat het een gewoonte wordt. Houd de gewichten iets conservatiever, want je lichaam krijgt maar één prikkel per week.","ifMore":"Een tweede dag verdubbelt de trainingsprikkel voor je been en laat je de belasting spreiden, waardoor elke sessie frisser en effectiever wordt."},{"days":2,"advice":"Twee keer per week is een prima basis: doe beide dagen het volledige full-body schema en plan minstens twee rustdagen ertussen, bijvoorbeeld maandag en donderdag. Je kunt de ene dag iets zwaarder trainen en de andere dag iets lichter met meer herhalingen, wat juist voor je herstellende achillespees een fijne afwisseling is.","ifMore":"Een derde dag brengt je op het klassieke om-de-dag-ritme, wat voor krachtopbouw in je onderbeen merkbaar sneller resultaat geeft."},{"days":3,"advice":"Drie dagen is voor een recreatieve sporter vaak de sweet spot: full body om de dag, bijvoorbeeld maandag, woensdag en vrijdag. Elke spiergroep krijgt drie prikkels per week en steeds een dag herstel ertussen, precies wat je achillespees en kuit nodig hebben om rustig sterker te worden. Wissel zwaar en licht af tussen de sessies.","ifMore":"Een vierde dag maakt een boven-/onderlichaam-split mogelijk, zodat je per sessie meer tijd en energie overhoudt voor gericht beenwerk zoals extra sets op de Leg Press."},{"days":4,"advice":"Bij vier dagen werkt een split goed: twee dagen onderlichaam (Leg Press, Leg Extension, Leg Curl, eventueel calf raises) en twee dagen bovenlichaam (Chest Press, Shoulder Press, Pulldown, Row, dumbbell raises). Plan de beendagen nooit direct achter elkaar, bijvoorbeeld maandag en donderdag benen, dinsdag en vrijdag bovenlichaam, zodat je achillespees steeds kan herstellen.","ifMore":"Een vijfde dag geeft ruimte voor een lichte extra sessie met cardio en mobiliteit, wat de doorbloeding en het herstel van je onderbeen ten goede komt."},{"days":5,"advice":"Met vijf dagen wissel je zware en lichte dagen af: bijvoorbeeld twee zwaardere full-body- of beendagen, twee bovenlichaamdagen en één lichte dag met rustig cardiowerk en lichte sets. Houd het aantal zware beensessies op maximaal twee tot drie per week met steeds een dag ertussen; meer belast je pees zonder dat het extra kracht oplevert.","ifMore":"Een zesde dag voegt vooral iets toe als hersteldag met wandelen, fietsen of rustig crosstrainen, niet als extra zware krachtdag."},{"days":6,"advice":"Zes dagen kan, maar alleen met een duidelijke split en discipline in de afwisseling: bijvoorbeeld drie keer bovenlichaam, twee keer onderlichaam en één lichte cardio- en mobiliteitsdag. Train je linker onderbeen nooit twee dagen achter elkaar zwaar en luister goed naar signalen als stijfheid of gevoeligheid rond de pees; bij twijfel is je fysio je beste raadgever.","ifMore":"Een zevende dag levert niets extra's op, integendeel: die ene volledige rustdag is juist het moment waarop je spieren en pees sterker worden. Houd die vrij."}],"duration":[{"maxMinutes":30,"label":"tot 30 minuten","structure":"Kort maar krachtig: 5 minuten rustig inwarmen op de fiets of crosstrainer, dan zo'n 20 minuten kracht en 5 minuten uitfietsen. Kies vier tot vijf apparaten met 2 sets per oefening en zet de beenapparaten (Leg Press, Leg Extension of Leg Curl) vooraan in de sessie, als je nog fris bent. Houd de rust tussen sets kort, rond de 60 seconden.","ifMore":"Met meer tijd voeg je eerst een derde set toe aan de beenoefeningen en daarna de ontbrekende apparaten, plus eventueel calf raises voor gerichte kuitversterking."},{"maxMinutes":45,"label":"tot 45 minuten","structure":"Een mooie compacte sessie: 8 minuten warming-up op cardio, ongeveer 30 minuten kracht en 5-7 minuten cooling-down. Je haalt zes van de acht apparaten met 2-3 sets; geef de drie beenapparaten steeds prioriteit en wissel de bovenlichaamoefeningen per sessie af, zodat alles over de week aan bod komt.","ifMore":"Met extra tijd maak je het schema compleet met alle acht apparaten en voeg je calf raises of een derde set op de Leg Press toe."},{"maxMinutes":60,"label":"tot 60 minuten","structure":"De ideale standaardsessie: 10 minuten warming-up op de fiets of crosstrainer, 40 minuten kracht en 8-10 minuten cooling-down met rustig cardio. In die 40 minuten passen alle acht apparaten met 3 sets per oefening, met 60-90 seconden rust tussen de sets. Begin met de beenapparaten en sluit af met de dumbbell raises.","ifMore":"Meer tijd besteed je aan calf raises voor je onderbeen, een iets langere en rustigere opbouw in de warming-up, of een extra set op de oefeningen die je het belangrijkst vindt."},{"maxMinutes":90,"label":"tot 90 minuten","structure":"Ruim de tijd voor een complete sessie: 12-15 minuten warming-up inclusief een paar lichte opwarmsets op de Leg Press, 55-60 minuten kracht en 10-15 minuten cooling-down met stretchen. Je doet alle acht apparaten met 3-4 sets en vult aan met extra kuitwerk zoals calf raises, met ruimere rust van 90 seconden tussen zware sets.","ifMore":"Met nog meer tijd voeg je een blok van 15-20 minuten rustig cardio toe na het krachtwerk, goed voor conditie en doorbloeding van je herstellende been."},{"maxMinutes":120,"label":"tot 120 minuten","structure":"Een uitgebreide sessie: 15 minuten warming-up, 70-75 minuten kracht met alle acht apparaten plus extra's zoals calf raises en enkele losse dumbbell-variaties, en tot slot 20-30 minuten rustig cardio en stretchen als cooling-down. Neem ruime rust tussen de sets en bewaar de zwaarste beensets voor het begin, wanneer je techniek nog scherp is.","ifMore":"Langer dan twee uur trainen levert weinig extra's op; de kwaliteit van je sets zakt dan meestal weg. Steek eventuele extra tijd liever in een tweede, kortere sessie op een andere dag."}]};
 let RECOVERY_STEPS = [{"fromMin":0,"toMin":15,"icon":"💧","title":"Direct water drinken","text":"Drink meteen na je training een groot glas water (300-500 ml). Je verliest vocht tijdens het trainen, ook op apparaten, en goed gehydrateerd herstellen je spieren sneller."},{"fromMin":0,"toMin":20,"icon":"🚶","title":"Niet meteen op de bank","text":"Blijf de eerste minuten na je sessie rustig in beweging: loop wat rond of fiets heel licht uit. Zo voer je afvalstoffen af en voorkom je stijve benen, fijn voor je linker kuit en achillespees."},{"fromMin":10,"toMin":40,"icon":"🦵","title":"Kuit-rek en verzorging","text":"Rek je kuiten rustig, zeker links: voet tegen de muur of een stap achteruit in stand, 2-3 keer 20-30 seconden zonder pijn. Voelt je achillespees anders dan normaal? Overleg dan even met je fysio."},{"fromMin":30,"toMin":60,"icon":"🍳","title":"Eiwitrijk eten","text":"Eet binnen 30-60 minuten iets eiwitrijks: kwark met fruit, een eiwitshake, gekookte eieren of een boterham met kipfilet. Eiwitten zijn de bouwstenen waarmee je spieren en pezen herstellen."},{"fromMin":30,"toMin":120,"icon":"🍌","title":"Koolhydraten aanvullen","text":"Vul ook je energievoorraad aan met koolhydraten, bijvoorbeeld een banaan, volkoren brood, rijst of havermout. Zo ben je bij je volgende training weer op volle kracht."},{"fromMin":180,"toMin":480,"icon":"🚲","title":"Lichte beweging later op de dag","text":"Plan later op de dag nog een rustige wandeling of een blokje fietsen van 15-30 minuten. Actief herstel houdt de doorbloeding op gang en helpt tegen spierpijn in je onderbeen."},{"fromMin":600,"toMin":0,"icon":"😴","title":"7-9 uur slaap","text":"Slaap vannacht 7 tot 9 uur. Tijdens je diepe slaap maakt je lichaam groeihormoon aan en gebeurt het echte herstelwerk van spieren en pezen."},{"fromMin":2880,"toMin":0,"icon":"🗓️","title":"Volgende training na 48 uur","text":"Geef dezelfde spiergroepen zo'n 48 uur rust voordat je ze weer zwaar belast, zeker je linker kuit en achillespees. Wil je eerder sporten? Kies dan een andere spiergroep of een lichte cardiosessie."}];
 let HR_GUIDANCE = [{"phase":"warmingup","pctLow":50,"pctHigh":70,"durationText":"5-10 minuten","text":"Begin rustig op de crosstrainer of fiets en bouw je hartslag geleidelijk op naar 60-70% van je maximum. Zo worden je spieren en je achillespees warm en soepel voordat je aan de apparaten begint."},{"phase":"kracht","pctLow":70,"pctHigh":85,"durationText":"kortdurende pieken per set","text":"Tijdens een set op bijvoorbeeld de leg press of chest press piekt je hartslag kort richting 70-85%. Dat is normaal bij krachtwerk; het gaat om de inspanning per set, niet om een constante zone."},{"phase":"rust-tussen-sets","pctLow":50,"pctHigh":65,"durationText":"60-120 seconden per rustpauze","text":"Laat je hartslag tussen sets zakken tot onder ongeveer 65% van je maximum voordat je aan de volgende set begint. Zo kun je elke set weer met goede techniek en volle kracht uitvoeren."},{"phase":"cooldown","pctLow":50,"pctHigh":60,"durationText":"5-10 minuten","text":"Bouw op een cardio-apparaat rustig af tot je hartslag onder de 60% van je maximum komt. Dit helpt je lichaam om te schakelen naar herstel en voorkomt dat je met stijve benen naar huis gaat."}];
 /*__CONTENT_V2_END__*/
+
+/* ============================================================
+   GEWICHTSSTAPELS PER APPARAAT (uit foto's van de gebruiker, kg)
+   ============================================================ */
+const MACHINE_STACKS = {
+  "Seated Chest Press":   [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Seated Leg Press":     [18, 29, 41, 52, 63, 75, 86, 97, 109, 120, 131, 143, 154, 165, 177, 188],
+  "Seated Leg Extension": [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Shoulder Press":       [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Pulldown":             [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Horizontal Row (Pulley)": [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+};
+/* Openstaande vragen per apparaat — zichtbaar in de app zodat de gebruiker weet welke info nog nodig is */
+const MACHINE_OPEN_QUESTIONS = {
+  "Seated Chest Press": "Zit er boven het plaatje van 9 kg nog een lichter plaatje? En kloppen de (op de foto onscherpe) waarden 43 t/m 104 kg?",
+  "Seated Leg Press": "De platen 52 en 75 kg waren op de foto's verdekt — kloppen die tussenwaarden?",
+  "Seated Leg Extension": "Zit er boven 14 kg nog een lichter plaatje (bijv. 9 kg)?",
+  "Shoulder Press": "Zit er boven 9 kg nog een lichter plaatje (bijv. 5 kg)?",
+  "Pulldown": "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?",
+  "Horizontal Row (Pulley)": "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?",
+  "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
+  "Dumbells": "Welke dumbbell-gewichten heeft jouw gym (bijv. 1 t/m 10 kg per hele kilo)?",
+};
+function machineStack(m) { return Array.isArray(m.stack) && m.stack.length ? m.stack : null; }
+function snapToStack(stack, w) { return stack.reduce((best, v) => Math.abs(v - w) < Math.abs(best - w) ? v : best, stack[0]); }
+function stackNext(stack, w) { const i = stack.indexOf(snapToStack(stack, w)); return stack[Math.min(stack.length - 1, i + 1)]; }
+function stackPrev(stack, w) { const i = stack.indexOf(snapToStack(stack, w)); return stack[Math.max(0, i - 1)]; }
 
 /* ============================================================
    STORAGE
@@ -817,31 +845,38 @@ const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
     const r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8); return v.toString(16);
   }));
 
+// veilige JSON-lezer: één corrupte waarde mag de app niet onbruikbaar maken
+function jget(key, fallback) {
+  try {
+    const v = JSON.parse(localStorage.getItem(key) ?? fallback);
+    return v === undefined ? JSON.parse(fallback) : v;
+  } catch { return JSON.parse(fallback); }
+}
 const store = {
-  machines: () => JSON.parse(localStorage.getItem("gymwave_machines") || "[]"),
+  machines: () => { const v = jget("gymwave_machines", "[]"); return Array.isArray(v) ? v : []; },
   setMachines: (m) => { localStorage.setItem("gymwave_machines", JSON.stringify(m)); touch(); },
-  sessions: () => JSON.parse(localStorage.getItem("gymwave_sessions") || "[]"),
+  sessions: () => { const v = jget("gymwave_sessions", "[]"); return Array.isArray(v) ? v : []; },
   setSessions: (s) => { localStorage.setItem("gymwave_sessions", JSON.stringify(s)); touch(); },
   theme: () => localStorage.getItem("gymwave_theme") || "Synthwave",
   setTheme: (t) => { if (localStorage.getItem("gymwave_theme") === t) return; localStorage.setItem("gymwave_theme", t); touch(); },
   setupDone: () => localStorage.getItem("gymwave_setup_done") === "true",
   setSetupDone: (v) => { localStorage.setItem("gymwave_setup_done", v ? "true" : "false"); touch(); },
-  checklist: () => JSON.parse(localStorage.getItem("gymwave_checklist") || "null"),
+  checklist: () => jget("gymwave_checklist", "null"),
   setChecklist: (c) => { localStorage.setItem("gymwave_checklist", JSON.stringify(c)); touch(); },
-  currentSession: () => JSON.parse(localStorage.getItem("gymwave_current_session") || "null"),
+  currentSession: () => jget("gymwave_current_session", "null"),
   setCurrentSession: (s) => { localStorage.setItem("gymwave_current_session", JSON.stringify(s)); touch(); },
   clearCurrentSession: () => { localStorage.removeItem("gymwave_current_session"); touch(); },
-  goals: () => JSON.parse(localStorage.getItem("gymwave_goals") || "[]"),
+  goals: () => { const v = jget("gymwave_goals", "[]"); return Array.isArray(v) ? v : []; },
   setGoals: (g) => { localStorage.setItem("gymwave_goals", JSON.stringify(g)); touch(); },
-  coach: () => Object.assign({ enabled: true, intensity: "fanatiek", restSec: 60, voiceURI: "", rate: 1.05, speakSettings: false }, JSON.parse(localStorage.getItem("gymwave_coach") || "{}")),
+  coach: () => Object.assign({ enabled: true, intensity: "fanatiek", restSec: 60, voiceURI: "", rate: 1.05, speakSettings: false }, jget("gymwave_coach", "{}")),
   setCoach: (c) => { localStorage.setItem("gymwave_coach", JSON.stringify(c)); touch(); },
-  profile: () => JSON.parse(localStorage.getItem("gymwave_profile") || "{}"),
+  profile: () => Object.assign({}, jget("gymwave_profile", "{}")),
   setProfile: (p) => { localStorage.setItem("gymwave_profile", JSON.stringify(p)); touch(); },
-  home: () => Object.assign({ equipment: ["geen"], minutes: 10, photoTime: "" }, JSON.parse(localStorage.getItem("gymwave_home") || "{}")),
+  home: () => Object.assign({ equipment: ["geen"], minutes: 10, photoTime: "" }, jget("gymwave_home", "{}")),
   setHome: (h) => { localStorage.setItem("gymwave_home", JSON.stringify(h)); touch(); },
-  calf: () => JSON.parse(localStorage.getItem("gymwave_calf") || "[]"),
+  calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
-  chat: () => JSON.parse(localStorage.getItem("gymwave_chat") || "[]"),
+  chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
   setChat: (c) => localStorage.setItem("gymwave_chat", JSON.stringify(c)), // lokaal, niet syncen
   apiKey: () => localStorage.getItem("gymwave_api_key") || "",
   setApiKey: (k) => { if (k) localStorage.setItem("gymwave_api_key", k); else localStorage.removeItem("gymwave_api_key"); }, // lokaal, niet syncen
@@ -854,8 +889,9 @@ function loadPreset() {
   store.setMachines(PRESET_SCHEMA.map(m => ({
     id: uuid(), name: m.name, settings: m.settings.map(s => ({...s})),
     lastWeight: m.lastWeight, unit: m.unit, note: m.note, cardio: !!m.cardio,
-    sets: m.cardio ? undefined : (m.sets || 3), reps: m.cardio ? undefined : (m.reps || 10),
+    sets: m.cardio ? undefined : (m.sets || 3), reps: m.cardio ? undefined : (m.reps || 12),
     step: m.cardio ? undefined : (m.step || 1),
+    stack: MACHINE_STACKS[m.name] ? MACHINE_STACKS[m.name].slice() : undefined,
     mistakes: (EXERCISE_MISTAKES[m.name] ? (EXERCISE_MISTAKES[m.name].mistakes || []).slice() : []),
   })));
   store.setSetupDone(true);
@@ -868,8 +904,9 @@ function migrateMachines() {
   machines.forEach(m => {
     if (!m.cardio) {
       if (m.sets == null) { m.sets = 3; changed = true; }
-      if (m.reps == null) { m.reps = m.name === "Seated Chest Press" ? 20 : 10; changed = true; }
+      if (m.reps == null) { m.reps = m.name === "Seated Chest Press" ? 20 : 12; changed = true; }
       if (m.step == null) { m.step = 1; changed = true; }
+      if (!Array.isArray(m.stack) && MACHINE_STACKS[m.name]) { m.stack = MACHINE_STACKS[m.name].slice(); changed = true; }
     }
     if (!Array.isArray(m.mistakes)) {
       const hit = EXERCISE_MISTAKES[m.name];
@@ -1002,15 +1039,20 @@ const restTimer = {
     clearInterval(this.interval); this.interval = null; this.left = 0; this.render();
     beep(990, 0.28);
     voiceCoach.say(this.nextIsLast ? "lastSet" : "restEnd", {}, { minGap: 0, interrupt: true });
+    // midden in de volgende set nog een aanmoediging om tot het uiterste te gaan
+    clearTimeout(this._encourageT);
+    this._encourageT = setTimeout(() => {
+      if (currentSession && isView("session") && expandedMachineId) voiceCoach.say("duringSet", {}, { minGap: 20000 });
+    }, 15000);
   },
-  stop() { clearInterval(this.interval); this.interval = null; this.left = 0; this.render(); },
+  stop() { clearInterval(this.interval); this.interval = null; this.left = 0; clearTimeout(this._encourageT); this.render(); },
   render() {
     const b = document.getElementById("rest-banner");
     if (!b) return;
     if (this.left > 0) {
       const hint = garmin.connected ? hrRestHint() : "";
       b.classList.add("active");
-      b.innerHTML = `<span>☕ Rust</span><span class="rest-time">${this.left}s</span>${hint}<button class="btn small ghost" id="rest-skip">▶</button>`;
+      b.innerHTML = `<span>☕ Rust</span><span class="rest-time">${this.left}s</span>${hint}<button class="btn small ghost" id="rest-skip">▶ Sla over</button>`;
       b.querySelector("#rest-skip").onclick = () => this.finish();
     } else { b.classList.remove("active"); b.innerHTML = ""; }
   },
@@ -1204,10 +1246,11 @@ function renderCrowdCard() {
         ${c.temp != null ? `<span>🌡️ ${c.temp}°C</span>` : ""}
       </div>
       <div class="crowd-scale">${[1,2,3,4,5].map(i => `<button class="crowd-btn ${c.level === i ? "sel" : ""}" data-crowd="${i}" title="${CROWD_LABELS[i]}">${CROWD_ICONS[i]}</button>`).join("")}</div>
-      <div class="feel-caption">${c.level ? CROWD_ICONS[c.level] + " " + CROWD_LABELS[c.level] : "Tik een smiley aan"}</div>
+      <div class="feel-caption">${c.level ? CROWD_ICONS[c.level] + " " + CROWD_LABELS[c.level] : "Tik aan hoe druk het was (🌵 = uitgestorven, 🥵 = overvol)"}</div>
       <input type="text" id="crowd-note" placeholder="Bijzonderheden (optioneel)…" value="${esc(c.note || "")}" style="margin-top:8px;" />
     </div>`;
   box.querySelectorAll("[data-crowd]").forEach(b => b.onclick = async () => {
+    if (!currentSession) return;
     currentSession.crowd = currentSession.crowd || {};
     currentSession.crowd.level = parseInt(b.dataset.crowd);
     if (!currentSession.crowd.time) currentSession.crowd.time = currentSession.firstExerciseAt || new Date().toTimeString().slice(0, 5);
@@ -1218,7 +1261,7 @@ function renderCrowdCard() {
     }
   });
   const note = box.querySelector("#crowd-note");
-  note.oninput = () => { currentSession.crowd = currentSession.crowd || {}; currentSession.crowd.note = note.value; persistCurrent(); };
+  note.oninput = () => { if (!currentSession) return; currentSession.crowd = currentSession.crowd || {}; currentSession.crowd.note = note.value; persistCurrent(); };
 }
 function dayPart(time) {
   const h = parseInt((time || "12:00").slice(0, 2));
@@ -1341,6 +1384,15 @@ function renderHome() {
   const last = sessions[sessions.length - 1];
   const lastLabel = last ? (last.name ? `${last.name} · ${fmtNice(last.date)}` : fmtNice(last.date)) : null;
   document.getElementById("home-last").textContent = lastLabel ? `Laatste sessie: ${lastLabel}` : "Nog geen sessies — tijd om te beginnen!";
+  // lopende sessie? dan wordt de grote knop "verder gaan" en kan een nieuwe alleen via bevestiging
+  document.getElementById("enter-gym").textContent = currentSession ? "Verder met je sessie ▶" : "De Gym In";
+  const extra = document.getElementById("hero-extra");
+  extra.innerHTML = "";
+  if (currentSession) {
+    const b = mkBtn("Nieuwe sessie starten (huidige weggooien)", "btn ghost small");
+    b.onclick = () => showModal("Nieuwe sessie starten?", `Je lopende sessie${currentSession.entries.length ? ` met ${currentSession.entries.length} afgeronde oefening(en)` : ""} wordt weggegooid.`, () => startNewSession());
+    extra.appendChild(b);
+  }
   renderHomeRecovery();
   renderHomeGoals();
   renderHomeBestTime();
@@ -1364,11 +1416,12 @@ function renderHomeRecovery() {
   const last = sessions[sessions.length - 1];
   if (!wrap) return;
   if (!last || !last.endedAt || !RECOVERY_STEPS.length) { wrap.innerHTML = ""; return; }
+  const CUTOFF = 49 * 60; // tijdlijn loopt door t/m de 48-uursstap
   const elapsed = () => Math.floor((Date.now() - new Date(last.endedAt).getTime()) / 60000);
-  if (elapsed() > 24 * 60) { wrap.innerHTML = ""; return; }
+  if (elapsed() > CUTOFF) { wrap.innerHTML = ""; return; }
   const draw = () => {
     const mins = elapsed();
-    if (mins > 24 * 60) { wrap.innerHTML = ""; clearInterval(recoveryTick); return; }
+    if (mins > CUTOFF) { wrap.innerHTML = ""; clearInterval(recoveryTick); return; }
     const rows = RECOVERY_STEPS.map(s => {
       const active = mins >= s.fromMin && (s.toMin === 0 || mins < s.toMin);
       const done = s.toMin !== 0 && mins >= s.toMin;
@@ -1402,7 +1455,7 @@ function renderHomeBestTime() {
   </div></details>`;
 }
 document.getElementById("open-checklist").addEventListener("click", () => route("checklist"));
-document.getElementById("enter-gym").addEventListener("click", () => {
+function startNewSession() {
   currentSession = { id: uuid(), date: todayISO(), name: "", entries: [], partial: {}, startedAt: new Date().toISOString() };
   expandedMachineId = null;
   persistCurrent();
@@ -1410,6 +1463,10 @@ document.getElementById("enter-gym").addEventListener("click", () => {
   voiceCoach.say("sessionStart", {}, { minGap: 0, interrupt: true });
   const goals = activeGoals();
   if (goals.length) setTimeout(() => voiceCoach.say("goal", { goal: goals[Math.floor(Math.random() * goals.length)].title }, { minGap: 0 }), 4000);
+}
+document.getElementById("enter-gym").addEventListener("click", () => {
+  if (currentSession) { route("session"); return; } // lopende sessie nooit stilzwijgend weggooien
+  startNewSession();
 });
 
 /* ============================================================
@@ -1427,6 +1484,8 @@ function suggestPrev(w, step) {
   const dec = w < 10 ? st : w < 40 ? Math.max(st, 2) : Math.max(st, 5);
   return Math.max(0, Math.round((w - Math.ceil(dec / st) * st) * 10) / 10);
 }
+function suggestNextFor(m, w) { const st = machineStack(m); return st ? stackNext(st, w) : suggestNext(w, m.step); }
+function suggestPrevFor(m, w) { const st = machineStack(m); return st ? stackPrev(st, w) : suggestPrev(w, m.step); }
 function machineMistakes(m) {
   if (Array.isArray(m.mistakes) && m.mistakes.length) return m.mistakes;
   const hit = EXERCISE_MISTAKES[m.name];
@@ -1457,11 +1516,12 @@ function readExerciseInputs(m, body) {
   const wEl = body.querySelector(".weight-display");
   const step = m.step || 1;
   const raw = parseFloat(String(wEl && wEl.value).replace(",", ".")) || 0;
-  const weight = m.cardio ? 0 : Math.max(0, Math.round((Math.round(raw / step) * step) * 10) / 10);
+  const stk = machineStack(m);
+  const weight = m.cardio ? 0 : (stk ? snapToStack(stk, raw) : Math.max(0, Math.round((Math.round(raw / step) * step) * 10) / 10));
   const settings = [...body.querySelectorAll(".sess-setting")].map((inp, i) => ({ label: m.settings[i].label, value: inp.value }));
   const setsEl = body.querySelector('[data-val="sets"]'), repsEl = body.querySelector('[data-val="reps"]');
   const sets = setsEl ? Math.max(1, parseInt(setsEl.textContent) || 3) : null;
-  const reps = repsEl ? Math.max(1, parseInt(repsEl.textContent) || 10) : null;
+  const reps = repsEl ? Math.max(1, parseInt(repsEl.textContent) || 12) : null;
   return { weight, settings, sets, reps };
 }
 function speakMachineSettings(m) {
@@ -1469,7 +1529,7 @@ function speakMachineSettings(m) {
   (m.settings || []).forEach(s => { if (s.lastValue) parts.push(s.label + " op " + s.lastValue + "."); });
   if (!m.cardio) {
     parts.push("Gewicht " + Math.round(m.lastWeight) + " " + (m.unit === "lbs" ? "pond" : "kilo") + ".");
-    parts.push((m.sets || 3) + " sets van " + (m.reps || 10) + ".");
+    parts.push((m.sets || 3) + " sets van " + (m.reps || 12) + ".");
   }
   voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
 }
@@ -1498,12 +1558,14 @@ function renderSession() {
     card.className = "card machine-card" + (done && !expanded ? " done" : "") + (expanded ? " open" : "");
     card.dataset.id = m.id;
 
+    // 📈/🔻-advies geldt pas in een volgende sessie (niet in de sessie waarin je 'm aanzette)
+    const nextUpAdvies = m.nextUp && (!currentSession || m.nextUp.sid !== currentSession.id) ? m.nextUp : null;
     const hint = done
       ? (expanded ? `<span class="chev">▾</span>` : `<span class="chk">✓</span>`)
-      : `${m.cardio ? "" : `<span>${m.nextUp ? (m.nextUp.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||10}</span>`}<span class="chev">▾</span>`;
+      : `${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">▾</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
-    header.innerHTML = `<div class="m-name">${m.name}</div><div class="m-hint">${hint}</div>`;
+    header.innerHTML = `<div class="m-name">${esc(m.name)}</div><div class="m-hint">${hint}</div>`;
     card.appendChild(header);
 
     header.onclick = () => {
@@ -1514,19 +1576,20 @@ function renderSession() {
       if (opening && !done) {
         if (store.coach().speakSettings) speakMachineSettings(m);
         else voiceCoach.say("exerciseStart", {}, { minGap: 5000 });
-        if (m.nextUp && m.nextUp.dir !== "down") setTimeout(() => voiceCoach.say("nextUp", {}, { minGap: 30000 }), 600);
+        if (nextUpAdvies && nextUpAdvies.dir !== "down") setTimeout(() => voiceCoach.say("nextUp", {}, { minGap: 30000 }), 600);
       }
     };
 
     if (expanded) {
       // bij heropenen vooraf invullen met wat al was ingevoerd; 📈-advies vult alvast het suggestiegewicht in
       const step = m.step || 1;
-      const prefill = entry && !m.cardio ? entry.weight : (m.nextUp && !done ? m.nextUp.suggested : m.lastWeight);
-      const startWeight = Math.round((prefill || 0) / step) * step;
+      const stack = machineStack(m);
+      const prefill = entry && !m.cardio ? entry.weight : (nextUpAdvies && !done ? nextUpAdvies.suggested : m.lastWeight);
+      const startWeight = stack ? snapToStack(stack, prefill || 0) : Math.round((prefill || 0) / step) * step;
       const sliderMax = Math.max(200, Math.ceil((startWeight + 20 * step) / 5) * 5);
       const valueFor = (i) => entry && entry.settings[i] ? entry.settings[i].value : (m.settings[i].lastValue || '');
       const setsVal = entry && entry.sets ? entry.sets : (m.sets || 3);
-      const repsVal = entry && entry.reps ? entry.reps : (m.reps || 10);
+      const repsVal = entry && entry.reps ? entry.reps : (m.reps || 12);
       const partial = (currentSession.partial || {})[m.id] || {};
       const setsDone = done ? (entry.setsDone != null ? entry.setsDone : setsVal) : Math.min(partial.setsDone || 0, setsVal);
       const feeling = done ? entry.feeling : partial.feeling;
@@ -1534,13 +1597,19 @@ function renderSession() {
       body.className = "mc-body";
       const settingsHtml = m.settings.map((s, i) => `
         <div class="s-item"><label>${esc(s.label)}</label><input type="text" class="sess-setting" data-i="${i}" value="${esc(valueFor(i))}" /></div>`).join("");
-      const weightHtml = m.cardio ? "" : `
+      const weightHtml = m.cardio ? "" : (stack ? `
+        <div class="weight-ctrl">
+          <button class="wbtn" data-act="dec">−</button>
+          <div class="wcol"><input type="number" class="weight-display" step="any" inputmode="decimal" value="${startWeight}" /><div class="weight-unit">${m.unit || 'kg'} · plaat ${stack.indexOf(startWeight) + 1}/${stack.length}</div></div>
+          <button class="wbtn" data-act="inc">+</button>
+        </div>
+        <input type="range" class="weight-slider" min="0" max="${stack.length - 1}" step="1" value="${stack.indexOf(startWeight)}" />` : `
         <div class="weight-ctrl">
           <button class="wbtn" data-act="dec">−</button>
           <div class="wcol"><input type="number" class="weight-display" step="${step}" inputmode="decimal" value="${startWeight}" /><div class="weight-unit">${m.unit || 'kg'}${step !== 1 ? ` · stap ${step}` : ""}</div></div>
           <button class="wbtn" data-act="inc">+</button>
         </div>
-        <input type="range" class="weight-slider" min="0" max="${sliderMax}" step="${step}" value="${startWeight}" />`;
+        <input type="range" class="weight-slider" min="0" max="${sliderMax}" step="${step}" value="${startWeight}" />`);
       const t = Object.assign({ up: 2, down: 3, pauseRep: 1 }, m.tempo || {});
       const metroHtml = m.cardio ? "" : `
         <details class="tip inline-tip"><summary>🎵 Tempo-metronoom</summary><div class="tip-body">
@@ -1588,9 +1657,9 @@ function renderSession() {
         <details class="tip inline-tip"><summary>📜 Vorige ${hist.length}× ${pr ? `· PR ${pr} ${m.unit || "kg"} 🏆` : ""}</summary><div class="tip-body">
           ${hist.map(h => `<div class="hist-row"><span class="h-date">${fmtNice(h.date)}</span><span>${h.e.sets ? `${h.e.sets}×${h.e.reps}` : ""} ${h.e.feeling ? `<span class="hist-feel" style="background:${FEEL_COLORS[h.e.feeling]};" title="${FEEL_LABELS[h.e.feeling]}"></span>` : ""}</span><span class="${parseFloat(h.e.weight) >= pr ? "h-pr" : ""}">${h.e.weight} ${m.unit || "kg"}${parseFloat(h.e.weight) >= pr ? " 🏆" : ""}</span></div>`).join("")}
         </div></details>` : "";
-      const nextupBadge = m.nextUp && !done ? (m.nextUp.dir === "down"
-        ? `<div class="nextup-badge">🔻 Vorige keer te zwaar — probeer nu <b>${m.nextUp.suggested} ${m.unit || "kg"}</b> (was ${m.nextUp.from} ${m.unit || "kg"}).</div>`
-        : `<div class="nextup-badge">📈 Vorige keer aangegeven: meer gewicht! Probeer <b>${m.nextUp.suggested} ${m.unit || "kg"}</b> (was ${m.nextUp.from} ${m.unit || "kg"}).</div>`) : "";
+      const nextupBadge = nextUpAdvies && !done ? (nextUpAdvies.dir === "down"
+        ? `<div class="nextup-badge">🔻 Vorige keer te zwaar — probeer nu <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`
+        : `<div class="nextup-badge">📈 Vorige keer aangegeven: meer gewicht! Probeer <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`) : "";
       body.innerHTML = `
         ${nextupBadge}
         ${m.note ? `<div class="m-note">${esc(m.note)}</div>` : ""}
@@ -1604,7 +1673,7 @@ function renderSession() {
         ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
         <div class="exercise-actions">
           ${m.cardio ? "" : `<button class="btn ghost full small save-btn">💾 Opslaan zonder af te ronden</button>
-          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">📈 Volgende keer meer gewicht</button>`}
+          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? "📈 Genoteerd voor volgende keer ✓ (tik om te annuleren)" : "📈 Volgende keer meer gewicht"}</button>`}
           <button class="btn full done-btn">${done ? "OPSLAAN ✓" : "KLAAR ✓"}</button>
           ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">↩ Heropenen (vink uit)</button>` : ""}
         </div>`;
@@ -1612,12 +1681,27 @@ function renderSession() {
       if (!m.cardio) {
         const wInput = body.querySelector(".weight-display");
         const slider = body.querySelector(".weight-slider");
-        const rnd = (v) => Math.round((Math.round((v || 0) / step) * step) * 10) / 10;
-        const setVal = (v) => { v = Math.max(0, rnd(v)); wInput.value = v; if (slider) slider.value = Math.min(v, +slider.max); };
-        body.querySelector('[data-act="dec"]').onclick = () => setVal((parseFloat(wInput.value) || 0) - step);
-        body.querySelector('[data-act="inc"]').onclick = () => setVal((parseFloat(wInput.value) || 0) + step);
-        if (slider) slider.oninput = () => { wInput.value = slider.value; };
-        wInput.oninput = () => { if (slider) slider.value = Math.min(Math.max(0, rnd(parseFloat(wInput.value))), +slider.max); };
+        const unitLbl = body.querySelector(".weight-unit");
+        if (stack) {
+          // vaste gewichtsstapel: alles klikt op de echte platen
+          const setW = (v) => {
+            v = snapToStack(stack, v || 0);
+            wInput.value = v;
+            if (slider) slider.value = stack.indexOf(v);
+            if (unitLbl) unitLbl.textContent = `${m.unit || 'kg'} · plaat ${stack.indexOf(v) + 1}/${stack.length}`;
+          };
+          body.querySelector('[data-act="dec"]').onclick = () => setW(stackPrev(stack, parseFloat(wInput.value) || 0));
+          body.querySelector('[data-act="inc"]').onclick = () => setW(stackNext(stack, parseFloat(wInput.value) || 0));
+          if (slider) slider.oninput = () => setW(stack[+slider.value]);
+          wInput.onchange = () => setW(parseFloat(String(wInput.value).replace(",", ".")) || 0);
+        } else {
+          const rnd = (v) => Math.round((Math.round((v || 0) / step) * step) * 10) / 10;
+          const setVal = (v) => { v = Math.max(0, rnd(v)); wInput.value = v; if (slider) slider.value = Math.min(v, +slider.max); };
+          body.querySelector('[data-act="dec"]').onclick = () => setVal((parseFloat(wInput.value) || 0) - step);
+          body.querySelector('[data-act="inc"]').onclick = () => setVal((parseFloat(wInput.value) || 0) + step);
+          if (slider) slider.oninput = () => { wInput.value = slider.value; };
+          wInput.oninput = () => { if (slider) slider.value = Math.min(Math.max(0, rnd(parseFloat(wInput.value))), +slider.max); };
+        }
         // sets/reps-steppers
         body.querySelectorAll("[data-sr]").forEach(btn => btn.onclick = () => {
           const kind = btn.dataset.sr, d = parseInt(btn.dataset.d);
@@ -1641,11 +1725,13 @@ function renderSession() {
             const total = parseInt(body.querySelector('[data-val="sets"]').textContent) || setsVal;
             currentSession.partial = currentSession.partial || {};
             const p = currentSession.partial[m.id] = currentSession.partial[m.id] || {};
-            const cur = p.setsDone || 0;
+            const curEntry = currentSession.entries.find(x => x.machineId === m.id);
+            const cur = p.setsDone != null ? p.setsDone : (curEntry && curEntry.setsDone != null ? Math.min(curEntry.setsDone, total) : 0);
             p.setsDone = Math.max(0, Math.min(total, (i + 1 === cur) ? i : i + 1)); // tik op laatste = ongedaan maken
+            if (curEntry) curEntry.setsDone = p.setsDone; // heropende oefening: direct bijwerken
             persistCurrent();
             body.querySelectorAll(".set-dot").forEach((d, j) => d.classList.toggle("done", j < p.setsDone));
-            if (p.setsDone > cur) {
+            if (p.setsDone > cur && !curEntry) {
               beep(880, 0.12);
               voiceCoach.say("setDone", { n: p.setsDone, total }, { minGap: 0, interrupt: true });
               if (p.setsDone < total) restTimer.start(m.restSec || store.coach().restSec, p.setsDone === total - 1);
@@ -1695,13 +1781,15 @@ function renderSession() {
           } else {
             const { weight } = readExerciseInputs(m, body);
             const w = weight || Math.round(target.lastWeight);
-            target.nextUp = { from: w, suggested: suggestNext(w, target.step), dir: "up" };
+            target.nextUp = { from: w, suggested: suggestNextFor(target, w), dir: "up", sid: currentSession ? currentSession.id : null };
             toast(`📈 Genoteerd! Volgende keer: ${target.nextUp.suggested} ${target.unit || "kg"}`);
             voiceCoach.say("nextUp", {}, { minGap: 0 });
           }
           store.setMachines(machines2);
           m.nextUp = target.nextUp;
-          nuBtn.classList.toggle("active", !!(target.nextUp && target.nextUp.dir !== "down"));
+          const active = !!(target.nextUp && target.nextUp.dir !== "down");
+          nuBtn.classList.toggle("active", active);
+          nuBtn.textContent = active ? "📈 Genoteerd voor volgende keer ✓ (tik om te annuleren)" : "📈 Volgende keer meer gewicht";
         };
       }
       const st = body.querySelector(".speak-tips");
@@ -1740,7 +1828,7 @@ function completeMachine(m, body) {
   const entry = { machineId: m.id, weight, settings };
   if (!m.cardio) {
     entry.sets = sets || 3;
-    entry.reps = reps || 10;
+    entry.reps = reps || 12;
     entry.setsDone = partial.setsDone != null && partial.setsDone > 0 ? Math.min(partial.setsDone, entry.sets) : entry.sets;
     if (partial.feeling) entry.feeling = partial.feeling;
   }
@@ -1758,10 +1846,10 @@ function completeMachine(m, body) {
       // 📈/🔻-advies afhandelen op basis van vlag en gevoel
       if (target.nextUp && ((target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) || (target.nextUp.dir === "down" && weight <= target.nextUp.suggested))) delete target.nextUp;
       if (entry.feeling >= 4 && !target.nextUp) {
-        target.nextUp = { from: weight, suggested: suggestNext(weight, target.step), dir: "up" };
+        target.nextUp = { from: weight, suggested: suggestNextFor(target, weight), dir: "up", sid: currentSession ? currentSession.id : null };
         toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} → volgende keer ${target.nextUp.suggested} ${target.unit || "kg"} 📈`);
       } else if (entry.feeling <= 2 && entry.feeling > 0 && !target.nextUp) {
-        target.nextUp = { from: weight, suggested: suggestPrev(weight, target.step), dir: "down" };
+        target.nextUp = { from: weight, suggested: suggestPrevFor(target, weight), dir: "down", sid: currentSession ? currentSession.id : null };
         toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} → volgende keer ${target.nextUp.suggested} ${target.unit || "kg"} 🔻`);
       }
     }
@@ -1769,7 +1857,10 @@ function completeMachine(m, body) {
     store.setMachines(machines);
   }
   if (currentSession.partial) delete currentSession.partial[m.id];
-  if (!currentSession.firstExerciseAt) currentSession.firstExerciseAt = new Date().toTimeString().slice(0, 5);
+  if (!currentSession.firstExerciseAt) {
+    currentSession.firstExerciseAt = new Date().toTimeString().slice(0, 5);
+    if (currentSession.crowd) currentSession.crowd.time = currentSession.firstExerciseAt; // drukte-meting hoort bij het tijdstip van je eerste oefening
+  }
   restTimer.stop();
   if (metronome.machineId === m.id) metronome.stop();
   expandedMachineId = null; // klap in en schuif naar onderen
@@ -1798,8 +1889,10 @@ function undoMachine(m) {
   renderSession();
 }
 function updateProgress() {
-  const total = store.machines().length;
-  const done = currentSession ? currentSession.entries.length : 0;
+  const machines = store.machines();
+  const total = machines.length;
+  // tel alleen entries van apparaten die nog bestaan (verwijderd apparaat = geen "3 / 2")
+  const done = currentSession ? currentSession.entries.filter(e => machines.some(m => m.id === e.machineId)).length : 0;
   document.getElementById("sess-progress").textContent = `${done} / ${total}`;
 }
 document.getElementById("finish-session").addEventListener("click", () => {
@@ -2018,7 +2111,7 @@ function renderCoachChat() {
   if (!history.length) {
     const hello = document.createElement("div");
     hello.className = "bubble ai";
-    hello.textContent = "Hoi! Ik ben je coach. 💪 Vraag me alles over trainen, techniek, voeding, herstel of je doelen. Je kunt ook een foto of filmpje van je oefening sturen (🎥) voor techniektips.";
+    hello.textContent = "Hoi! Ik ben je coach. 💪 Vraag me alles over trainen, techniek, voeding, herstel of je doelen. Je kunt ook een foto of filmpje van je oefening sturen (🎥, werkt met AI-sleutel) voor techniektips.";
     wrap.appendChild(hello);
   }
   history.forEach(msg => {
@@ -2100,7 +2193,7 @@ function kbAnswer(q) {
   return "Daar heb ik in mijn ingebouwde kennisbank nog geen goed antwoord op. Probeer het met andere woorden (bijv. 'afvallen', 'spierpijn', 'kuit', 'eiwitten', 'warming-up')" + (store.apiKey() ? "." : " — of voeg bij Instellingen een API-sleutel toe, dan kan ik als volledige AI-coach élke vraag beantwoorden.");
 }
 function appContextSummary() {
-  const machines = store.machines().map(m => `${m.name}: ${m.cardio ? "cardio" : Math.round(m.lastWeight) + (m.unit || "kg") + ", " + (m.sets || 3) + "×" + (m.reps || 10)}`).join("; ");
+  const machines = store.machines().map(m => `${m.name}: ${m.cardio ? "cardio" : Math.round(m.lastWeight) + (m.unit || "kg") + ", " + (m.sets || 3) + "×" + (m.reps || 12)}`).join("; ");
   const goals = activeGoals().map(g => `${g.title} (${g.type})${g.note ? " — " + g.note : ""}`).join("; ");
   const sessions = store.sessions().slice(-3).map(s => `${s.date}: ${s.entries.length} oefeningen${s.avgHr ? ", gem. hartslag " + s.avgHr : ""}`).join("; ");
   const p = store.profile();
@@ -2321,7 +2414,7 @@ function renderCalfBox() {
     <div class="card">
       <div class="calf-modes">${Object.entries(CALF_MODES).map(([k, lbl]) => `<button class="btn small ${calfMode === k ? "" : "ghost"}" data-cm="${k}">${lbl}</button>`).join("")}</div>
       <div class="rep-legend"><span style="color:#7bd4ff;">◯ vorige (${last})</span><span style="color:#ffd75e;">◯ PR (${pr})</span></div>
-      <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < calfCurrent ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rep="${i}">${i + 1}</button>`).join("")}</div>
+      <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < calfCurrent ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rep="${i}">${i < calfCurrent ? "✗" : i + 1}</button>`).join("")}</div>
       <div class="feel-caption">${calfCurrent ? `${calfCurrent} raise${calfCurrent === 1 ? "" : "s"}${pr && calfCurrent > pr ? " — NIEUW RECORD! 🏆" : pr ? ` (PR: ${pr})` : ""}` : "Tik aan hoeveel calf raises je haalt — versla je vorige poging!"}</div>
       <button class="btn full small" id="calf-save" ${calfCurrent ? "" : "disabled"} style="margin-top:8px;">Poging opslaan ✓</button>
       ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>📜 Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? " 🏆" : ""}</span></div>`).join("")}</div></details>` : ""}
@@ -2376,6 +2469,7 @@ const photoDB = {
   async add(rec) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").put(rec); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
   async all() { const db = await this.open(); return new Promise((res, rej) => { const rq = db.transaction("photos").objectStore("photos").getAll(); rq.onsuccess = () => res((rq.result || []).sort((a, b) => a.ts - b.ts)); rq.onerror = () => rej(rq.error); }); },
   async remove(id) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").delete(id); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
+  async clear() { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction("photos", "readwrite"); tx.objectStore("photos").clear(); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
 };
 async function renderPhotosBox() {
   const box = document.getElementById("photos-box");
@@ -2384,7 +2478,7 @@ async function renderPhotosBox() {
   try { photos = await photoDB.all(); } catch {}
   box.innerHTML = `
     <div class="card">
-      <p style="font-weight:600; opacity:0.85; line-height:1.45; font-size:0.95rem;">Volg je lichaamsbouw met benchmarkfoto's. Ze blijven <b>alleen op dit apparaat</b> (geen cloud, geen back-up-export). Tip voor anoniem: houd je gezicht buiten beeld. Voor een eerlijke vergelijking: maak ze steeds op hetzelfde moment van de dag.</p>
+      <p style="font-weight:600; opacity:0.85; line-height:1.45; font-size:0.95rem;">Volg je lichaamsbouw met benchmarkfoto's. Ze blijven <b>alleen op dit apparaat</b> (geen cloud, geen back-up-export). Tip om anoniem te blijven: houd je gezicht buiten beeld. Voor een eerlijke vergelijking: maak ze steeds op hetzelfde moment van de dag.</p>
       <label>Vast fotomoment</label>
       <input type="text" id="photo-time" placeholder="bijv. 's ochtends vóór het ontbijt" value="${esc(h.photoTime || "")}" />
       <button class="btn full small" id="photo-add" style="margin-top:12px;">📸 Foto toevoegen</button>
@@ -2405,7 +2499,7 @@ async function renderPhotosBox() {
       const hours = photos.map(p => new Date(p.ts).getHours()).sort((a, b) => a - b);
       const median = hours[Math.floor(hours.length / 2)];
       if (Math.abs(hourNow - median) > 2) {
-        const ok = confirm(`Let op: je eerdere foto's maakte je rond ${median}:00 uur, nu is het ${hourNow}:00 uur. Voor een eerlijke vergelijking is hetzelfde moment beter${h.photoTime ? ` (jouw vaste moment: ${h.photoTime})` : ""}. Toch doorgaan?`);
+        const ok = confirm(`Let op: je eerdere foto's maakte je rond ${median}:00 uur, nu is het rond ${hourNow}:00 uur. Voor een eerlijke vergelijking is hetzelfde moment beter${h.photoTime ? ` (jouw vaste moment: ${h.photoTime})` : ""}. Toch doorgaan?`);
         if (!ok) return;
       }
     }
@@ -2575,6 +2669,7 @@ function renderTips() {
     html += blocks.map(({ m, mistakes, tips }) => `<details class="tip"><summary>${esc(m.name)}</summary><div class="tip-body">
       ${mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       ${tips.length ? `<div class="sub">Tips</div><ul>${tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      <button class="btn small ghost tips-speak" data-mid="${m.id}" style="margin-top:10px;">🔊 Lees voor</button>
     </div></details>`).join("");
   }
   if (GENERAL_MISTAKES.length) {
@@ -2593,6 +2688,14 @@ function renderTips() {
       </div></details>`;
   }
   wrap.innerHTML = html;
+  wrap.querySelectorAll(".tips-speak").forEach(b => b.onclick = () => {
+    const m = store.machines().find(x => x.id === b.dataset.mid);
+    if (!m) return;
+    const parts = [m.name + "."];
+    machineMistakes(m).forEach(x => parts.push("Let op: " + x));
+    machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
+    voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
+  });
   wrap.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => {
     const np = store.profile();
     if (b.dataset.plan === "days") np.daysPerWeek = Math.max(1, Math.min(6, (np.daysPerWeek || 2) + parseInt(b.dataset.d)));
@@ -2753,7 +2856,18 @@ function renderThemeGrid() {
     grid.appendChild(sw);
   });
 }
+function renderMachineQuestions() {
+  const box = document.getElementById("machine-questions");
+  if (!box) return;
+  const names = store.machines().map(m => m.name).filter(n => MACHINE_OPEN_QUESTIONS[n]);
+  box.innerHTML = names.length ? `
+    <details class="tip" style="margin-bottom:12px;"><summary>📸 Nog te checken bij je apparaten (${names.length})</summary><div class="tip-body">
+      <p style="font-weight:600; opacity:0.75; margin-bottom:8px;">De kilo-sprongen zijn ingesteld op basis van je foto's. Dit staat nog open — stuur een foto of pas het aan via "Bewerk":</p>
+      <ul>${names.map(n => `<li><b>${esc(n)}:</b> ${esc(MACHINE_OPEN_QUESTIONS[n])}</li>`).join("")}</ul>
+    </div></details>` : "";
+}
 function renderManageMachines() {
+  renderMachineQuestions();
   const wrap = document.getElementById("manage-machines");
   wrap.innerHTML = "";
   const machines = store.machines();
@@ -2795,12 +2909,15 @@ function buildEditForm(m) {
     ${m.cardio ? "" : `<label>Standaard gewicht (${m.unit || 'kg'})</label><input type="number" class="edit-weight" step="0.5" inputmode="decimal" value="${m.lastWeight}" />
     <div style="display:flex; gap:10px;">
       <div style="flex:1;"><label>Sets</label><input type="number" class="edit-sets" min="1" max="12" value="${m.sets || 3}" /></div>
-      <div style="flex:1;"><label>Reps</label><input type="number" class="edit-reps" min="1" max="100" value="${m.reps || 10}" /></div>
+      <div style="flex:1;"><label>Reps</label><input type="number" class="edit-reps" min="1" max="100" value="${m.reps || 12}" /></div>
     </div>
     <div style="display:flex; gap:10px;">
       <div style="flex:1;"><label>Gewichtsstap (kg per klik)</label><input type="number" class="edit-step" min="0.5" max="25" step="0.5" value="${m.step || 1}" /></div>
       <div style="flex:1;"><label>Rust tussen sets (sec, leeg = standaard)</label><input type="number" class="edit-restsec" min="10" max="600" step="5" value="${m.restSec || ""}" placeholder="${store.coach().restSec}" /></div>
     </div>
+    <label>Gewichtsstapel (kg van alle platen, kommagescheiden — leeg = losse stappen)</label>
+    <textarea class="edit-stack" rows="2" placeholder="bijv. 9, 14, 18, 23, 29, 36">${Array.isArray(m.stack) ? m.stack.join(", ") : ""}</textarea>
+    ${MACHINE_OPEN_QUESTIONS[m.name] ? `<div class="muted" style="font-size:0.85rem; font-weight:600; margin-top:4px;">📸 Nog te checken: ${esc(MACHINE_OPEN_QUESTIONS[m.name])}</div>` : ""}
     <label>Tempo (tellen: heen / terug / pauze tussen reps)</label>
     <div style="display:flex; gap:10px;">
       <input type="number" class="edit-tempo-up" min="1" max="10" value="${tempo.up}" />
@@ -2829,9 +2946,15 @@ function buildEditForm(m) {
     if (wEl) target.lastWeight = Math.max(0, Math.round((parseFloat(String(wEl.value).replace(",", ".")) || 0) * 10) / 10);
     const setsEl = form.querySelector(".edit-sets"), repsEl = form.querySelector(".edit-reps");
     if (setsEl) target.sets = Math.max(1, Math.min(12, parseInt(setsEl.value) || 3));
-    if (repsEl) target.reps = Math.max(1, Math.min(100, parseInt(repsEl.value) || 10));
+    if (repsEl) target.reps = Math.max(1, Math.min(100, parseInt(repsEl.value) || 12));
     const stepEl = form.querySelector(".edit-step");
     if (stepEl) target.step = Math.max(0.5, Math.min(25, parseFloat(String(stepEl.value).replace(",", ".")) || 1));
+    const stackEl = form.querySelector(".edit-stack");
+    if (stackEl) {
+      const vals = stackEl.value.split(/[,;\n]+/).map(x => parseFloat(String(x).trim().replace(",", "."))).filter(v => !isNaN(v) && v > 0);
+      if (vals.length >= 2) target.stack = [...new Set(vals)].sort((a, b) => a - b);
+      else delete target.stack;
+    }
     const restEl = form.querySelector(".edit-restsec");
     if (restEl) target.restSec = parseInt(restEl.value) || undefined;
     const tu = form.querySelector(".edit-tempo-up"), td = form.querySelector(".edit-tempo-down"), tp = form.querySelector(".edit-tempo-pause");
@@ -2863,6 +2986,7 @@ function exportData() {
     machines: store.machines().map(m => { const c = {...m}; delete c._editing; return c; }),
     sessions: store.sessions(), checklist: store.checklist(),
     goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(),
+    currentSession: store.currentSession(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -2897,7 +3021,9 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       if (Array.isArray(data.calf)) store.setCalf(data.calf);
       if (data.theme && THEMES[data.theme]) applyTheme(data.theme);
       store.setSetupDone(true);
-      currentSession = null; expandedMachineId = null; store.clearCurrentSession();
+      currentSession = null; expandedMachineId = null;
+      if (data.currentSession && Array.isArray(data.currentSession.entries)) store.setCurrentSession(data.currentSession);
+      else store.clearCurrentSession();
       boot();
     });
   };
@@ -2905,11 +3031,12 @@ document.getElementById("import-file").addEventListener("change", (e) => {
 });
 
 document.getElementById("reset-data").addEventListener("click", () => {
-  showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies, doelen en instellingen. Dit kan niet ongedaan worden gemaakt.", () => {
+  showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies, doelen, foto's en instellingen op dit apparaat. Cloud-sync wordt eerst uitgeschakeld, zodat je andere apparaten niets kwijtraken. Dit kan niet ongedaan worden gemaakt.", () => {
+    cloud.disable(); // eerst sync los, anders wordt de lege staat naar de cloud gepusht
     ["gymwave_machines","gymwave_sessions","gymwave_setup_done","gymwave_theme","gymwave_checklist",
      "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_chat",
-     "gymwave_api_key","gymwave_snack_salt","gymwave_snack_done"].forEach(k => localStorage.removeItem(k));
-    store.clearCurrentSession();
+     "gymwave_api_key","gymwave_snack_salt","gymwave_snack_done","gymwave_current_session","gymwave_last_modified"].forEach(k => localStorage.removeItem(k));
+    photoDB.clear().catch(() => {});
     currentSession = null; expandedMachineId = null; obMachines = []; applyTheme("Synthwave"); boot();
   });
 });
@@ -3000,16 +3127,17 @@ const cloud = {
   },
   // koppel dit apparaat aan een (nieuwe of bestaande) code en synchroniseer slim samen
   async connect(code) {
+    const joining = !!code; // bestaande code invoeren = data van de cloud overnemen
     const newCode = (code || genSyncCode()).trim().toUpperCase();
     localStorage.setItem("gymwave_sync_id", newCode);
     this.init();
     try {
       const remote = await this.pull();
-      if (remote && (remote.lastModified || 0) >= lastModified()) {
-        this.applyState(remote);                 // cloud is nieuwer → overnemen
+      if (remote && (joining || (remote.lastModified || 0) >= lastModified())) {
+        this.applyState(remote);                 // bestaande code of nieuwere cloud → cloud overnemen (voorkomt dat een leeg apparaat de cloud wist)
         currentSession = null; expandedMachineId = null; boot();
       } else {
-        await this.push();                        // lokaal is nieuwer (of leeg in cloud) → uploaden
+        await this.push();                        // nieuwe code (of lege cloud) → uploaden
       }
       cloudState.lastStatus = "Cloud-sync actief ✓";
     } catch (e) { cloudState.lastStatus = "Verbinden mislukt: " + (e.message || e); }
@@ -3078,7 +3206,7 @@ function boot() {
   migrateMachines();
   renderObSettings();
   const machines = store.machines();
-  if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); store.setMachines(machines); }
+  if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); localStorage.setItem("gymwave_machines", JSON.stringify(machines)); } // zonder touch: opruimen is geen inhoudelijke wijziging
   // herstel een lopende sessie zodat verversen niets vergeet
   const saved = store.currentSession();
   currentSession = (saved && Array.isArray(saved.entries)) ? saved : null;
