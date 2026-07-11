@@ -831,8 +831,8 @@ const MACHINE_OPEN_QUESTIONS = {
   "Pulldown": "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?",
   "Horizontal Row (Pulley)": "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?",
   "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
-  "Dumbells": "Dumbbells van 1 t/m 5 kg staan ingesteld. Hoeveel kilo is de kettlebell? (nog doorgeven)",
 };
+const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
 function machineStack(m) { return Array.isArray(m.stack) && m.stack.length ? m.stack : null; }
 function snapToStack(stack, w) { return stack.reduce((best, v) => Math.abs(v - w) < Math.abs(best - w) ? v : best, stack[0]); }
 function stackNext(stack, w) { const i = stack.indexOf(snapToStack(stack, w)); return stack[Math.min(stack.length - 1, i + 1)]; }
@@ -2380,7 +2380,7 @@ function renderSnacksBox() {
         <button class="btn small ${isDone ? "" : "ghost"} sn-check">${isDone ? "✓ Gedaan" : "Afvinken"}</button>
       </div>
       <div class="sn-desc">${esc(s.description)}</div>
-      <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.achillesSafe === false ? "<span>⚠️ niet bij achillesherstel</span>" : ""}</div>
+      <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}${s.achillesSafe === false ? "<span>⚠️ niet bij achillesherstel</span>" : ""}</div>
       ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>💡 Tips &amp; valkuilen</summary><div class="tip-body">
         ${s.tips.length ? `<ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
         ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
@@ -2546,7 +2546,7 @@ function renderEquipmentBox() {
   box.innerHTML = `
     <div class="card">
       <p class="muted" style="font-weight:600; font-size:0.9rem; margin-bottom:6px;">Vink aan wat je thuis hebt — de beweegsnacks passen zich hierop aan.</p>
-      ${EQUIPMENT_OPTIONS.map(eq => `<label class="machine-check"><input type="checkbox" value="${eq}" ${(h.equipment || []).includes(eq) ? "checked" : ""}/> ${eq === "geen" ? "Geen materiaal (lichaamsgewicht)" : esc(eq)}</label>`).join("")}
+      ${EQUIPMENT_OPTIONS.map(eq => `<label class="machine-check"><input type="checkbox" value="${eq}" ${(h.equipment || []).includes(eq) ? "checked" : ""}/> ${eq === "geen" ? "Geen materiaal (lichaamsgewicht)" : eq === "kettlebell" ? `kettlebell (${KETTLEBELL_WEIGHTS.join(" & ")} kg)` : eq === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(eq)}</label>`).join("")}
     </div>`;
   box.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
     const nh = store.home();
