@@ -558,7 +558,8 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <div id="home-recovery" style="margin-top:18px;"></div>
     <div id="home-goals" style="margin-top:18px;"></div>
     <div id="home-besttime" style="margin-top:18px;"></div>
-    <button class="btn ghost full" id="open-checklist" style="margin-top:18px;">🎒 Meenemen-checklist</button>
+    <button class="btn ghost full" id="open-calf" style="margin-top:18px;">🦵 Calf raises-tracker</button>
+    <button class="btn ghost full" id="open-checklist" style="margin-top:10px;">🎒 Meenemen-checklist</button>
   </section>
 
   <!-- ============ SESSIE ============ -->
@@ -1456,6 +1457,10 @@ function renderHomeBestTime() {
   </div></details>`;
 }
 document.getElementById("open-checklist").addEventListener("click", () => route("checklist"));
+document.getElementById("open-calf").addEventListener("click", () => {
+  route("thuis");
+  setTimeout(() => { const el = document.getElementById("calf-box"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+});
 function startNewSession() {
   currentSession = { id: uuid(), date: todayISO(), name: "", entries: [], partial: {}, startedAt: new Date().toISOString() };
   expandedMachineId = null;
