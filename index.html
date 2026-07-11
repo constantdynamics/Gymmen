@@ -817,6 +817,7 @@ const MACHINE_STACKS = {
   "Seated Chest Press":   [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Seated Leg Press":     [18, 29, 41, 52, 63, 75, 86, 97, 109, 120, 131, 143, 154, 165, 177, 188],
   "Seated Leg Extension": [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Dumbells":             [1, 2, 3, 4, 5],
   "Shoulder Press":       [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Pulldown":             [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Horizontal Row (Pulley)": [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
@@ -830,7 +831,7 @@ const MACHINE_OPEN_QUESTIONS = {
   "Pulldown": "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?",
   "Horizontal Row (Pulley)": "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?",
   "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
-  "Dumbells": "Welke dumbbell-gewichten heeft jouw gym (bijv. 1 t/m 10 kg per hele kilo)?",
+  "Dumbells": "Dumbbells van 1 t/m 5 kg staan ingesteld. Hoeveel kilo is de kettlebell? (nog doorgeven)",
 };
 function machineStack(m) { return Array.isArray(m.stack) && m.stack.length ? m.stack : null; }
 function snapToStack(stack, w) { return stack.reduce((best, v) => Math.abs(v - w) < Math.abs(best - w) ? v : best, stack[0]); }
