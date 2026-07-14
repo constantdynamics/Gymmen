@@ -413,6 +413,20 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
 .snack-card.sn-done { opacity: 0.5; }
 .snack-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .snack-tags span { font-size: 0.7rem; font-weight: 700; padding: 2px 9px; border-radius: 20px; background: color-mix(in srgb, var(--accent) 22%, transparent); font-family: var(--head-font); }
+/* --- Thuis-workout --- */
+.loc-actions { flex-direction: column; gap: 10px; }
+.hw-rate-row { display: flex; gap: 8px; margin-top: 10px; }
+.hw-rate { flex: 1; height: 44px; border-radius: 12px; border: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); background: rgba(0,0,0,0.35); cursor: pointer; font-size: 0.82rem; font-weight: 800; color: var(--text); opacity: 0.62; transition: all 0.18s ease; font-family: var(--head-font); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.05; gap: 1px; }
+.hw-rate .hw-emoji { font-size: 1.15rem; }
+.hw-rate.sel { opacity: 1; border-color: var(--primary); background: color-mix(in srgb, var(--primary) 26%, transparent); transform: scale(1.04); box-shadow: 0 0 12px color-mix(in srgb, var(--glow) 55%, transparent); }
+.hw-rate.sel.dis { border-color: #ff4d6a; background: color-mix(in srgb, #ff4d6a 24%, transparent); box-shadow: 0 0 12px rgba(255,77,106,0.5); }
+.hw-log { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.hw-log label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; opacity: 0.7; text-transform: uppercase; font-family: var(--head-font); margin: 0; }
+.hw-log input { width: 70px; padding: 8px; text-align: center; font-weight: 800; font-size: 1.05rem; margin: 0; }
+.hw-prog { font-size: 0.8rem; font-weight: 700; opacity: 0.8; margin-top: 8px; }
+.hw-prog .hw-pr { color: var(--primary); }
+.snack-card.hw-done { opacity: 1; border-color: var(--primary); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 40%, transparent); }
+.hw-summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
 .photo-thumb { position: relative; aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; border: 1.5px solid color-mix(in srgb, var(--glow) 45%, transparent); cursor: pointer; background: rgba(0,0,0,0.4); }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -613,6 +627,16 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <div id="photos-box"></div>
     <div class="section-title">🧰 Wat heb je thuis?</div>
     <div id="home-equipment-box"></div>
+    <div class="section-title" id="hw-progress-title" style="display:none;">📈 Voortgang thuis-workouts</div>
+    <div id="hw-progress-box"></div>
+  </section>
+
+  <!-- ============ THUIS-WORKOUT ============ -->
+  <section id="view-homeworkout" class="view">
+    <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:6px;">🏠 Thuis-workout</h2>
+    <p class="reset-note">Jouw materiaal + jouw tijd → elke keer een vers, gevarieerd programma.</p>
+    <div id="hw-setup"></div>
+    <div id="hw-plan"></div>
   </section>
 
   <!-- ============ STATS ============ -->
@@ -687,6 +711,19 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <button class="nav-item" data-view="tips"><span class="nav-icon">📖</span><span class="nav-label">TIPS</span></button>
   <button class="nav-item" data-view="settings"><span class="nav-icon">⚙️</span><span class="nav-label">INSTEL</span></button>
 </nav>
+
+<!-- ============ LOCATIEKEUZE ============ -->
+<div class="modal-overlay" id="loc-modal">
+  <div class="modal">
+    <h3>Waar train je vandaag?</h3>
+    <p>Kies je locatie — je programma past zich aan.</p>
+    <div class="modal-actions loc-actions">
+      <button class="btn full" id="loc-gym">🏋️ De Gym In</button>
+      <button class="btn full ghost" id="loc-home">🏠 Thuis trainen</button>
+      <button class="btn ghost small" id="loc-cancel">Annuleren</button>
+    </div>
+  </div>
+</div>
 
 <!-- ============ MODAL ============ -->
 <div class="modal-overlay" id="modal">
@@ -874,8 +911,13 @@ const store = {
   setCoach: (c) => { localStorage.setItem("gymwave_coach", JSON.stringify(c)); touch(); },
   profile: () => Object.assign({}, jget("gymwave_profile", "{}")),
   setProfile: (p) => { localStorage.setItem("gymwave_profile", JSON.stringify(p)); touch(); },
-  home: () => Object.assign({ equipment: ["geen"], minutes: 10, photoTime: "" }, jget("gymwave_home", "{}")),
+  home: () => Object.assign({ equipment: ["geen"], minutes: 10, photoTime: "", workoutMin: 30, ratings: {} }, jget("gymwave_home", "{}")),
   setHome: (h) => { localStorage.setItem("gymwave_home", JSON.stringify(h)); touch(); },
+  homeWorkout: () => jget("gymwave_home_workout", "null"),
+  setHomeWorkout: (w) => { localStorage.setItem("gymwave_home_workout", JSON.stringify(w)); touch(); },
+  clearHomeWorkout: () => { localStorage.removeItem("gymwave_home_workout"); touch(); },
+  homeSessions: () => { const v = jget("gymwave_home_sessions", "[]"); return Array.isArray(v) ? v : []; },
+  setHomeSessions: (s) => { localStorage.setItem("gymwave_home_sessions", JSON.stringify(s)); touch(); },
   calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
@@ -932,6 +974,18 @@ function migrateMachines() {
     }
   });
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
+}
+// Thuis-workouts staan apart: verplaats eventuele oude thuis-sessies uit de gym-lijst
+function migrateHomeSessions() {
+  const sessions = store.sessions();
+  const thuis = sessions.filter(s => s.location === "thuis");
+  if (!thuis.length) return;
+  const gym = sessions.filter(s => s.location !== "thuis");
+  const hs = store.homeSessions();
+  const existing = new Set(hs.map(s => s.id));
+  thuis.forEach(s => { if (!existing.has(s.id)) hs.push(s); });
+  store.setHomeSessions(hs);
+  store.setSessions(gym);
 }
 
 /* ============================================================
@@ -1297,6 +1351,7 @@ function route(view) {
   if (view === "session") renderSession();
   if (view === "coach") renderCoachChat();
   if (view === "goals") renderGoals();
+  if (view === "homeworkout") renderHomeWorkout();
   if (view === "thuis") renderThuis();
   if (view === "stats") renderStats();
   if (view === "tips") renderTips();
@@ -1395,6 +1450,13 @@ function renderHome() {
     b.onclick = () => showModal("Nieuwe sessie starten?", `Je lopende sessie${currentSession.entries.length ? ` met ${currentSession.entries.length} afgeronde oefening(en)` : ""} wordt weggegooid.`, () => startNewSession());
     extra.appendChild(b);
   }
+  const hw = store.homeWorkout();
+  if (hw && hw.date === todayISO()) {
+    const doneN = Object.values(hw.results || {}).filter(r => r && r.done).length;
+    const b = mkBtn(`🏠 Verder met je thuis-workout ▶${doneN ? ` (${doneN} gedaan)` : ""}`, "btn ghost small");
+    b.onclick = () => route("homeworkout");
+    extra.appendChild(b);
+  } else if (hw) { store.clearHomeWorkout(); } // oude workout van een vorige dag opruimen
   renderHomeRecovery();
   renderHomeGoals();
   renderHomeBestTime();
@@ -1472,8 +1534,14 @@ function startNewSession() {
 }
 document.getElementById("enter-gym").addEventListener("click", () => {
   if (currentSession) { route("session"); return; } // lopende sessie nooit stilzwijgend weggooien
-  startNewSession();
+  const hw = store.homeWorkout();
+  if (hw && hw.date === todayISO()) { route("homeworkout"); return; } // lopende thuis-workout hervatten
+  openLocationChoice();
 });
+function openLocationChoice() { document.getElementById("loc-modal").classList.add("show"); }
+document.getElementById("loc-cancel").onclick = () => document.getElementById("loc-modal").classList.remove("show");
+document.getElementById("loc-gym").onclick = () => { document.getElementById("loc-modal").classList.remove("show"); startNewSession(); };
+document.getElementById("loc-home").onclick = () => { document.getElementById("loc-modal").classList.remove("show"); route("homeworkout"); };
 
 /* ============================================================
    SESSIE
@@ -2358,7 +2426,41 @@ function toggleSnackDone(name) {
   names = names.includes(name) ? names.filter(n => n !== name) : [...names, name];
   localStorage.setItem("gymwave_snack_done", JSON.stringify({ date: todayISO(), names }));
 }
-function renderThuis() { renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); }
+function renderThuis() { renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+function renderThuisProgress() {
+  const wrap = document.getElementById("hw-progress-box");
+  const title = document.getElementById("hw-progress-title");
+  if (!wrap || !title) return;
+  wrap.innerHTML = "";
+  const home = store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date));
+  const names = [];
+  home.forEach(s => (s.entries || []).forEach(e => { if (e.exerciseName && e.value != null && !names.includes(e.exerciseName)) names.push(e.exerciseName); }));
+  if (!names.length) { title.style.display = "none"; return; }
+  title.style.display = "";
+  names.sort((a, b) => a.localeCompare(b, "nl"));
+  names.forEach(name => {
+    const pts = [];
+    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+    if (!pts.length) return;
+    const block = document.createElement("div"); block.className = "card";
+    const pb = Math.max(...pts.map(p => p.value));
+    const minV = Math.min(...pts.map(p => p.value));
+    const unit = pts[0].metric === "sec" ? "sec" : "reps";
+    const weights = pts.map(p => p.weight).filter(w => w != null);
+    const wPr = weights.length ? Math.max(...weights) : null;
+    const cells = pts.map(p => {
+      const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
+      const intensity = 0.35 + ratio * 0.65;
+      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity * 100)}%, var(--accent))`;
+      const glow = `0 0 ${Math.round(intensity * 14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity * 70)}%, transparent)`;
+      const star = p.value >= pb && pb > minV ? `<span class="star">★</span>` : "";
+      return `<div class="waffle-cell" title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}" style="background:${color}; box-shadow:${glow};">${star}</div>`;
+    }).join("");
+    block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
+      <div class="legend">★ = beste (${pb} ${unit})${wPr != null ? ` · zwaarste ${wPr} kg` : ""} · ${pts.length}× gedaan</div>`;
+    wrap.appendChild(block);
+  });
+}
 function renderSnacksBox() {
   const box = document.getElementById("snacks-box");
   const h = store.home();
@@ -2560,6 +2662,232 @@ function renderEquipmentBox() {
     store.setHome(nh);
     renderSnacksBox();
   });
+}
+
+/* ============================================================
+   THUIS-WORKOUT (locatie-keuze, gevarieerd programma, ratings)
+   ============================================================ */
+function equipLabel(e) {
+  return e === "geen" ? "Geen materiaal (lichaamsgewicht)"
+    : e === "kettlebell" ? `kettlebell (${KETTLEBELL_WEIGHTS.join(" & ")} kg)`
+    : e === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(e);
+}
+function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
+function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell"; }
+function hwDoseNum(s) { const m = String(s.dose || "").match(/\d+/g); return m ? parseInt(m[m.length - 1]) : null; }
+function exByName(name) { return SNACK_POOL.find(x => x.name === name); }
+function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s = exByName(n); return t + (s ? s.minutes : 0); }, 0); }
+function homeExerciseHistory(name) {
+  const pts = [];
+  store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+  return pts;
+}
+function pickWeighted(list, rnd, wf) {
+  const total = list.reduce((s, x) => s + wf(x), 0);
+  if (total <= 0) return list[Math.floor(rnd() * list.length)] || null;
+  let r = rnd() * total;
+  for (const x of list) { r -= wf(x); if (r <= 0) return x; }
+  return list[list.length - 1];
+}
+function homeWorkoutPlan(salt) {
+  const h = store.home();
+  const budget = Math.max(8, h.workoutMin || 30);
+  const ratings = h.ratings || {};
+  const equip = (h.equipment && h.equipment.length) ? h.equipment : ["geen"];
+  const rehab = activeGoals().some(g => g.type === "revalidatie");
+  const rnd = mulberry32((hashStr(todayISO()) ^ Math.imul((salt | 0) + 1, 0x9e3779b1)) | 0);
+  let pool = SNACK_POOL.filter(s => equip.includes(s.equipment));
+  if (rehab) pool = pool.filter(s => s.achillesSafe !== false);
+  pool = pool.filter(s => (ratings[s.name] || "") !== "dislike");
+  if (!pool.length) pool = SNACK_POOL.filter(s => s.equipment === "geen");
+  const plan = []; let left = budget; const usedFocus = {};
+  const add = s => { if (s && !plan.includes(s) && s.minutes <= left) { plan.push(s); left -= s.minutes; usedFocus[s.focus] = (usedFocus[s.focus] || 0) + 1; return true; } return false; };
+  // 1. warming-up: een mobiliteitsoefening
+  const warm = pool.filter(s => s.focus === "mobiliteit");
+  if (warm.length) add(pickWeighted(warm, rnd, () => 1));
+  // 2. superlikes eerst — "elke keer, indien haalbaar met de tijd" (klein → groot zodat er meer passen)
+  pool.filter(s => ratings[s.name] === "super").sort((a, b) => a.minutes - b.minutes).forEach(add);
+  // 3. gebalanceerd opvullen, gewogen op rating (like ×3) en variatie in spiergroep
+  const wf = s => (ratings[s.name] === "like" ? 3 : 1) / (1 + (usedFocus[s.focus] || 0) * 1.5);
+  let guard = 0;
+  while (left >= 2 && guard++ < 300) {
+    const cand = pool.filter(s => !plan.includes(s) && s.minutes <= left);
+    if (!cand.length || !add(pickWeighted(cand, rnd, wf))) break;
+  }
+  return { plan, budget, used: budget - left };
+}
+function regenerateHomeWorkout(salt) {
+  const prev = store.homeWorkout();
+  const keep = (prev && prev.date === todayISO());
+  const { plan } = homeWorkoutPlan(salt);
+  const w = {
+    id: keep && prev.id ? prev.id : uuid(),
+    date: todayISO(),
+    startedAt: keep && prev.startedAt ? prev.startedAt : new Date().toISOString(),
+    salt: salt | 0,
+    plan: plan.map(s => s.name),
+    results: keep ? (prev.results || {}) : {},
+  };
+  store.setHomeWorkout(w);
+  return w;
+}
+function backfillHomeWorkout(hw) {
+  const h = store.home();
+  const budget = Math.max(8, h.workoutMin || 30);
+  const ratings = h.ratings || {};
+  const equip = (h.equipment && h.equipment.length) ? h.equipment : ["geen"];
+  const rehab = activeGoals().some(g => g.type === "revalidatie");
+  const left = budget - hwPlanMinutes(hw);
+  const cand = SNACK_POOL.filter(s => equip.includes(s.equipment) && !hw.plan.includes(s.name)
+    && (ratings[s.name] || "") !== "dislike" && (!rehab || s.achillesSafe !== false) && s.minutes <= left);
+  if (cand.length) hw.plan.push(cand[Math.floor(Math.random() * cand.length)].name);
+}
+function setHwRating(name, rating) {
+  const h = store.home();
+  h.ratings = h.ratings || {};
+  if (h.ratings[name] === rating) delete h.ratings[name]; // nogmaals tikken = terug naar neutraal
+  else h.ratings[name] = rating;
+  store.setHome(h);
+  if (h.ratings[name] === "dislike") {
+    const hw = store.homeWorkout();
+    if (hw) { hw.plan = hw.plan.filter(n => n !== name); backfillHomeWorkout(hw); store.setHomeWorkout(hw); }
+    toast("👎 Deze zie je niet meer terug in nieuwe voorstellen");
+  } else if (h.ratings[name] === "super") { toast("⭐ Deze proberen we elke keer in te plannen"); }
+  else if (h.ratings[name] === "like") { toast("👍 Deze zie je nu vaker"); }
+  renderHomeWorkout();
+}
+function nextHwSalt() {
+  const n = (parseInt(localStorage.getItem("gymwave_hw_gen") || "0") || 0) + 1;
+  localStorage.setItem("gymwave_hw_gen", String(n));
+  return n;
+}
+function renderHomeWorkout() {
+  let hw = store.homeWorkout();
+  if (!hw || hw.date !== todayISO()) hw = regenerateHomeWorkout(nextHwSalt()); // elke verse workout varieert
+  renderHwSetup(hw);
+  renderHwPlan(hw);
+}
+function renderHwSetup(hw) {
+  const box = document.getElementById("hw-setup");
+  const h = store.home();
+  const total = hwPlanMinutes(hw);
+  const rehab = activeGoals().some(g => g.type === "revalidatie");
+  box.innerHTML = `
+    <div class="card">
+      <div class="sr-row" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div class="stepper"><span class="st-label">Tijd (min)</span><button data-hwmin="-5">−</button><span class="st-val">${h.workoutMin || 30}</span><button data-hwmin="5">+</button></div>
+        <button class="btn small ghost" id="hw-regen">🎲 Ander voorstel</button>
+      </div>
+      <div class="muted" style="font-weight:600; font-size:0.9rem;">Voorstel: <b>${hw.plan.length} oefening${hw.plan.length === 1 ? "" : "en"}</b> · ~${total} van ${h.workoutMin || 30} min${rehab ? " · veilig bij achillesherstel 🩹" : ""}</div>
+      <details class="tip inline-tip" style="margin-top:10px;"><summary>🧰 Wat heb je thuis?</summary><div class="tip-body" id="hw-equip"></div></details>
+    </div>`;
+  const eq = box.querySelector("#hw-equip");
+  eq.innerHTML = EQUIPMENT_OPTIONS.map(e => `<label class="machine-check"><input type="checkbox" value="${e}" ${(h.equipment || []).includes(e) ? "checked" : ""}/> ${equipLabel(e)}</label>`).join("");
+  eq.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
+    const nh = store.home();
+    nh.equipment = [...eq.querySelectorAll("input:checked")].map(i => i.value);
+    if (!nh.equipment.length) nh.equipment = ["geen"];
+    store.setHome(nh);
+    regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1);
+    renderHomeWorkout();
+  });
+  box.querySelectorAll("[data-hwmin]").forEach(b => b.onclick = () => {
+    const nh = store.home();
+    nh.workoutMin = Math.max(8, Math.min(90, (nh.workoutMin || 30) + parseInt(b.dataset.hwmin)));
+    store.setHome(nh);
+    regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1);
+    renderHomeWorkout();
+  });
+  box.querySelector("#hw-regen").onclick = () => { regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1); renderHomeWorkout(); };
+}
+function hwCard(s, hw) {
+  const r = hw.results[s.name] || {};
+  const metric = hwMetric(s);
+  const unitLbl = metric === "sec" ? "sec" : "reps";
+  const weighted = hwWeighted(s);
+  const rating = (store.home().ratings || {})[s.name] || "";
+  const hist = homeExerciseHistory(s.name);
+  const last = hist.length ? hist[hist.length - 1] : null;
+  const pr = hist.reduce((m, p) => Math.max(m, p.value || 0), 0);
+  const card = document.createElement("div");
+  card.className = "card snack-card" + (r.done ? " hw-done" : "");
+  card.innerHTML = `
+    <div class="sn-head">
+      <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
+      <button class="btn small ${r.done ? "" : "ghost"} hw-check">${r.done ? "✓ Klaar" : "Afvinken"}</button>
+    </div>
+    <div class="sn-desc">${esc(s.description)}</div>
+    <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}</div>
+    <div class="hw-log">
+      <label>${metric === "sec" ? "Seconden" : "Reps"}</label>
+      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${hwDoseNum(s) != null ? hwDoseNum(s) : ""}" />
+      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="kg" />` : ""}
+    </div>
+    ${(last || pr) ? `<div class="hw-prog">${last ? `Vorige: <b>${last.value} ${last.metric === "sec" ? "sec" : "reps"}</b>${last.weight ? ` @ ${last.weight}kg` : ""}` : ""}${pr ? `${last ? " · " : ""}<span class="hw-pr">PR: ${pr} ${unitLbl}</span>` : ""}</div>` : ""}
+    <div class="hw-rate-row">
+      <button class="hw-rate ${rating === "like" ? "sel" : ""}" data-rate="like"><span class="hw-emoji">👍</span>Vaker</button>
+      <button class="hw-rate ${rating === "super" ? "sel" : ""}" data-rate="super"><span class="hw-emoji">⭐</span>Elke keer</button>
+      <button class="hw-rate dis ${rating === "dislike" ? "sel dis" : ""}" data-rate="dislike"><span class="hw-emoji">👎</span>Niet meer</button>
+    </div>
+    ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>💡 Tips &amp; valkuilen</summary><div class="tip-body">
+      ${s.tips.length ? `<ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    </div></details>` : ""}`;
+  const saveResult = (patch) => {
+    const w = store.homeWorkout(); if (!w) return;
+    const rr = Object.assign({ metric }, w.results[s.name] || {}, patch);
+    w.results[s.name] = rr; store.setHomeWorkout(w);
+  };
+  const valIn = card.querySelector(".hw-val");
+  valIn.oninput = () => saveResult({ value: valIn.value === "" ? null : parseFloat(valIn.value) });
+  const wtIn = card.querySelector(".hw-wt");
+  if (wtIn) wtIn.oninput = () => saveResult({ weight: wtIn.value === "" ? null : parseFloat(wtIn.value) });
+  card.querySelector(".hw-check").onclick = () => {
+    const w = store.homeWorkout(); if (!w) return;
+    const rr = Object.assign({ metric }, w.results[s.name] || {});
+    rr.done = !rr.done;
+    if (rr.done && rr.value == null && valIn.value !== "") rr.value = parseFloat(valIn.value);
+    w.results[s.name] = rr; store.setHomeWorkout(w);
+    renderHomeWorkout();
+  };
+  card.querySelectorAll(".hw-rate").forEach(b => b.onclick = () => setHwRating(s.name, b.dataset.rate));
+  return card;
+}
+function renderHwPlan(hw) {
+  const wrap = document.getElementById("hw-plan");
+  wrap.innerHTML = "";
+  if (!hw.plan.length) {
+    wrap.innerHTML = `<div class="empty-state">Geen oefeningen passen bij je materiaal en tijd. Vink meer materiaal aan of zet de tijd hoger.</div>`;
+    return;
+  }
+  hw.plan.forEach(name => { const s = exByName(name); if (s) wrap.appendChild(hwCard(s, hw)); });
+  const doneN = hw.plan.filter(n => (hw.results[n] || {}).done).length;
+  const footer = document.createElement("div");
+  footer.innerHTML = `
+    <div class="card hw-summary"><span class="muted" style="font-weight:700;">${doneN} van ${hw.plan.length} afgevinkt</span>${doneN ? `<span class="hw-pr" style="font-weight:800;">💪 lekker bezig!</span>` : ""}</div>
+    <button class="btn full" id="hw-finish" ${doneN ? "" : "disabled"} style="margin-top:8px;">Workout afronden 🏁</button>
+    <button class="btn ghost full small" id="hw-cancel" style="margin-top:8px;">Workout wissen</button>`;
+  wrap.appendChild(footer);
+  footer.querySelector("#hw-finish").onclick = finishHomeWorkout;
+  footer.querySelector("#hw-cancel").onclick = () => showModal("Workout wissen?", "Je huidige thuis-workout en ingevulde reps worden weggegooid.", () => { store.clearHomeWorkout(); route("home"); });
+}
+function finishHomeWorkout() {
+  const hw = store.homeWorkout();
+  if (!hw) return;
+  const entries = hw.plan.map(name => {
+    const s = exByName(name); const r = hw.results[name] || {};
+    if (!r.done) return null;
+    return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg" };
+  }).filter(Boolean);
+  if (!entries.length) { alert("Vink minstens één oefening af voordat je de workout afrondt!"); return; }
+  // Thuis-workouts staan apart van je gym-sessies (eigen opslag, eigen voortgang in Thuis)
+  const session = { id: hw.id || uuid(), date: todayISO(), name: `Thuis-workout ${fmtNice(todayISO())}`, location: "thuis", entries, startedAt: hw.startedAt || new Date().toISOString(), endedAt: new Date().toISOString() };
+  const hs = store.homeSessions(); hs.push(session); store.setHomeSessions(hs);
+  store.clearHomeWorkout();
+  celebrate();
+  voiceCoach.speak((voiceCoach.line("sessionEnd") || "Workout klaar!") + ` ${entries.length} oefening${entries.length === 1 ? "" : "en"} thuis gedaan. Sterk bezig!`, { interrupt: true });
+  setTimeout(() => { route("thuis"); toast("🏁 Thuis-workout opgeslagen — voortgang staat bij Thuis"); }, 700);
 }
 
 /* ============================================================
@@ -2992,7 +3320,8 @@ function exportData() {
     machines: store.machines().map(m => { const c = {...m}; delete c._editing; return c; }),
     sessions: store.sessions(), checklist: store.checklist(),
     goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(),
-    currentSession: store.currentSession(),
+    currentSession: store.currentSession(), homeWorkout: store.homeWorkout(),
+    homeSessions: store.homeSessions(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -3030,6 +3359,9 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       currentSession = null; expandedMachineId = null;
       if (data.currentSession && Array.isArray(data.currentSession.entries)) store.setCurrentSession(data.currentSession);
       else store.clearCurrentSession();
+      if (data.homeWorkout && Array.isArray(data.homeWorkout.plan)) store.setHomeWorkout(data.homeWorkout);
+      else store.clearHomeWorkout();
+      if (Array.isArray(data.homeSessions)) store.setHomeSessions(data.homeSessions);
       boot();
     });
   };
@@ -3068,7 +3400,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_home_workout","gymwave_home_sessions"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 
@@ -3210,6 +3542,7 @@ function boot() {
   applyTheme(store.theme());
   voiceCoach.init();
   migrateMachines();
+  migrateHomeSessions();
   renderObSettings();
   const machines = store.machines();
   if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); localStorage.setItem("gymwave_machines", JSON.stringify(machines)); } // zonder touch: opruimen is geen inhoudelijke wijziging
