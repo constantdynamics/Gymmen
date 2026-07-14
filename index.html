@@ -627,6 +627,8 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <div id="photos-box"></div>
     <div class="section-title">🧰 Wat heb je thuis?</div>
     <div id="home-equipment-box"></div>
+    <div class="section-title" id="hw-progress-title" style="display:none;">📈 Voortgang thuis-workouts</div>
+    <div id="hw-progress-box"></div>
   </section>
 
   <!-- ============ THUIS-WORKOUT ============ -->
@@ -655,8 +657,6 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <div class="card" id="total-chart-card"></div>
     <div class="section-title">Voortgang per apparaat</div>
     <div id="waffle-section"></div>
-    <div class="section-title" id="home-waffle-title" style="display:none;">🏠 Voortgang thuis</div>
-    <div id="home-waffle-section"></div>
   </section>
 
   <!-- ============ TIPS ============ -->
@@ -916,6 +916,8 @@ const store = {
   homeWorkout: () => jget("gymwave_home_workout", "null"),
   setHomeWorkout: (w) => { localStorage.setItem("gymwave_home_workout", JSON.stringify(w)); touch(); },
   clearHomeWorkout: () => { localStorage.removeItem("gymwave_home_workout"); touch(); },
+  homeSessions: () => { const v = jget("gymwave_home_sessions", "[]"); return Array.isArray(v) ? v : []; },
+  setHomeSessions: (s) => { localStorage.setItem("gymwave_home_sessions", JSON.stringify(s)); touch(); },
   calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
@@ -972,6 +974,18 @@ function migrateMachines() {
     }
   });
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
+}
+// Thuis-workouts staan apart: verplaats eventuele oude thuis-sessies uit de gym-lijst
+function migrateHomeSessions() {
+  const sessions = store.sessions();
+  const thuis = sessions.filter(s => s.location === "thuis");
+  if (!thuis.length) return;
+  const gym = sessions.filter(s => s.location !== "thuis");
+  const hs = store.homeSessions();
+  const existing = new Set(hs.map(s => s.id));
+  thuis.forEach(s => { if (!existing.has(s.id)) hs.push(s); });
+  store.setHomeSessions(hs);
+  store.setSessions(gym);
 }
 
 /* ============================================================
@@ -2412,7 +2426,41 @@ function toggleSnackDone(name) {
   names = names.includes(name) ? names.filter(n => n !== name) : [...names, name];
   localStorage.setItem("gymwave_snack_done", JSON.stringify({ date: todayISO(), names }));
 }
-function renderThuis() { renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); }
+function renderThuis() { renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+function renderThuisProgress() {
+  const wrap = document.getElementById("hw-progress-box");
+  const title = document.getElementById("hw-progress-title");
+  if (!wrap || !title) return;
+  wrap.innerHTML = "";
+  const home = store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date));
+  const names = [];
+  home.forEach(s => (s.entries || []).forEach(e => { if (e.exerciseName && e.value != null && !names.includes(e.exerciseName)) names.push(e.exerciseName); }));
+  if (!names.length) { title.style.display = "none"; return; }
+  title.style.display = "";
+  names.sort((a, b) => a.localeCompare(b, "nl"));
+  names.forEach(name => {
+    const pts = [];
+    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+    if (!pts.length) return;
+    const block = document.createElement("div"); block.className = "card";
+    const pb = Math.max(...pts.map(p => p.value));
+    const minV = Math.min(...pts.map(p => p.value));
+    const unit = pts[0].metric === "sec" ? "sec" : "reps";
+    const weights = pts.map(p => p.weight).filter(w => w != null);
+    const wPr = weights.length ? Math.max(...weights) : null;
+    const cells = pts.map(p => {
+      const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
+      const intensity = 0.35 + ratio * 0.65;
+      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity * 100)}%, var(--accent))`;
+      const glow = `0 0 ${Math.round(intensity * 14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity * 70)}%, transparent)`;
+      const star = p.value >= pb && pb > minV ? `<span class="star">★</span>` : "";
+      return `<div class="waffle-cell" title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}" style="background:${color}; box-shadow:${glow};">${star}</div>`;
+    }).join("");
+    block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
+      <div class="legend">★ = beste (${pb} ${unit})${wPr != null ? ` · zwaarste ${wPr} kg` : ""} · ${pts.length}× gedaan</div>`;
+    wrap.appendChild(block);
+  });
+}
 function renderSnacksBox() {
   const box = document.getElementById("snacks-box");
   const h = store.home();
@@ -2631,7 +2679,7 @@ function exByName(name) { return SNACK_POOL.find(x => x.name === name); }
 function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s = exByName(n); return t + (s ? s.minutes : 0); }, 0); }
 function homeExerciseHistory(name) {
   const pts = [];
-  store.sessions().filter(s => s.location === "thuis").slice().sort((a, b) => a.date.localeCompare(b.date))
+  store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date))
     .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
   return pts;
 }
@@ -2833,12 +2881,13 @@ function finishHomeWorkout() {
     return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg" };
   }).filter(Boolean);
   if (!entries.length) { alert("Vink minstens één oefening af voordat je de workout afrondt!"); return; }
+  // Thuis-workouts staan apart van je gym-sessies (eigen opslag, eigen voortgang in Thuis)
   const session = { id: hw.id || uuid(), date: todayISO(), name: `Thuis-workout ${fmtNice(todayISO())}`, location: "thuis", entries, startedAt: hw.startedAt || new Date().toISOString(), endedAt: new Date().toISOString() };
-  const sessions = store.sessions(); sessions.push(session); store.setSessions(sessions);
+  const hs = store.homeSessions(); hs.push(session); store.setHomeSessions(hs);
   store.clearHomeWorkout();
   celebrate();
   voiceCoach.speak((voiceCoach.line("sessionEnd") || "Workout klaar!") + ` ${entries.length} oefening${entries.length === 1 ? "" : "en"} thuis gedaan. Sterk bezig!`, { interrupt: true });
-  setTimeout(() => { route("home"); toast("🏁 Thuis-workout opgeslagen — voortgang staat bij Stats"); }, 700);
+  setTimeout(() => { route("thuis"); toast("🏁 Thuis-workout opgeslagen — voortgang staat bij Thuis"); }, 700);
 }
 
 /* ============================================================
@@ -2861,37 +2910,7 @@ function filterSessions() {
     if (from && d < from) return false; if (to && d > to) return false; return true;
   });
 }
-function renderStats() { const sessions = filterSessions(); renderTotalChart(sessions); renderWaffles(sessions); renderHomeWaffles(sessions); }
-function renderHomeWaffles(sessions) {
-  const wrap = document.getElementById("home-waffle-section");
-  const title = document.getElementById("home-waffle-title");
-  wrap.innerHTML = "";
-  const home = sessions.filter(s => s.location === "thuis").slice().sort((a, b) => a.date.localeCompare(b.date));
-  const names = [];
-  home.forEach(s => (s.entries || []).forEach(e => { if (e.exerciseName && e.value != null && !names.includes(e.exerciseName)) names.push(e.exerciseName); }));
-  if (!names.length) { title.style.display = "none"; return; }
-  title.style.display = "";
-  names.forEach(name => {
-    const pts = [];
-    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
-    if (!pts.length) return;
-    const block = document.createElement("div"); block.className = "card";
-    const pb = Math.max(...pts.map(p => p.value));
-    const minV = Math.min(...pts.map(p => p.value));
-    const unit = pts[0].metric === "sec" ? "sec" : "reps";
-    const cells = pts.map(p => {
-      const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
-      const intensity = 0.35 + ratio * 0.65;
-      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity * 100)}%, var(--accent))`;
-      const glow = `0 0 ${Math.round(intensity * 14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity * 70)}%, transparent)`;
-      const star = p.value >= pb && pb > minV ? `<span class="star">★</span>` : "";
-      return `<div class="waffle-cell" title="${p.date}: ${p.value} ${unit}${p.weight ? ` @ ${p.weight}kg` : ""}" style="background:${color}; box-shadow:${glow};">${star}</div>`;
-    }).join("");
-    block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
-      <div class="legend">★ = beste (${pb} ${unit}) · ${pts.length}× gedaan</div>`;
-    wrap.appendChild(block);
-  });
-}
+function renderStats() { const sessions = filterSessions(); renderTotalChart(sessions); renderWaffles(sessions); }
 function renderTotalChart(sessions) {
   const card = document.getElementById("total-chart-card");
   if (sessions.length === 0) { card.innerHTML = `<div class="empty-state">Geen sessies in dit bereik.</div>`; return; }
@@ -3302,6 +3321,7 @@ function exportData() {
     sessions: store.sessions(), checklist: store.checklist(),
     goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(),
     currentSession: store.currentSession(), homeWorkout: store.homeWorkout(),
+    homeSessions: store.homeSessions(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -3341,6 +3361,7 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       else store.clearCurrentSession();
       if (data.homeWorkout && Array.isArray(data.homeWorkout.plan)) store.setHomeWorkout(data.homeWorkout);
       else store.clearHomeWorkout();
+      if (Array.isArray(data.homeSessions)) store.setHomeSessions(data.homeSessions);
       boot();
     });
   };
@@ -3379,7 +3400,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_home_workout"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_home_workout","gymwave_home_sessions"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 
@@ -3521,6 +3542,7 @@ function boot() {
   applyTheme(store.theme());
   voiceCoach.init();
   migrateMachines();
+  migrateHomeSessions();
   renderObSettings();
   const machines = store.machines();
   if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); localStorage.setItem("gymwave_machines", JSON.stringify(machines)); } // zonder touch: opruimen is geen inhoudelijke wijziging
