@@ -157,7 +157,9 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .session-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
 input.session-name-input { flex: 1; min-width: 0; font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.3rem; color: var(--text); background: transparent; border: none; border-bottom: 2px dashed color-mix(in srgb, var(--primary) 45%, transparent); border-radius: 0; padding: 4px 2px; }
 input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow: none; }
-.progress-tag { font-family: "Orbitron", sans-serif; font-weight: 700; padding: 8px 16px; border-radius: 30px; background: rgba(0,0,0,0.4); border: 1.5px solid var(--primary); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); font-size: 0.95rem; }
+.progress-tag { font-family: "Orbitron", sans-serif; font-weight: 700; padding: 8px 16px; border-radius: 30px; background: rgba(0,0,0,0.4); border: 1.5px solid var(--primary); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); font-size: 0.95rem; white-space: nowrap; }
+.coach-mute-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--primary); background: rgba(0,0,0,0.4); font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); }
+.coach-mute-btn.off { border-color: rgba(120,120,140,0.5); box-shadow: none; opacity: 0.6; filter: grayscale(0.5); }
 .m-name { font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); }
 .machine-card { padding: 0; }
 .mc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; cursor: pointer; }
@@ -174,6 +176,8 @@ input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow
 .wcol { display: flex; flex-direction: column; align-items: center; }
 input.weight-display { width: 150px; padding: 12px 8px; font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 2rem; text-align: center; color: var(--text); background: rgba(0,0,0,0.45); border: 1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: var(--field-radius); text-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); }
 .weight-unit { margin-top: 7px; font-family: "Orbitron", sans-serif; font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.55; text-align: center; }
+/* pan-y: verticaal scrollen over een schuifje blijft gewoon scrollen */
+input[type="range"] { touch-action: pan-y; }
 .weight-slider { -webkit-appearance: none; appearance: none; width: 100%; height: 12px; border-radius: 999px; margin: 4px 0 16px; outline: none; cursor: pointer; background: linear-gradient(90deg, var(--primary), var(--accent)); box-shadow: 0 0 14px color-mix(in srgb, var(--glow) 45%, transparent); }
 .weight-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 4px solid var(--primary); box-shadow: 0 0 16px var(--glow); cursor: pointer; }
 .weight-slider::-moz-range-thumb { width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 4px solid var(--primary); box-shadow: 0 0 16px var(--glow); cursor: pointer; }
@@ -183,6 +187,8 @@ input.weight-display { width: 150px; padding: 12px 8px; font-family: "Orbitron",
 .settings-grid .s-item input { padding: 9px 12px; font-size: 1rem; }
 
 .machine-card.done { opacity: 0.55; filter: grayscale(0.7); border-color: rgba(120,120,140,0.4); box-shadow: none; animation: flipDone 0.5s ease; }
+.machine-card.skipped { opacity: 0.6; border-style: dashed; box-shadow: none; }
+.skip-tag { font-family: "Orbitron", sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
 @keyframes flipDone { 0% { transform: rotateX(0) scale(1); } 50% { transform: rotateX(85deg) scale(0.95); } 100% { transform: rotateX(0) scale(1); } }
 .done-collapsed { display: flex; align-items: center; justify-content: space-between; }
 .done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
@@ -580,6 +586,7 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <section id="view-session" class="view">
     <div class="session-header">
       <input type="text" id="session-name" class="session-name-input" placeholder="Naam je sessie…" maxlength="40" />
+      <button class="coach-mute-btn" id="sess-coach-toggle" title="Audio-coach aan/uit">🔊</button>
       <div class="progress-tag" id="sess-progress">0 / 0</div>
     </div>
     <div class="hr-bar" id="hr-bar"></div>
@@ -785,6 +792,8 @@ const PRESET_SCHEMA = [
     note: "Ellebogen naar buiten." },
   { name: "Horizontal Row (Pulley)", settings: [{label:"Stoel", lastValue:"3"},{label:"Kussentje", lastValue:"6"}], lastWeight: 27.3, unit: "kg",
     note: "Seated row, 25+2,3 kg (ca. 29 kg op display). Romp recht, handen op schouderhoogte, trek je armen naar achter. Schouderbladen van voor naar achter knijpen — niet via je biceps werken." },
+  { name: "Kettlebell", settings: [], lastWeight: 16, unit: "kg",
+    note: "Vrije oefening met de kettlebell van 16 kg — bijvoorbeeld goblet squats, deadlifts of suitcase carries. Rug recht, beweeg vanuit je heupen en houd de kettlebell dicht bij je lichaam." },
   { name: "Cooling-down", cardio: true, settings: [], lastWeight: 0, unit: "kg",
     note: "5 tot 10 min rustig uitlopen/fietsen." },
 ];
@@ -818,6 +827,14 @@ const TIPS = [
     "Net boven je wreef — je moet je voeten vrij kunnen bewegen.",
     "Alleen het laatste stukje doen om je kniestabiliteit te versterken.",
     "Houd je voeten neutraal en ontspannen, niet overstrekken." ] },
+  { title: "Kettlebell (16 kg)", items: [
+    "Rug recht en borst vooruit; beweeg vanuit je heupen, niet vanuit je onderrug.",
+    "Houd de kettlebell dicht bij je lichaam.",
+    { sub: "Oefeningen" },
+    "Goblet squat: kettlebell met twee handen tegen je borst, ellebogen naar beneden.",
+    "Deadlift: kettlebell tussen je voeten, heupen naar achteren, krachtig rechtop komen.",
+    "Suitcase carry: als een koffer in één hand, kaarsrecht blijven lopen, wissel van hand.",
+    "Begin met 16 kg; voelt 3×12 makkelijk, dan is de 20 kg de volgende stap." ] },
 ];
 
 /* ============================================================
@@ -859,6 +876,7 @@ const MACHINE_STACKS = {
   "Shoulder Press":       [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Pulldown":             [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Horizontal Row (Pulley)": [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  "Kettlebell":           [16, 20],
 };
 /* Openstaande vragen per apparaat — zichtbaar in de app zodat de gebruiker weet welke info nog nodig is */
 const MACHINE_OPEN_QUESTIONS = {
@@ -871,6 +889,21 @@ const MACHINE_OPEN_QUESTIONS = {
   "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
 };
 const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
+/* Tips voor de kettlebell-oefening in het gym-schema (los van de content-blobs hierboven) */
+EXERCISE_MISTAKES["Kettlebell"] = EXERCISE_MISTAKES["Kettlebell"] || {
+  mistakes: [
+    "Een bolle onderrug bij het oppakken of neerzetten — pak de kettlebell altijd op met rechte rug en heupen naar achteren.",
+    "Zwaaien met momentum in plaats van gecontroleerd bewegen vanuit je spieren.",
+    "De kettlebell ver van je lichaam houden, waardoor je onderrug onnodig zwaar belast wordt.",
+    "Te snel naar de 20 kg grijpen terwijl de techniek met 16 kg nog niet strak staat.",
+  ],
+  tips: [
+    "Begin met 16 kg; pas als 3 sets van 12 nette herhalingen makkelijk voelen, pak je de 20 kg.",
+    "Goblet squat: houd de kettlebell met twee handen tegen je borst, ellebogen naar beneden.",
+    "Deadlift: kettlebell tussen je voeten, heupen naar achteren, krachtig rechtop komen met aangespannen billen.",
+    "Span je buik aan voordat je tilt en adem uit tijdens het zwaarste deel van de beweging.",
+  ],
+};
 function machineStack(m) { return Array.isArray(m.stack) && m.stack.length ? m.stack : null; }
 function snapToStack(stack, w) { return stack.reduce((best, v) => Math.abs(v - w) < Math.abs(best - w) ? v : best, stack[0]); }
 function stackNext(stack, w) { const i = stack.indexOf(snapToStack(stack, w)); return stack[Math.min(stack.length - 1, i + 1)]; }
@@ -973,6 +1006,18 @@ function migrateMachines() {
       }
     }
   });
+  // Kettlebell-oefening (16 kg, daarna 20 kg) toevoegen voor bestaande gebruikers — vóór de Cooling-down
+  if (machines.length && !machines.some(m => (m.name || "").toLowerCase().includes("kettlebell"))) {
+    const kbPreset = PRESET_SCHEMA.find(p => p.name === "Kettlebell");
+    const kb = {
+      id: uuid(), name: "Kettlebell", settings: [], lastWeight: 16, unit: "kg", note: kbPreset ? kbPreset.note : "",
+      cardio: false, sets: 3, reps: 12, step: 1, stack: MACHINE_STACKS["Kettlebell"].slice(),
+      mistakes: (EXERCISE_MISTAKES["Kettlebell"] ? (EXERCISE_MISTAKES["Kettlebell"].mistakes || []) : []).slice(),
+    };
+    const idx = machines.findIndex(m => m.name === "Cooling-down");
+    if (idx >= 0) machines.splice(idx, 0, kb); else machines.push(kb);
+    changed = true;
+  }
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
 }
 // Thuis-workouts staan apart: verplaats eventuele oude thuis-sessies uit de gym-lijst
@@ -1033,29 +1078,117 @@ function beep(freq = 880, dur = 0.12, delay = 0) {
 function activeGoals() { return store.goals().filter(g => !g.done); }
 
 /* ============================================================
+   SCHUIFJES: alleen bewust verslepen
+   Een tik of veeg op de balk tijdens het scrollen mag de waarde
+   niet veranderen: alleen slepen vanaf de duimknop telt, of een
+   duidelijk horizontale sleep. Geldt voor alle range-inputs.
+   ============================================================ */
+(() => {
+  let guard = null; // { slider, value, x0, y0, accepted }
+  const thumbCenterX = (s) => {
+    const rect = s.getBoundingClientRect();
+    const min = parseFloat(s.min) || 0, max = parseFloat(s.max) || 100;
+    const frac = max > min ? (((parseFloat(s.value) || 0) - min) / (max - min)) : 0;
+    const thumbW = 34; // grootste duimknop in de app
+    return rect.left + thumbW / 2 + frac * (rect.width - thumbW);
+  };
+  const restore = (fireInput) => {
+    if (!guard) return;
+    if (guard.slider.value !== guard.value) {
+      guard.slider.value = guard.value;
+      if (fireInput) guard.slider.dispatchEvent(new Event("input"));
+    }
+    guard = null;
+  };
+  document.addEventListener("touchstart", (e) => {
+    const s = e.target;
+    if (!(s instanceof HTMLInputElement) || s.type !== "range") { guard = null; return; }
+    const t = e.touches[0];
+    guard = { slider: s, value: s.value, x0: t.clientX, y0: t.clientY, accepted: Math.abs(t.clientX - thumbCenterX(s)) <= 28 };
+  }, { capture: true, passive: true });
+  document.addEventListener("touchmove", (e) => {
+    if (!guard || guard.accepted) return;
+    const t = e.touches[0];
+    const dx = Math.abs(t.clientX - guard.x0), dy = Math.abs(t.clientY - guard.y0);
+    if (dx >= 14 && dx > dy * 1.2) guard.accepted = true; // duidelijk horizontale sleep = bewust
+  }, { capture: true, passive: true });
+  ["input", "change"].forEach(type => document.addEventListener(type, (e) => {
+    if (guard && !guard.accepted && e.target === guard.slider && e.isTrusted) {
+      e.stopPropagation();
+      guard.slider.value = guard.value; // sprong door tik op de balk meteen terugdraaien
+    }
+  }, true));
+  document.addEventListener("touchend", () => restore(false), { capture: true, passive: true });
+  document.addEventListener("touchcancel", () => restore(true), { capture: true, passive: true }); // browser nam het gebaar over om te scrollen
+})();
+
+/* ============================================================
    AUDIO-COACH (Web Speech API)
    ============================================================ */
+/* Engelse gym-termen die met een Engelse stem worden uitgesproken (langste eerst, zodat
+   "seated leg press" niet als "seated" + "leg press" wordt geknipt) */
+const ENGLISH_SPOKEN_TERMS = [
+  "horizontal row (pulley)", "bent-over dumbbell row", "seated leg extension", "single-leg calf raise",
+  "seated chest press", "seated leg press", "incline push-up", "suitcase carry", "turkish get-up",
+  "horizontal row", "shoulder press", "lat pulldown", "monster walk", "glute bridge", "pallof press",
+  "leg extension", "reverse lunge", "jumping jacks", "band pull-apart", "goblet squat", "chest press",
+  "calf raises", "calf raise", "side plank", "side raise", "front raise", "biceps curl", "row pulley",
+  "leg press", "leg curl", "kettlebell", "dumbbells", "dumbbell", "dumbells", "dumbell", "wall sit",
+  "pulldown", "deadlift", "thruster", "dead bug", "push-up", "step-up", "pulley", "squat", "lunge",
+  "plank", "row",
+].sort((a, b) => b.length - a.length);
+const ENGLISH_TERM_RE = new RegExp("(" + ENGLISH_SPOKEN_TERMS.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
 const voiceCoach = {
   voices: [],
+  enVoices: [],
   lastSpoken: {},
   init() {
     if (!this.available()) return;
-    const load = () => { this.voices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith("nl")); };
+    const load = () => {
+      const all = speechSynthesis.getVoices();
+      this.voices = all.filter(v => v.lang && v.lang.toLowerCase().startsWith("nl"));
+      this.enVoices = all.filter(v => v.lang && v.lang.toLowerCase().startsWith("en"));
+    };
     load();
     if ("onvoiceschanged" in speechSynthesis) speechSynthesis.addEventListener("voiceschanged", load);
   },
   available() { return "speechSynthesis" in window; },
+  englishVoice() {
+    return this.enVoices.find(v => /en[-_]gb/i.test(v.lang)) || this.enVoices.find(v => /en[-_]us/i.test(v.lang)) || this.enVoices[0] || null;
+  },
+  // knip een zin in Nederlandse en Engelse stukken, zodat "leg extension" niet vernederlandst klinkt
+  segments(text) {
+    const out = [];
+    let last = 0;
+    ENGLISH_TERM_RE.lastIndex = 0;
+    let match;
+    while ((match = ENGLISH_TERM_RE.exec(text)) !== null) {
+      // alleen op woordgrenzen (geen Engelse term midden in een Nederlands woord)
+      const before = text[match.index - 1], after = text[match.index + match[0].length];
+      if ((before && /[a-zà-ÿ]/i.test(before)) || (after && /[a-zà-ÿ]/i.test(after))) continue;
+      if (match.index > last) out.push({ text: text.slice(last, match.index), en: false });
+      out.push({ text: match[0], en: true });
+      last = match.index + match[0].length;
+    }
+    if (last < text.length) out.push({ text: text.slice(last), en: false });
+    return out.filter(s => s.text.trim());
+  },
   speak(text, opts = {}) {
     if (!this.available() || !text) return;
     if (!opts.force && !store.coach().enabled) return;
     if (opts.interrupt) speechSynthesis.cancel();
     else if (speechSynthesis.pending) return; // max 1 in de wachtrij, niet opstapelen
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "nl-NL";
-    u.rate = store.coach().rate || 1.05;
-    const v = this.voices.find(x => x.voiceURI === store.coach().voiceURI) || this.voices[0];
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
+    const rate = store.coach().rate || 1.05;
+    const nlVoice = this.voices.find(x => x.voiceURI === store.coach().voiceURI) || this.voices[0];
+    const enVoice = this.englishVoice();
+    const segs = enVoice ? this.segments(text) : [{ text, en: false }];
+    segs.forEach(seg => {
+      const u = new SpeechSynthesisUtterance(seg.text);
+      u.rate = rate;
+      if (seg.en && enVoice) { u.voice = enVoice; u.lang = enVoice.lang; }
+      else { u.lang = "nl-NL"; if (nlVoice) u.voice = nlVoice; }
+      speechSynthesis.speak(u);
+    });
   },
   line(event, vars = {}) {
     const intensity = store.coach().intensity;
@@ -1616,27 +1749,36 @@ function renderSession() {
   if (nameInput.value !== (currentSession.name || "")) nameInput.value = currentSession.name || "";
   nameInput.oninput = () => { currentSession.name = nameInput.value; persistCurrent(); };
   if (metronome.running && metronome.machineId !== expandedMachineId) metronome.stop(); // stopt mee bij wisselen van oefening
+  renderSessionCoachBtn();
   renderHrBar();
   renderCrowdCard();
   if (machines.length === 0) { list.innerHTML = `<div class="empty-state">Nog geen apparaten. Voeg ze toe bij Instellingen.</div>`; updateProgress(); return; }
 
   const entryOf = id => currentSession.entries.find(e => e.machineId === id);
-  // niet-afgevinkt eerst (oorspronkelijke volgorde), afgevinkt onderaan
-  const ordered = [...machines.filter(m => !entryOf(m.id)), ...machines.filter(m => entryOf(m.id))];
+  const isSkipped = id => !entryOf(id) && !!(currentSession.skipped && currentSession.skipped[id]);
+  // te doen eerst (oorspronkelijke volgorde), dan overgeslagen, afgevinkt helemaal onderaan
+  const ordered = [
+    ...machines.filter(m => !entryOf(m.id) && !isSkipped(m.id)),
+    ...machines.filter(m => isSkipped(m.id)),
+    ...machines.filter(m => entryOf(m.id)),
+  ];
 
   ordered.forEach(m => {
     const entry = entryOf(m.id);
     const done = !!entry;
+    const skipped = isSkipped(m.id);
     const expanded = expandedMachineId === m.id;       // ook afgevinkte kun je heropenen
     const card = document.createElement("div");
-    card.className = "card machine-card" + (done && !expanded ? " done" : "") + (expanded ? " open" : "");
+    card.className = "card machine-card" + (done && !expanded ? " done" : "") + (skipped && !expanded ? " skipped" : "") + (expanded ? " open" : "");
     card.dataset.id = m.id;
 
     // 📈/🔻-advies geldt pas in een volgende sessie (niet in de sessie waarin je 'm aanzette)
     const nextUpAdvies = m.nextUp && (!currentSession || m.nextUp.sid !== currentSession.id) ? m.nextUp : null;
     const hint = done
       ? (expanded ? `<span class="chev">▾</span>` : `<span class="chk">✓</span>`)
-      : `${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">▾</span>`;
+      : skipped
+        ? `<span class="skip-tag">⏭ overgeslagen</span><span class="chev">▾</span>`
+        : `${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">▾</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
     header.innerHTML = `<div class="m-name">${esc(m.name)}</div><div class="m-hint">${hint}</div>`;
@@ -1749,7 +1891,8 @@ function renderSession() {
           ${m.cardio ? "" : `<button class="btn ghost full small save-btn">💾 Opslaan zonder af te ronden</button>
           <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? "📈 Genoteerd voor volgende keer ✓ (tik om te annuleren)" : "📈 Volgende keer meer gewicht"}</button>`}
           <button class="btn full done-btn">${done ? "OPSLAAN ✓" : "KLAAR ✓"}</button>
-          ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">↩ Heropenen (vink uit)</button>` : ""}
+          ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">↩ Heropenen (vink uit)</button>`
+                 : `<button class="btn ghost full small skip-btn" style="margin-top:0;">${skipped ? "↩ Toch doen — zet terug in de lijst" : "⏭ Deze keer overslaan"}</button>`}
         </div>`;
       card.appendChild(body);
       if (!m.cardio) {
@@ -1877,6 +2020,8 @@ function renderSession() {
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
       const undo = body.querySelector(".undo-btn");
       if (undo) undo.onclick = () => undoMachine(m);
+      const skipBtn = body.querySelector(".skip-btn");
+      if (skipBtn) skipBtn.onclick = () => (skipped ? unskipMachine(m) : skipMachine(m));
     }
     list.appendChild(card);
   });
@@ -1931,6 +2076,7 @@ function completeMachine(m, body) {
     store.setMachines(machines);
   }
   if (currentSession.partial) delete currentSession.partial[m.id];
+  if (currentSession.skipped) delete currentSession.skipped[m.id]; // afgerond wint van overgeslagen
   if (!currentSession.firstExerciseAt) {
     currentSession.firstExerciseAt = new Date().toTimeString().slice(0, 5);
     if (currentSession.crowd) currentSession.crowd.time = currentSession.firstExerciseAt; // drukte-meting hoort bij het tijdstip van je eerste oefening
@@ -1947,6 +2093,7 @@ function completeMachine(m, body) {
     voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
   }
   renderSession();
+  scrollSessionToTop();
   const total = store.machines().length;
   if (currentSession && total > 3 && currentSession.entries.length === Math.ceil(total / 2)) {
     setTimeout(() => voiceCoach.say("halfway", {}, { minGap: 0 }), 1800);
@@ -1962,13 +2109,55 @@ function undoMachine(m) {
   persistCurrent();
   renderSession();
 }
+// na afvinken of overslaan: terug naar de bovenkant, waar de volgende oefening staat
+function scrollSessionToTop() {
+  setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 80);
+}
+function skipMachine(m) {
+  // deze keer overslaan: schuift naar onderen en telt niet mee als gedaan
+  currentSession.skipped = currentSession.skipped || {};
+  currentSession.skipped[m.id] = true;
+  restTimer.stop();
+  if (metronome.machineId === m.id) metronome.stop();
+  expandedMachineId = null;
+  persistCurrent();
+  renderSession();
+  scrollSessionToTop();
+  toast(`⏭ ${m.name} overgeslagen — telt niet mee als gedaan`);
+}
+function unskipMachine(m) {
+  if (currentSession.skipped) delete currentSession.skipped[m.id];
+  expandedMachineId = m.id; // meteen open als actieve oefening
+  persistCurrent();
+  renderSession();
+}
 function updateProgress() {
   const machines = store.machines();
-  const total = machines.length;
   // tel alleen entries van apparaten die nog bestaan (verwijderd apparaat = geen "3 / 2")
   const done = currentSession ? currentSession.entries.filter(e => machines.some(m => m.id === e.machineId)).length : 0;
-  document.getElementById("sess-progress").textContent = `${done} / ${total}`;
+  const skipped = currentSession && currentSession.skipped
+    ? machines.filter(m => currentSession.skipped[m.id] && !currentSession.entries.some(e => e.machineId === m.id)).length : 0;
+  const total = machines.length - skipped;
+  document.getElementById("sess-progress").textContent = `${done} / ${total}` + (skipped ? ` · ${skipped}⏭` : "");
 }
+/* Audio-coach direct vanuit de sessie aan- of uitzetten */
+function renderSessionCoachBtn() {
+  const btn = document.getElementById("sess-coach-toggle");
+  if (!btn) return;
+  const on = store.coach().enabled;
+  btn.textContent = on ? "🔊" : "🔇";
+  btn.classList.toggle("off", !on);
+  btn.title = on ? "Audio-coach staat aan — tik om uit te zetten" : "Audio-coach staat uit — tik om aan te zetten";
+}
+document.getElementById("sess-coach-toggle").addEventListener("click", () => {
+  const c = store.coach();
+  c.enabled = !c.enabled;
+  store.setCoach(c);
+  if (!c.enabled && voiceCoach.available()) speechSynthesis.cancel(); // meteen stil
+  renderSessionCoachBtn();
+  toast(c.enabled ? "🔊 Audio-coach staat aan" : "🔇 Audio-coach staat uit");
+  if (c.enabled) voiceCoach.speak("Ik doe weer mee. Kom op!", { force: true, interrupt: true });
+});
 document.getElementById("finish-session").addEventListener("click", () => {
   if (!currentSession || currentSession.entries.length === 0) { alert("Rond minstens één apparaat af voordat je de sessie afsluit!"); return; }
   if (!currentSession.name || !currentSession.name.trim()) currentSession.name = `Training ${fmtNice(currentSession.date)}`;
@@ -1981,7 +2170,7 @@ document.getElementById("finish-session").addEventListener("click", () => {
     currentSession.avgHr = Math.round(currentSession.hrSum / currentSession.hrCount);
     currentSession.maxHrSeen = currentSession.hrMax;
   }
-  delete currentSession.hrSum; delete currentSession.hrCount; delete currentSession.hrMax; delete currentSession.partial;
+  delete currentSession.hrSum; delete currentSession.hrCount; delete currentSession.hrMax; delete currentSession.partial; delete currentSession.skipped;
   const sessions = store.sessions(); sessions.push(currentSession); store.setSessions(sessions);
   const hrTxt = currentSession.avgHr ? ` Gemiddelde hartslag ${currentSession.avgHr}.` : "";
   currentSession = null; store.clearCurrentSession(); celebrate();
