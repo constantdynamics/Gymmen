@@ -1006,17 +1006,23 @@ function migrateMachines() {
       }
     }
   });
-  // Kettlebell-oefening (16 kg, daarna 20 kg) toevoegen voor bestaande gebruikers — vóór de Cooling-down
-  if (machines.length && !machines.some(m => (m.name || "").toLowerCase().includes("kettlebell"))) {
-    const kbPreset = PRESET_SCHEMA.find(p => p.name === "Kettlebell");
-    const kb = {
-      id: uuid(), name: "Kettlebell", settings: [], lastWeight: 16, unit: "kg", note: kbPreset ? kbPreset.note : "",
-      cardio: false, sets: 3, reps: 12, step: 1, stack: MACHINE_STACKS["Kettlebell"].slice(),
-      mistakes: (EXERCISE_MISTAKES["Kettlebell"] ? (EXERCISE_MISTAKES["Kettlebell"].mistakes || []) : []).slice(),
-    };
-    const idx = machines.findIndex(m => m.name === "Cooling-down");
-    if (idx >= 0) machines.splice(idx, 0, kb); else machines.push(kb);
-    changed = true;
+  // Kettlebell-oefening (16 kg, daarna 20 kg) eenmalig toevoegen voor bestaande gebruikers — vóór de
+  // Cooling-down. De vlag in het profiel zorgt dat een later bewust verwijderde kettlebell niet terugkomt.
+  const prof = store.profile();
+  if (machines.length && !prof.kbMigrated) {
+    if (!machines.some(m => (m.name || "").toLowerCase().includes("kettlebell"))) {
+      const kbPreset = PRESET_SCHEMA.find(p => p.name === "Kettlebell");
+      const kb = {
+        id: uuid(), name: "Kettlebell", settings: [], lastWeight: 16, unit: "kg", note: kbPreset ? kbPreset.note : "",
+        cardio: false, sets: 3, reps: 12, step: 1, stack: MACHINE_STACKS["Kettlebell"].slice(),
+        mistakes: (EXERCISE_MISTAKES["Kettlebell"] ? (EXERCISE_MISTAKES["Kettlebell"].mistakes || []) : []).slice(),
+      };
+      const idx = machines.findIndex(m => m.name === "Cooling-down");
+      if (idx >= 0) machines.splice(idx, 0, kb); else machines.push(kb);
+      changed = true;
+    }
+    prof.kbMigrated = true;
+    localStorage.setItem("gymwave_profile", JSON.stringify(prof)); // zonder touch: migratie mag geen cloud-push uitlokken
   }
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
 }
@@ -1085,6 +1091,7 @@ function activeGoals() { return store.goals().filter(g => !g.done); }
    ============================================================ */
 (() => {
   let guard = null; // { slider, value, x0, y0, accepted }
+  let recentBlock = null; // net-onderdrukte tik: vangt ook de compat-muisevents die daarna nog komen
   const thumbCenterX = (s) => {
     const rect = s.getBoundingClientRect();
     const min = parseFloat(s.min) || 0, max = parseFloat(s.max) || 100;
@@ -1092,15 +1099,18 @@ function activeGoals() { return store.goals().filter(g => !g.done); }
     const thumbW = 34; // grootste duimknop in de app
     return rect.left + thumbW / 2 + frac * (rect.width - thumbW);
   };
-  const restore = (fireInput) => {
+  const clearGuard = (revertAccepted) => {
     if (!guard) return;
-    if (guard.slider.value !== guard.value) {
+    if (guard.slider.value !== guard.value && (!guard.accepted || revertAccepted)) {
       guard.slider.value = guard.value;
-      if (fireInput) guard.slider.dispatchEvent(new Event("input"));
+      // bij een teruggedraaide bewuste sleep liepen de app-handlers al mee: die ook terugzetten
+      if (guard.accepted) guard.slider.dispatchEvent(new Event("input"));
     }
+    if (!guard.accepted) recentBlock = { slider: guard.slider, t: Date.now() };
     guard = null;
   };
   document.addEventListener("touchstart", (e) => {
+    recentBlock = null; // een nieuwe aanraking is een nieuw gebaar: oude blokkade opheffen
     const s = e.target;
     if (!(s instanceof HTMLInputElement) || s.type !== "range") { guard = null; return; }
     const t = e.touches[0];
@@ -1118,8 +1128,14 @@ function activeGoals() { return store.goals().filter(g => !g.done); }
       guard.slider.value = guard.value; // sprong door tik op de balk meteen terugdraaien
     }
   }, true));
-  document.addEventListener("touchend", () => restore(false), { capture: true, passive: true });
-  document.addEventListener("touchcancel", () => restore(true), { capture: true, passive: true }); // browser nam het gebaar over om te scrollen
+  // bewuste sleep blijft staan; alleen een geblokkeerde tik wordt teruggedraaid
+  document.addEventListener("touchend", () => clearGuard(false), { capture: true, passive: true });
+  // browser nam het gebaar over om te scrollen: alles terugdraaien
+  document.addEventListener("touchcancel", () => clearGuard(true), { capture: true, passive: true });
+  // Android/Chrome vuurt na een tik ook nog muis-compat-events op dezelfde plek af
+  ["mousedown", "click"].forEach(type => document.addEventListener(type, (e) => {
+    if (recentBlock && e.target === recentBlock.slider && Date.now() - recentBlock.t < 700) { e.preventDefault(); e.stopPropagation(); }
+  }, true));
 })();
 
 /* ============================================================
@@ -1173,20 +1189,26 @@ const voiceCoach = {
     if (last < text.length) out.push({ text: text.slice(last), en: false });
     return out.filter(s => s.text.trim());
   },
+  _gen: 0,     // generatie-teller: onderscheidt geannuleerde van lopende spraak
+  _queued: 0,  // aantal speak()-beurten dat nog loopt of wacht
   speak(text, opts = {}) {
     if (!this.available() || !text) return;
     if (!opts.force && !store.coach().enabled) return;
-    if (opts.interrupt) speechSynthesis.cancel();
-    else if (speechSynthesis.pending) return; // max 1 in de wachtrij, niet opstapelen
+    if (this._queued && !speechSynthesis.speaking && !speechSynthesis.pending) this._queued = 0; // zelfherstel als een end-event ooit uitblijft
+    if (opts.interrupt) { speechSynthesis.cancel(); this._gen++; this._queued = 0; }
+    else if (this._queued >= 2) return; // max 1 aan het woord + 1 in de wachtrij, niet opstapelen
     const rate = store.coach().rate || 1.05;
     const nlVoice = this.voices.find(x => x.voiceURI === store.coach().voiceURI) || this.voices[0];
     const enVoice = this.englishVoice();
     const segs = enVoice ? this.segments(text) : [{ text, en: false }];
-    segs.forEach(seg => {
+    const gen = this._gen;
+    this._queued++;
+    segs.forEach((seg, i) => {
       const u = new SpeechSynthesisUtterance(seg.text);
       u.rate = rate;
       if (seg.en && enVoice) { u.voice = enVoice; u.lang = enVoice.lang; }
       else { u.lang = "nl-NL"; if (nlVoice) u.voice = nlVoice; }
+      if (i === segs.length - 1) u.onend = u.onerror = () => { if (gen === this._gen) this._queued = Math.max(0, this._queued - 1); };
       speechSynthesis.speak(u);
     });
   },
@@ -2094,8 +2116,12 @@ function completeMachine(m, body) {
   }
   renderSession();
   scrollSessionToTop();
-  const total = store.machines().length;
-  if (currentSession && total > 3 && currentSession.entries.length === Math.ceil(total / 2)) {
+  // "op de helft"-melding: geskipte oefeningen tellen niet mee, en niet melden bij de laatste oefening
+  const machinesNow = store.machines();
+  const skippedNow = currentSession && currentSession.skipped
+    ? machinesNow.filter(x => currentSession.skipped[x.id] && !currentSession.entries.some(e => e.machineId === x.id)).length : 0;
+  const total = machinesNow.length - skippedNow;
+  if (currentSession && total > 3 && currentSession.entries.length === Math.ceil(total / 2) && currentSession.entries.length < total) {
     setTimeout(() => voiceCoach.say("halfway", {}, { minGap: 0 }), 1800);
   }
 }
@@ -2130,6 +2156,9 @@ function unskipMachine(m) {
   expandedMachineId = m.id; // meteen open als actieve oefening
   persistCurrent();
   renderSession();
+  // de kaart springt terug naar zijn plek bovenin — breng hem in beeld
+  setTimeout(() => { const el = document.querySelector(".machine-card.open"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
+  toast(`↩ ${m.name} staat weer in de lijst`);
 }
 function updateProgress() {
   const machines = store.machines();
