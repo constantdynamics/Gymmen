@@ -1181,33 +1181,41 @@ SNACK_POOL = SNACK_POOL.concat([
     tips: ["Voeten iets breder voor meer balans", "Heupen stil houden — dat is het doel"], mistakes: ["Heen en weer wiegen met de heupen", "Te snel tikken zonder controle"] },
 ]);
 /* Videolinks per oefening: stille demonstratievideo (MuscleWiki, geen gepraat) waar beschikbaar.
-   Elke oefening krijgt daarnaast altijd een gerichte YouTube-zoekknop als reserve. */
+   Elke oefening krijgt daarnaast altijd een gerichte YouTube-zoekknop als reserve.
+   URL-vorm musclewiki.com/exercise/<slug> — alle slugs geverifieerd via zoekmachine-index (juli 2026). */
 const EXERCISE_VIDEOS = {
-  "Squat (lichaamsgewicht)": "https://musclewiki.com/bodyweight/male/glutes/bodyweight-squat",
-  "Goblet squat": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-goblet-squat",
-  "Kettlebell deadlift": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-deadlift",
-  "Kettlebell swing": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-swing",
-  "Glute bridge": "https://musclewiki.com/bodyweight/male/glutes/glute-bridge",
-  "Plank": "https://musclewiki.com/bodyweight/male/abdominals/plank",
-  "Side plank": "https://musclewiki.com/bodyweight/male/obliques/side-plank",
-  "Dead bug": "https://musclewiki.com/bodyweight/male/abdominals/dead-bug",
-  "Russian twist": "https://musclewiki.com/bodyweight/male/obliques/russian-twist",
-  "Bicycle crunch": "https://musclewiki.com/bodyweight/male/abdominals/bicycle-crunch",
-  "Bird dog": "https://musclewiki.com/bodyweight/male/lowerback/bird-dog",
-  "Superman": "https://musclewiki.com/bodyweight/male/lowerback/superman",
-  "Bent-over dumbbell row": "https://musclewiki.com/dumbbells/male/back/dumbbell-bent-over-row",
-  "One-arm dumbbell row (fitnessbank)": "https://musclewiki.com/dumbbells/male/back/dumbbell-row-unilateral",
-  "Dumbbell bench press (fitnessbank)": "https://musclewiki.com/dumbbells/male/chest/dumbbell-bench-press",
-  "Dumbbell chest fly (fitnessbank)": "https://musclewiki.com/dumbbells/male/chest/dumbbell-fly",
-  "Staande dumbbell shoulder press": "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-overhead-press",
-  "Hammer curl": "https://musclewiki.com/dumbbells/male/biceps/dumbbell-hammer-curl",
-  "Biceps curl met weerstandsband": "https://musclewiki.com/band/male/biceps/band-bicep-curl",
-  "Dumbbell romanian deadlift": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-romanian-deadlift",
-  "Reverse lunge met dumbbells": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-reverse-lunge",
-  "Suitcase carry": "https://musclewiki.com/kettlebells/male/forearms/kettlebell-suitcase-carry",
-  "Hip thrust (fitnessbank)": "https://musclewiki.com/barbell/male/glutes/barbell-hip-thrust",
-  "Step-up": "https://musclewiki.com/bodyweight/male/glutes/step-up",
-  "Step-up op de bank": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-step-up",
+  "Squat (lichaamsgewicht)": "https://musclewiki.com/exercise/bodyweight-squat",
+  "Squat pulse": "https://musclewiki.com/exercise/bodyweight-pulse-squat",
+  "Chair squat (opstaan-zitten)": "https://musclewiki.com/exercise/bodyweight-box-squat",
+  "Goblet squat": "https://musclewiki.com/exercise/kettlebell-goblet-squat",
+  "Kettlebell deadlift": "https://musclewiki.com/exercise/kettlebell-deadlift",
+  "Kettlebell swing": "https://musclewiki.com/exercise/kettlebell-swing",
+  "Kettlebell single-leg deadlift": "https://musclewiki.com/exercise/kettlebell-single-leg-deadlift",
+  "Kettlebell goblet reverse lunge": "https://musclewiki.com/exercise/dumbbell-goblet-reverse-lunge",
+  "Glute bridge": "https://musclewiki.com/exercise/glute-bridge",
+  "Single-leg glute bridge": "https://musclewiki.com/exercise/single-leg-glute-bridge",
+  "Plank": "https://musclewiki.com/exercise/forearm-plank",
+  "Side plank": "https://musclewiki.com/exercise/elbow-side-plank",
+  "Dead bug": "https://musclewiki.com/exercise/dead-bug",
+  "Russian twist": "https://musclewiki.com/exercise/bodyweight-russian-twist",
+  "Bicycle crunch": "https://musclewiki.com/exercise/bicycle-crunch",
+  "Bird dog": "https://musclewiki.com/exercise/bird-dog",
+  "Superman": "https://musclewiki.com/exercise/supermans",
+  "Bent-over dumbbell row": "https://musclewiki.com/exercise/dumbbell-row-bilateral",
+  "One-arm dumbbell row (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-single-arm-row",
+  "Dumbbell bench press (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-bench-press",
+  "Dumbbell chest fly (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-chest-fly",
+  "Staande dumbbell shoulder press": "https://musclewiki.com/exercise/dumbbell-overhead-press",
+  "Hammer curl": "https://musclewiki.com/exercise/dumbbell-hammer-curl",
+  "Seated dumbbell curl (bank)": "https://musclewiki.com/exercise/dumbbell-curl",
+  "Biceps curl met weerstandsband": "https://musclewiki.com/exercise/band-curl",
+  "Dumbbell romanian deadlift": "https://musclewiki.com/exercise/dumbbell-romanian-deadlift",
+  "Reverse lunge met dumbbells": "https://musclewiki.com/exercise/dumbbell-reverse-lunge",
+  "Suitcase carry": "https://musclewiki.com/exercise/kettlebell-farmers-carry",
+  "Farmer's walk (dumbbells)": "https://musclewiki.com/exercise/kettlebell-farmers-carry",
+  "Hip thrust (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-hip-thrust",
+  "Step-up": "https://musclewiki.com/exercise/dumbbell-step-up",
+  "Step-up op de bank": "https://musclewiki.com/exercise/dumbbell-step-up",
 };
 function exVideo(s) { return EXERCISE_VIDEOS[s.name] || null; }
 function exVideoSearch(s) {
@@ -3486,11 +3494,9 @@ function hwVideoBtns(s) {
 function exVideoMp4Candidates(s) {
   const url = exVideo(s);
   if (!url) return [];
-  const parts = url.split("/");
-  const slug = parts[parts.length - 1];
-  const cat = { bodyweight: "bodyweight", dumbbells: "dumbbell", kettlebells: "kettlebell", band: "band", barbell: "barbell" }[parts[3]] || parts[3];
+  const slug = url.split("/").pop();
   const base = "https://media.musclewiki.com/media/uploads/videos/branded/";
-  return [`${base}male-${slug}-front.mp4`, `${base}male-${cat}-${slug}-front.mp4`, `${base}male-${slug}-side.mp4`];
+  return [`${base}male-${slug}-front.mp4`, `${base}male-${slug}-side.mp4`, `${base}female-${slug}-front.mp4`];
 }
 function bindHwVideo(root, s) {
   const det = root.querySelector(".hw-embed");
@@ -3504,7 +3510,11 @@ function bindHwVideo(root, s) {
     let i = 0, timer = null;
     const tryNext = () => {
       clearTimeout(timer);
-      if (i >= cands.length) { det.style.display = "none"; return; } // geen embed mogelijk: alleen de knoppen
+      if (i >= cands.length) {
+        // insluiten lukt niet: leg uit wat er aan de hand is in plaats van stilletjes verdwijnen
+        det.querySelector(".tip-body").innerHTML = `<div class="muted" style="font-weight:600;">De video kan hier niet ingesloten worden. Open hem via de knop <b>🎥 Demo-pagina</b> hieronder — die toont dezelfde stille demonstratie.</div>`;
+        return;
+      }
       vid.src = cands[i++];
       vid.load();
       vid.play().catch(() => {});
