@@ -193,6 +193,10 @@ input[type="range"] { touch-action: pan-y; }
 .photo-ask { font-size: 0.92rem; font-weight: 600; line-height: 1.4; margin-bottom: 12px; padding: 8px 12px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
 .kb-lbl { font-size: 0.85rem; font-weight: 800; margin: 6px 0 2px; opacity: 0.85; }
 .speak-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+.hw-target { font-size: 0.95rem; font-weight: 700; margin-top: 10px; }
+.hw-target-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.hw-timer-big { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 2.2rem; text-align: center; color: var(--primary); text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent); min-height: 1em; margin: 6px 0; }
 @keyframes flipDone { 0% { transform: rotateX(0) scale(1); } 50% { transform: rotateX(85deg) scale(0.95); } 100% { transform: rotateX(0) scale(1); } }
 .done-collapsed { display: flex; align-items: center; justify-content: space-between; }
 .done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
@@ -1014,6 +1018,202 @@ SNACK_POOL = SNACK_POOL.concat([
     mistakes: ["Je onderrug hol laten trekken door te zwaar gewicht", "De dumbbells voor je gezicht laten zakken in plaats van naast je oren", "Met een rukje uit de schouders drukken"],
     focus: "schouders/armen", achillesSafe: true },
 ]);
+/* Nog veel meer thuis-oefeningen (feedbackronde 6) — compact, elk met do's (tips) en don'ts (mistakes) */
+SNACK_POOL = SNACK_POOL.concat([
+  { name: "Wall push-up", equipment: "geen", minutes: 2, dose: "3×12", focus: "schouders/armen", achillesSafe: true,
+    description: "Zet je handen op schouderhoogte tegen de muur, stap iets naar achteren en duw jezelf met een strak lichaam van de muur af en weer terug.",
+    tips: ["Houd je lichaam als één rechte plank", "Hoe verder je voeten van de muur, hoe zwaarder"], mistakes: ["Heupen laten doorzakken", "Ellebogen wijd uit laten steken"] },
+  { name: "Good morning (lichaamsgewicht)", equipment: "geen", minutes: 2, dose: "3×12", focus: "rug", achillesSafe: true,
+    description: "Handen achter je hoofd, knieën licht gebogen. Buig vanuit je heupen voorover tot je romp bijna horizontaal is en kom rechtop door je billen aan te spannen.",
+    tips: ["Duw je heupen echt naar achteren", "Houd je rug de hele beweging recht"], mistakes: ["Bol trekken van de onderrug", "Door de knieën zakken alsof het een squat is"] },
+  { name: "Standing knee raise + twist", equipment: "geen", minutes: 2, dose: "3×10 per kant", focus: "core", achillesSafe: true,
+    description: "Til je knie op tot heuphoogte en draai je romp zodat je tegengestelde elleboog richting de knie komt. Wissel per herhaling van kant.",
+    tips: ["Rustig tempo: balans boven snelheid", "Adem uit bij elke draai"], mistakes: ["Hangen in je onderrug", "Zwaaien in plaats van draaien vanuit je romp"] },
+  { name: "Squat pulse", equipment: "geen", minutes: 2, dose: "3×15", focus: "benen", achillesSafe: true,
+    description: "Zak in een halve squat en veer daar in kleine pulsjes op en neer zonder helemaal omhoog te komen.",
+    tips: ["Houd de spanning constant op je bovenbenen", "Hielen plat op de grond"], mistakes: ["Te hoog komen tussen de pulsjes", "Knieën naar binnen laten zakken"] },
+  { name: "Sumo squat", equipment: "geen", minutes: 2, dose: "3×12", focus: "benen", achillesSafe: true,
+    description: "Zet je voeten ruim breder dan je schouders met de tenen schuin naar buiten en zak recht naar beneden tussen je knieën.",
+    tips: ["Duw je knieën actief naar buiten", "Romp rechtop houden"], mistakes: ["Voorover leunen", "Hielen laten loskomen"] },
+  { name: "Reverse snow angels", equipment: "mat", minutes: 2, dose: "2×10", focus: "rug", achillesSafe: true,
+    description: "Lig op je buik en beweeg je gestrekte armen langzaam van langs je lichaam in een boog tot boven je hoofd, net boven de vloer — als een omgekeerde sneeuwengel.",
+    tips: ["Beweeg traag en houd je armen laag boven de grond", "Duimen omhoog voor betere schouderrotatie"], mistakes: ["De armen op de grond laten rusten", "De nek overstrekken"] },
+  { name: "Bird dog", equipment: "mat", minutes: 3, dose: "3×8 per kant", focus: "core", achillesSafe: true,
+    description: "Op handen en knieën strek je tegelijk je rechterarm en linkerbeen tot ze horizontaal zijn. Houd 2 tellen vast, kom terug en wissel.",
+    tips: ["Houd je heupen horizontaal, alsof er een dienblad op je rug staat", "Kijk naar de vloer voor een neutrale nek"], mistakes: ["De onderrug hol laten zakken", "Snel zwaaien zonder pauze"] },
+  { name: "Bicycle crunch", equipment: "mat", minutes: 2, dose: "3×12 per kant", focus: "core", achillesSafe: true,
+    description: "Lig op je rug met je handen naast je hoofd en fiets: elleboog richting de tegengestelde knie terwijl je andere been strekt.",
+    tips: ["Draai vanuit je romp, niet vanuit je nek", "Strek het onderste been laag maar zonder je onderrug los te laten komen"], mistakes: ["Aan je hoofd trekken", "Te snel roffelen zonder controle"] },
+  { name: "Russian twist", equipment: "mat", minutes: 2, dose: "3×10 per kant", focus: "core", achillesSafe: true,
+    description: "Zit met gebogen knieën, leun iets naar achteren met rechte rug en draai je romp afwisselend naar links en rechts.",
+    tips: ["Houd je borst vooruit en rug recht", "Zwaarder? Houd een dumbbell of kettlebell vast"], mistakes: ["Bol inzakken met de rug", "Alleen de armen bewegen in plaats van de romp"] },
+  { name: "Reverse crunch", equipment: "mat", minutes: 2, dose: "3×12", focus: "core", achillesSafe: true,
+    description: "Lig op je rug met je knieën boven je heupen. Kantel je bekken en til je heupen iets van de mat door je knieën richting je borst te brengen; laat rustig zakken.",
+    tips: ["Klein en gecontroleerd is genoeg", "Adem uit als je heupen loskomen"], mistakes: ["Zwaaien met de benen voor momentum", "De onderrug hol laten trekken bij het zakken"] },
+  { name: "Single-leg glute bridge", equipment: "mat", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Als de glute bridge, maar met één been gestrekt in het verlengde van je lichaam. Duw je heupen omhoog via het standbeen.",
+    tips: ["Houd je bekken horizontaal", "Begin met je linkerbeen als standbeen"], mistakes: ["De heup van het gestrekte been laten zakken", "Duwen vanuit de onderrug in plaats van de bil"] },
+  { name: "Clamshell", equipment: "mat", minutes: 2, dose: "3×12 per kant", focus: "benen", achillesSafe: true,
+    description: "Lig op je zij met gebogen knieën op elkaar. Open je bovenste knie als een schelp terwijl je voeten op elkaar blijven, en sluit rustig.",
+    tips: ["Houd je bekken stil — alleen de knie beweegt", "Zwaarder? Doe een weerstandsband om je knieën"], mistakes: ["Naar achteren rollen met je heup", "Te groot willen openen"] },
+  { name: "Swimmer", equipment: "mat", minutes: 2, dose: "3×20 sec", focus: "rug", achillesSafe: true,
+    description: "Lig op je buik met gestrekte armen voor je en maak kleine wisselslag-bewegingen met tegengestelde arm en been.",
+    tips: ["Klein en vloeiend bewegen", "Blijf rustig doorademen"], mistakes: ["De nek ver optillen", "Grote schokkerige slagen maken"] },
+  { name: "Dumbbell romanian deadlift", equipment: "dumbbells", minutes: 3, dose: "3×10", focus: "benen", achillesSafe: true,
+    description: "Houd de dumbbells voor je bovenbenen, schuif ze langs je benen naar beneden door je heupen naar achteren te duwen (knieën licht gebogen) en kom krachtig rechtop.",
+    tips: ["Voel de rek in je hamstrings, dat is het signaal om terug te komen", "Houd de dumbbells dicht bij je benen"], mistakes: ["Bol trekken van de rug", "Door de knieën zakken in plaats van de heupen te sturen"] },
+  { name: "Hammer curl", equipment: "dumbbells", minutes: 2, dose: "3×12", focus: "schouders/armen", achillesSafe: true,
+    description: "Als een biceps curl, maar met de handpalmen naar elkaar toe (neutrale greep). Krul rustig omhoog en laat traag zakken.",
+    tips: ["Ellebogen tegen je zij houden", "Het zakken duurt langer dan het krullen"], mistakes: ["Meezwaaien met de rug", "De polsen laten knikken"] },
+  { name: "Triceps kickback", equipment: "dumbbells", minutes: 2, dose: "3×12 per arm", focus: "schouders/armen", achillesSafe: true,
+    description: "Buig voorover met een rechte rug, houd je bovenarm horizontaal langs je lichaam en strek je onderarm naar achteren tot je arm recht is.",
+    tips: ["Alleen de onderarm beweegt — de elleboog blijft op zijn plek", "Knijp aan het eind even je triceps aan"], mistakes: ["De bovenarm mee laten zwaaien", "Een te zware dumbbell pakken"] },
+  { name: "Overhead triceps extension", equipment: "dumbbells", minutes: 2, dose: "3×10", focus: "schouders/armen", achillesSafe: true,
+    description: "Houd één dumbbell met twee handen boven je hoofd, laat hem in de nek zakken door je ellebogen te buigen en strek weer omhoog.",
+    tips: ["Houd je ellebogen dicht bij je hoofd", "Buik aangespannen zodat je rug niet hol trekt"], mistakes: ["Ellebogen wijd uit laten wijken", "Hol trekken van de onderrug"] },
+  { name: "Arnold press", equipment: "dumbbells", minutes: 3, dose: "3×10", focus: "schouders/armen", achillesSafe: true,
+    description: "Start met de dumbbells voor je borst met de handpalmen naar je toe. Draai tijdens het omhoog drukken je handpalmen naar voren; draai op de terugweg weer terug.",
+    tips: ["Maak de draai vloeiend, niet in stapjes", "Iets lichter gewicht dan bij een gewone press"], mistakes: ["Achterover leunen", "De draai vergeten waardoor het een gewone press wordt"] },
+  { name: "Lateral lunge", equipment: "dumbbells", minutes: 3, dose: "3×8 per kant", focus: "benen", achillesSafe: true,
+    description: "Stap ruim opzij, zak op dat been met je heupen naar achteren terwijl het andere been gestrekt blijft, en duw jezelf terug naar het midden.",
+    tips: ["Houd beide voeten naar voren wijzen", "Borst vooruit, gewicht op de hiel van het buigende been"], mistakes: ["De knie voorbij de tenen laten schieten", "Bol inzakken met de romp"] },
+  { name: "Dumbbell floor press", equipment: "dumbbells", minutes: 3, dose: "3×10", focus: "schouders/armen", achillesSafe: true,
+    description: "Lig op je rug op de mat met gebogen knieën en druk de dumbbells vanaf borsthoogte recht omhoog; de bovenarmen raken tussen de herhalingen licht de vloer.",
+    tips: ["Rustig neerleggen van de bovenarm, niet laten stuiteren", "Prima bench press-alternatief zonder bank"], mistakes: ["De ellebogen hard op de vloer laten vallen", "Hol trekken van de onderrug"] },
+  { name: "Dumbbell shrug", equipment: "dumbbells", minutes: 2, dose: "3×15", focus: "rug", achillesSafe: true,
+    description: "Sta rechtop met de dumbbells langs je lichaam en trek je schouders recht omhoog richting je oren; houd even vast en laat zakken.",
+    tips: ["Recht omhoog en omlaag — geen rondjes draaien", "Houd bovenin 1 tel vast"], mistakes: ["Met de armen trekken", "Rondjes draaien met de schouders"] },
+  { name: "Farmer's walk (dumbbells)", equipment: "dumbbells", minutes: 3, dose: "3×40 sec", focus: "full body", achillesSafe: true,
+    description: "Pak in elke hand een zware dumbbell en loop rustig en kaarsrecht rondjes door de kamer.",
+    tips: ["Schouders laag en iets naar achteren", "Rustige, bewuste stappen"], mistakes: ["Voorover hangen", "Te licht kiezen — dit mag zwaar voelen"] },
+  { name: "Concentration curl", equipment: "dumbbells", minutes: 2, dose: "3×10 per arm", focus: "schouders/armen", achillesSafe: true,
+    description: "Zit op een stoel, laat je elleboog op de binnenkant van je bovenbeen rusten en krul de dumbbell rustig omhoog.",
+    tips: ["De elleboog blijft de hele set op je been steunen", "Extra traag zakken maakt hem effectiever"], mistakes: ["Meehelpen met je schouder", "De dumbbell laten vallen op de terugweg"] },
+  { name: "Kettlebell goblet reverse lunge", equipment: "kettlebell", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Houd de kettlebell tegen je borst en stap ruim naar achteren in een uitvalspas; duw jezelf via je voorste been terug omhoog.",
+    tips: ["De achterwaartse stap is vriendelijk voor je achillespees", "Romp rechtop dankzij het gewicht voor je borst"], mistakes: ["Een te korte stap nemen", "Afzetten met het achterste been"] },
+  { name: "Kettlebell march (rack hold)", equipment: "kettlebell", minutes: 2, dose: "2×30 sec per kant", focus: "core", achillesSafe: true,
+    description: "Houd de kettlebell in de rack-positie tegen je borst en marcheer rustig op de plaats met hoge knieën.",
+    tips: ["Blijf kaarsrecht — niet naar de kettlebell toe leunen", "Zet je voet steeds zacht neer"], mistakes: ["Opzij hangen naar de draagkant", "Stampen in plaats van gecontroleerd neerzetten"] },
+  { name: "Kettlebell single-leg deadlift", equipment: "kettlebell", minutes: 3, dose: "3×6 per been", focus: "benen", achillesSafe: true,
+    description: "Sta op één been met de kettlebell in de tegenovergestelde hand. Buig vanuit je heup voorover terwijl je vrije been naar achteren strekt, en kom gecontroleerd terug.",
+    tips: ["Houd je heupen recht naar de vloer gericht", "Licht gebogen standbeen-knie"], mistakes: ["De heup open laten draaien", "Bol trekken van de rug"] },
+  { name: "Kettlebell around-the-body pass", equipment: "kettlebell", minutes: 2, dose: "2×8 per richting", focus: "core", achillesSafe: true,
+    description: "Geef de kettlebell rustig van hand tot hand rondom je middel door, zonder dat je romp meedraait.",
+    tips: ["Buik aangespannen, romp stil", "Wissel na 8 rondjes van richting"], mistakes: ["Meedraaien met je heupen", "De kettlebell tegen je lichaam laten tikken"] },
+  { name: "Step-up op de bank", equipment: "fitnessbank", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Zet je hele voet op de bank en duw jezelf gecontroleerd omhoog tot je gestrekt staat; stap rustig terug. Dumbbells in de hand voor extra gewicht.",
+    tips: ["Duw vanuit het been dat op de bank staat", "Controleer eerst of de bank stevig staat"], mistakes: ["Afzetten met het onderste been", "Neerploffen bij het afstappen"] },
+  { name: "Decline push-up (voeten op bank)", equipment: "fitnessbank", minutes: 3, dose: "3×8", focus: "schouders/armen", achillesSafe: true,
+    description: "Zet je voeten op de bank en je handen op de grond en doe push-ups met je lichaam in één strakke lijn.",
+    tips: ["Zwaarder dan een gewone push-up — bouw rustig op", "Kijk naar de vloer voor een neutrale nek"], mistakes: ["Doorzakken met de heupen", "De handen te ver naar voren zetten"] },
+  { name: "Chest-supported row (schuine bank)", equipment: "fitnessbank", minutes: 3, dose: "3×10", focus: "rug", achillesSafe: true,
+    description: "Leg je borst op de schuin gezette rugleuning met dumbbells recht onder je. Roei ze naar je heupen en laat rustig zakken.",
+    tips: ["De bank vangt je rug op: puur roeiwerk", "Knijp je schouderbladen samen bovenin"], mistakes: ["Het hoofd optillen en de nek overstrekken", "Zwaaien met de gewichten"] },
+  { name: "Seated dumbbell curl (bank)", equipment: "fitnessbank", minutes: 2, dose: "3×10", focus: "schouders/armen", achillesSafe: true,
+    description: "Zit rechtop op de bank en krul de dumbbells tegelijk of om en om richting je schouders.",
+    tips: ["Zittend kun je minder smokkelen — perfect voor strakke techniek", "Laat de dumbbells traag zakken"], mistakes: ["Ellebogen naar voren laten komen", "Half bewegingsbereik draaien"] },
+  { name: "Split squat (voet op bank optioneel)", equipment: "fitnessbank", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Neem een ruime uitvalspositie en zak recht naar beneden en weer omhoog zonder van plek te komen; zwaarder met dumbbells of met de achtervoet op de bank.",
+    tips: ["Romp rechtop, gewicht op de voorste hiel", "Links bepaalt het aantal herhalingen"], mistakes: ["Te korte stand waardoor de knie ver naar voren duwt", "Wiebelen doordat je voeten op één lijn staan"] },
+  { name: "Face pull met band", equipment: "weerstandsband", minutes: 2, dose: "3×12", focus: "rug", achillesSafe: true,
+    description: "Bevestig de band op ooghoogte, pak de uiteinden en trek ze naar je gezicht terwijl je ellebogen hoog en wijd gaan.",
+    tips: ["Eindig met je handen naast je oren", "Perfect medicijn tegen bureau-schouders"], mistakes: ["De ellebogen laag houden waardoor het een row wordt", "Achterover leunen"] },
+  { name: "Overhead press met band", equipment: "weerstandsband", minutes: 2, dose: "3×12", focus: "schouders/armen", achillesSafe: true,
+    description: "Ga op het midden van de band staan, breng de uiteinden naar schouderhoogte en druk ze recht boven je hoofd uit.",
+    tips: ["Buik en billen aanspannen tegen een holle rug", "Druk in een rechte lijn omhoog"], mistakes: ["Hol trekken van de onderrug", "De band voor je gezicht langs laten schieten"] },
+  { name: "Squat met band", equipment: "weerstandsband", minutes: 2, dose: "3×12", focus: "benen", achillesSafe: true,
+    description: "Sta op de band met de uiteinden op je schouders en squat tegen de bandspanning in.",
+    tips: ["De band maakt vooral het opstaan zwaarder — kom krachtig omhoog", "Houd de spanning het hele bereik vast"], mistakes: ["Voorover buigen door de bandtrek", "Half zakken"] },
+  { name: "Glute kickback met band", equipment: "weerstandsband", minutes: 2, dose: "3×12 per been", focus: "benen", achillesSafe: true,
+    description: "Doe de band om je enkels en trap één been rustig gestrekt naar achteren; houd je romp stil.",
+    tips: ["Klein en gecontroleerd — voel het in je bil", "Houd lichte steun vast voor balans"], mistakes: ["Hol trekken van de rug bij het trappen", "Zwaaien met momentum"] },
+  { name: "Triceps pushdown met band", equipment: "weerstandsband", minutes: 2, dose: "3×12", focus: "schouders/armen", achillesSafe: true,
+    description: "Hang de band over een deur of haak, pak de uiteinden en strek je armen van elleboog­hoogte recht naar beneden.",
+    tips: ["Ellebogen tegen je zij geklemd houden", "Laat de band langzaam terugkomen"], mistakes: ["Voorover op de band leunen", "De ellebogen mee laten bewegen"] },
+  { name: "Band biceps curl 21s", equipment: "weerstandsband", minutes: 3, dose: "7+7+7", focus: "schouders/armen", achillesSafe: true,
+    description: "Sta op de band: 7 halve curls onderin, 7 halve curls bovenin en 7 volledige curls achter elkaar.",
+    tips: ["Kies lichter dan bij gewone curls — 21 herhalingen branden flink", "Houd het tempo rustig en constant"], mistakes: ["Meezwaaien met je rug", "De laatste 7 afraffelen"] },
+  { name: "Chair squat (opstaan-zitten)", equipment: "stoel/verhoging", minutes: 2, dose: "3×12", focus: "benen", achillesSafe: true,
+    description: "Ga voor een stoel staan, zak rustig tot je de zitting nét raakt en sta zonder handen weer op.",
+    tips: ["Raak de stoel alleen aan — niet echt zitten", "Duw omhoog vanuit je hielen"], mistakes: ["Neerploffen op de stoel", "Met de handen op de knieën duwen"] },
+  { name: "Split squat met stoel", equipment: "stoel/verhoging", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Uitvalspositie met de wreef van je achterste voet op de stoelzitting; zak recht naar beneden en duw jezelf weer omhoog.",
+    tips: ["Sta een ruime stap voor de stoel", "Houd je romp rechtop"], mistakes: ["Te dicht bij de stoel staan", "Met het achterbeen meeduwen"] },
+  { name: "Boks-combinaties met tempo", equipment: "geen", minutes: 3, dose: "3×45 sec", focus: "cardio", achillesSafe: true,
+    description: "Schaduwboksen in rondes: 45 seconden combinaties van jabs, hoeken en stoten in een stevig tempo, met korte pauzes.",
+    tips: ["Draai je romp mee met elke stoot", "Verplaats met schuifstapjes, niet met sprongen"], mistakes: ["Alleen met de armen werken", "De handen tussen stoten laten zakken"] },
+  { name: "March met dumbbells (loaded march)", equipment: "dumbbells", minutes: 2, dose: "3×40 sec", focus: "cardio", achillesSafe: true,
+    description: "Marcheer op de plaats met hoge knieën terwijl je in elke hand een dumbbell langs je lichaam draagt.",
+    tips: ["Kaarsrecht blijven onder het gewicht", "Zacht neerzetten met de hele voet"], mistakes: ["Voorover hangen", "De knieën maar half optillen"] },
+  { name: "Statische dumbbell lunge", equipment: "dumbbells", minutes: 3, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Neem een ruime uitvalspositie met dumbbells langs je lichaam en zak recht op en neer zonder van plek te komen.",
+    tips: ["Romp rechtop, gewicht op de voorste hiel", "Wissel pas na de hele set van been"], mistakes: ["Te korte stand", "Voorover leunen bij vermoeidheid"] },
+  { name: "Renegade row", equipment: "dumbbells", minutes: 3, dose: "3×6 per arm", focus: "full body", achillesSafe: true,
+    description: "In push-up-houding op twee dumbbells roei je om en om één dumbbell naar je heup terwijl je romp stil blijft.",
+    tips: ["Zet je voeten wat breder voor balans", "Duw actief in de steunende dumbbell"], mistakes: ["De heupen mee laten draaien", "De dumbbell omhoog rukken"] },
+  { name: "Dumbbell upright row", equipment: "dumbbells", minutes: 2, dose: "3×12", focus: "schouders/armen", achillesSafe: true,
+    description: "Trek de dumbbells rustig langs je lichaam omhoog tot borsthoogte met je ellebogen naar buiten, en laat gecontroleerd zakken.",
+    tips: ["Niet hoger trekken dan borsthoogte", "Houd de gewichten dicht bij je lichaam"], mistakes: ["De schouders naar de oren optrekken", "Zwaaien vanuit de rug"] },
+  { name: "Dumbbell side bend", equipment: "dumbbells", minutes: 2, dose: "3×10 per kant", focus: "core", achillesSafe: true,
+    description: "Sta rechtop met één dumbbell langs je zij en buig rustig opzij; kom terug via de spanning in je andere zij.",
+    tips: ["Beweeg puur zijwaarts, niet naar voren of achteren", "Eén kant tegelijk — geen dumbbell in beide handen"], mistakes: ["Te ver zakken", "Vanuit de heup duwen in plaats van de zij"] },
+  { name: "Kettlebell front rack carry", equipment: "kettlebell", minutes: 2, dose: "3×30 sec", focus: "full body", achillesSafe: true,
+    description: "Houd de kettlebell in de rack-positie tegen borst en onderarm en loop rustig en kaarsrecht rondjes; wissel halverwege van arm.",
+    tips: ["Ribben laag, buik aangespannen", "Rustige, gelijkmatige stappen"], mistakes: ["Achterover hangen tegen het gewicht in", "De elleboog van je lichaam af laten zakken"] },
+  { name: "Kettlebell floor press", equipment: "kettlebell", minutes: 3, dose: "3×8 per arm", focus: "schouders/armen", achillesSafe: true,
+    description: "Lig op je rug met de kettlebell in één hand op borsthoogte (bel rust op je onderarm) en druk hem recht omhoog.",
+    tips: ["Pols recht houden — de bel leunt tegen je onderarm", "Rustig zakken tot je bovenarm de vloer raakt"], mistakes: ["De pols laten knikken onder de bel", "De elleboog laten stuiteren op de vloer"] },
+  { name: "Band woodchopper", equipment: "weerstandsband", minutes: 2, dose: "3×10 per kant", focus: "core", achillesSafe: true,
+    description: "Bevestig de band laag, pak hem met twee handen en trek hem in een diagonale lijn van je heup naar je tegenoverliggende schouder.",
+    tips: ["Draai vanuit je romp en heupen, armen blijven gestrekt", "Rustig terug — dat is de helft van het werk"], mistakes: ["Alleen met de armen zwaaien", "De rug bol trekken"] },
+  { name: "Band pull-through", equipment: "weerstandsband", minutes: 2, dose: "3×12", focus: "benen", achillesSafe: true,
+    description: "Sta met je rug naar het lage ankerpunt met de band tussen je benen door. Buig vanuit je heupen en kom krachtig rechtop door je billen aan te spannen.",
+    tips: ["Heupen naar achteren duwen, rug recht", "Eindig rechtop zonder door te leunen"], mistakes: ["Squatten in plaats van hip-hingen", "De band laten terugtrekken zonder controle"] },
+  { name: "Marching glute bridge", equipment: "mat", minutes: 2, dose: "3×8 per been", focus: "benen", achillesSafe: true,
+    description: "Houd een glute bridge vast en til om en om één voet van de mat zonder dat je heupen zakken.",
+    tips: ["Heupen hoog en horizontaal houden", "Rustig marcheren — geen haast"], mistakes: ["De heupen laten zakken bij elke stap", "Duwen vanuit de onderrug"] },
+  { name: "Heel taps", equipment: "mat", minutes: 2, dose: "3×10 per kant", focus: "core", achillesSafe: true,
+    description: "Lig op je rug met je knieën boven je heupen en tik om en om één hiel rustig op de mat, terwijl je onderrug in de mat gedrukt blijft.",
+    tips: ["De onderrug blijft de hele oefening contact houden met de mat", "Adem uit bij elke tik"], mistakes: ["De onderrug hol laten trekken", "Beide benen tegelijk zakken"] },
+  { name: "Incline shoulder taps", equipment: "stoel/verhoging", minutes: 2, dose: "3×8 per kant", focus: "core", achillesSafe: true,
+    description: "In steunpositie met je handen op een stoel of verhoging tik je om en om met één hand je tegenoverliggende schouder aan.",
+    tips: ["Voeten iets breder voor meer balans", "Heupen stil houden — dat is het doel"], mistakes: ["Heen en weer wiegen met de heupen", "Te snel tikken zonder controle"] },
+]);
+/* Videolinks per oefening: stille demonstratievideo (MuscleWiki, geen gepraat) waar beschikbaar.
+   Elke oefening krijgt daarnaast altijd een gerichte YouTube-zoekknop als reserve. */
+const EXERCISE_VIDEOS = {
+  "Squat (lichaamsgewicht)": "https://musclewiki.com/bodyweight/male/glutes/bodyweight-squat",
+  "Goblet squat": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-goblet-squat",
+  "Kettlebell deadlift": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-deadlift",
+  "Kettlebell swing": "https://musclewiki.com/kettlebells/male/glutes/kettlebell-swing",
+  "Glute bridge": "https://musclewiki.com/bodyweight/male/glutes/glute-bridge",
+  "Plank": "https://musclewiki.com/bodyweight/male/abdominals/plank",
+  "Side plank": "https://musclewiki.com/bodyweight/male/obliques/side-plank",
+  "Dead bug": "https://musclewiki.com/bodyweight/male/abdominals/dead-bug",
+  "Russian twist": "https://musclewiki.com/bodyweight/male/obliques/russian-twist",
+  "Bicycle crunch": "https://musclewiki.com/bodyweight/male/abdominals/bicycle-crunch",
+  "Bird dog": "https://musclewiki.com/bodyweight/male/lowerback/bird-dog",
+  "Superman": "https://musclewiki.com/bodyweight/male/lowerback/superman",
+  "Bent-over dumbbell row": "https://musclewiki.com/dumbbells/male/back/dumbbell-bent-over-row",
+  "One-arm dumbbell row (fitnessbank)": "https://musclewiki.com/dumbbells/male/back/dumbbell-row-unilateral",
+  "Dumbbell bench press (fitnessbank)": "https://musclewiki.com/dumbbells/male/chest/dumbbell-bench-press",
+  "Dumbbell chest fly (fitnessbank)": "https://musclewiki.com/dumbbells/male/chest/dumbbell-fly",
+  "Staande dumbbell shoulder press": "https://musclewiki.com/dumbbells/male/shoulders/dumbbell-overhead-press",
+  "Hammer curl": "https://musclewiki.com/dumbbells/male/biceps/dumbbell-hammer-curl",
+  "Biceps curl met weerstandsband": "https://musclewiki.com/band/male/biceps/band-bicep-curl",
+  "Dumbbell romanian deadlift": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-romanian-deadlift",
+  "Reverse lunge met dumbbells": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-reverse-lunge",
+  "Suitcase carry": "https://musclewiki.com/kettlebells/male/forearms/kettlebell-suitcase-carry",
+  "Hip thrust (fitnessbank)": "https://musclewiki.com/barbell/male/glutes/barbell-hip-thrust",
+  "Step-up": "https://musclewiki.com/bodyweight/male/glutes/step-up",
+  "Step-up op de bank": "https://musclewiki.com/dumbbells/male/glutes/dumbbell-step-up",
+};
+function exVideo(s) { return EXERCISE_VIDEOS[s.name] || null; }
+function exVideoSearch(s) {
+  const q = String(s.name).replace(/\(.*?\)/g, "").trim();
+  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " proper form shorts");
+}
 /* Extra variatie in de "oefening afgerond"-zinnen (op verzoek: veel meer afwisseling) */
 COACH_LINES = COACH_LINES.concat([
   { event: "exerciseDone", intensity: "rustig", text: "Netjes gedaan. Neem even een slokje water." },
@@ -1353,6 +1553,13 @@ const ENGLISH_SPOKEN_TERMS = [
   "leg press", "leg curl", "kettlebell", "dumbbells", "dumbbell", "dumbells", "dumbell", "wall sit",
   "pulldown", "deadlift", "thruster", "dead bug", "push-up", "step-up", "pulley", "squat", "lunge",
   "plank", "row",
+  "overhead triceps extension", "chest-supported row", "around-the-body pass", "single-leg glute bridge",
+  "single-leg deadlift", "romanian deadlift", "concentration curl", "seated dumbbell curl", "triceps kickback",
+  "triceps pushdown", "glute kickback", "farmer's walk", "loaded march", "wall push-up", "decline push-up",
+  "good morning", "standing knee raise", "squat pulse", "sumo squat", "hammer curl", "arnold press",
+  "lateral lunge", "floor press", "russian twist", "bicycle crunch", "reverse crunch", "bird dog",
+  "clamshell", "swimmer", "face pull", "overhead press", "chair squat", "split squat", "rack hold",
+  "reverse snow angels", "shrug", "twist",
 ].sort((a, b) => b.length - a.length);
 const ENGLISH_TERM_RE = new RegExp("(" + ENGLISH_SPOKEN_TERMS.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
 const voiceCoach = {
@@ -3049,11 +3256,13 @@ function renderSnacksBox() {
       </div>
       <div class="sn-desc">${esc(s.description)}</div>
       <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}${s.achillesSafe === false ? "<span>⚠️ niet bij achillesherstel</span>" : ""}</div>
+      ${hwVideoBtns(s)}
       ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>💡 Tips &amp; valkuilen</summary><div class="tip-body">
         ${s.tips.length ? `<ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
         ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       </div></details>` : ""}`;
     card.querySelector(".sn-check").onclick = () => { toggleSnackDone(s.name); renderSnacksBox(); };
+    bindHwVideo(card, s);
     list.appendChild(card);
   });
   box.querySelectorAll("[data-snmin]").forEach(b => b.onclick = () => {
@@ -3231,7 +3440,80 @@ function renderEquipmentBox() {
 function equipLabel(e) {
   return e === "geen" ? "Geen materiaal (lichaamsgewicht)"
     : e === "kettlebell" ? `kettlebell (${KETTLEBELL_WEIGHTS.join(" & ")} kg)`
-    : e === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(e);
+    : e === "dumbbells" ? "dumbbells (alle gewichten)" : esc(e);
+}
+/* 🎯 Voorstel per oefening: reps/seconden + kg, op basis van dosering en je vorige poging.
+   Handmatig aangepaste doelen (targets in gymwave_home) winnen altijd van het voorstel. */
+function hwSuggest(s) {
+  const metric = hwMetric(s);
+  const t = (store.home().targets || {})[s.name] || {};
+  const hist = homeExerciseHistory(s.name);
+  const last = hist.length ? hist[hist.length - 1] : null;
+  const base = hwDoseNum(s) || (metric === "sec" ? 30 : 10);
+  let reps = t.reps != null ? t.reps : base;
+  let kg = null;
+  if (hwWeighted(s)) {
+    kg = t.kg != null ? t.kg : (last && last.weight ? last.weight : (s.equipment === "kettlebell" ? KETTLEBELL_WEIGHTS[0] : 4));
+  }
+  // progressie-voorstel: vorige keer het doel gehaald → één stapje erbij (eerst reps, dan gewicht)
+  if (t.reps == null && last && last.value != null && (last.metric || metric) === metric && last.value >= base) {
+    if (!hwWeighted(s) || last.value < base + 5) reps = Math.min(last.value + 1, base + 8);
+    else if (t.kg == null) { kg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, kg) : Math.round((kg + 1) * 2) / 2; reps = base; }
+  }
+  const sets = (String(s.dose || "").match(/^(\d+)\s*×/) || [])[1] || null;
+  return { reps, kg, sets, txt: `${sets ? sets + "×" : ""}${reps}${metric === "sec" ? " sec" : ""}${kg != null ? ` @ ${kg} kg` : ""}` };
+}
+function setHwTarget(name, patch) {
+  const h = store.home();
+  h.targets = h.targets || {};
+  h.targets[name] = Object.assign({}, h.targets[name] || {}, patch);
+  store.setHome(h);
+}
+function hwVideoBtns(s) {
+  const mw = exVideo(s);
+  return `
+    ${mw ? `<details class="tip inline-tip hw-embed" style="margin-top:8px;"><summary>🎥 Demo-video (zonder gepraat)</summary><div class="tip-body">
+      <video class="hw-video" controls muted loop playsinline preload="none" style="width:100%; border-radius:12px; background:#000;"></video>
+      <div class="muted" style="font-weight:600; font-size:0.8rem; margin-top:6px;">Stille demo via MuscleWiki — laadt de video niet? Gebruik de knoppen hieronder.</div>
+    </div></details>` : ""}
+    <div class="speak-row" style="margin-top:8px;">
+      ${mw ? `<a class="btn small ghost" href="${mw}" target="_blank" rel="noopener">🎥 Demo-pagina</a>` : ""}
+      <a class="btn small ghost" href="${exVideoSearch(s)}" target="_blank" rel="noopener">🔎 Video zoeken</a>
+    </div>`;
+}
+/* Ingebedde demo-video: probeer de stille MuscleWiki-mp4 in een paar bekende URL-varianten;
+   lukt geen enkele, dan verdwijnt de speler en blijven de linkknoppen over. */
+function exVideoMp4Candidates(s) {
+  const url = exVideo(s);
+  if (!url) return [];
+  const parts = url.split("/");
+  const slug = parts[parts.length - 1];
+  const cat = { bodyweight: "bodyweight", dumbbells: "dumbbell", kettlebells: "kettlebell", band: "band", barbell: "barbell" }[parts[3]] || parts[3];
+  const base = "https://media.musclewiki.com/media/uploads/videos/branded/";
+  return [`${base}male-${slug}-front.mp4`, `${base}male-${cat}-${slug}-front.mp4`, `${base}male-${slug}-side.mp4`];
+}
+function bindHwVideo(root, s) {
+  const det = root.querySelector(".hw-embed");
+  if (!det) return;
+  const vid = det.querySelector(".hw-video");
+  let started = false;
+  det.addEventListener("toggle", () => {
+    if (!det.open || started) return;
+    started = true;
+    const cands = exVideoMp4Candidates(s);
+    let i = 0, timer = null;
+    const tryNext = () => {
+      clearTimeout(timer);
+      if (i >= cands.length) { det.style.display = "none"; return; } // geen embed mogelijk: alleen de knoppen
+      vid.src = cands[i++];
+      vid.load();
+      vid.play().catch(() => {});
+      timer = setTimeout(() => { if (vid.readyState === 0) tryNext(); }, 8000); // hangend verzoek: probeer de volgende
+    };
+    vid.addEventListener("error", tryNext);
+    vid.addEventListener("loadeddata", () => { clearTimeout(timer); vid.removeEventListener("error", tryNext); });
+    tryNext();
+  });
 }
 function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
 function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell" || s.equipment === "fitnessbank"; }
@@ -3326,8 +3608,97 @@ function nextHwSalt() {
 function renderHomeWorkout() {
   let hw = store.homeWorkout();
   if (!hw || hw.date !== todayISO()) hw = regenerateHomeWorkout(nextHwSalt()); // elke verse workout varieert
+  clearInterval(hwTimerInt);
+  if (hw.playing) { renderHwPlayer(hw); return; }
   renderHwSetup(hw);
   renderHwPlan(hw);
+}
+/* ▶️ Reeks-speler: werkt het voorstel oefening voor oefening af */
+let hwTimerInt = null;
+function renderHwPlayer(hw) {
+  document.getElementById("hw-setup").innerHTML = "";
+  const wrap = document.getElementById("hw-plan");
+  wrap.innerHTML = "";
+  const names = hw.plan;
+  const idx = Math.max(0, Math.min(hw.playIdx || 0, names.length));
+  const doneN = names.filter(n => (hw.results[n] || {}).done).length;
+  const save = (mut) => { const w = store.homeWorkout(); if (!w) return; mut(w); store.setHomeWorkout(w); renderHomeWorkout(); };
+  // klaar met de reeks
+  if (idx >= names.length) {
+    const end = document.createElement("div");
+    end.className = "card";
+    end.innerHTML = `
+      <div class="section-title" style="margin:0 0 8px;">🏁 Reeks klaar!</div>
+      <p style="font-weight:600; opacity:0.85;">Je hebt ${doneN} van de ${names.length} oefeningen afgevinkt.</p>
+      <button class="btn full" id="hwp-finish" ${doneN ? "" : "disabled"} style="margin-top:10px;">Workout afronden 🏁</button>
+      <button class="btn ghost full small" id="hwp-back" style="margin-top:8px;">↩ Terug naar de lijst</button>`;
+    wrap.appendChild(end);
+    end.querySelector("#hwp-finish").onclick = finishHomeWorkout;
+    end.querySelector("#hwp-back").onclick = () => save(w => { w.playing = false; });
+    return;
+  }
+  const s = exByName(names[idx]);
+  if (!s) { save(w => { w.playIdx = idx + 1; }); return; }
+  const metric = hwMetric(s), weighted = hwWeighted(s);
+  const sug = hwSuggest(s);
+  const r = hw.results[s.name] || {};
+  const head = document.createElement("div");
+  head.className = "card hw-summary";
+  head.innerHTML = `<span class="muted" style="font-weight:700;">Oefening ${idx + 1} van ${names.length}</span><span style="font-weight:800;">${doneN} ✓</span>`;
+  wrap.appendChild(head);
+  const card = document.createElement("div");
+  card.className = "card snack-card";
+  card.innerHTML = `
+    <div class="sn-head"><div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div></div>
+    <div class="sn-desc">${esc(s.description)}</div>
+    ${hwVideoBtns(s)}
+    <div class="hw-target">🎯 Voorstel: <b>${esc(sug.txt)}</b></div>
+    ${metric === "sec" ? `<button class="btn ghost full small" id="hwp-timer">⏱ Start ${sug.reps} sec timer</button><div class="hw-timer-big" id="hwp-timer-val"></div>` : ""}
+    <div class="hw-log">
+      <label>${metric === "sec" ? "Seconden" : "Reps"}</label>
+      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${sug.reps}" />
+      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${sug.kg}" />` : ""}
+    </div>
+    ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:8px;"><summary>✅ Do's &amp; don'ts</summary><div class="tip-body">
+      ${s.tips.length ? `<div class="sub">✅ Do's</div><ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${s.mistakes.length ? `<div class="sub">🚫 Don'ts</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    </div></details>` : ""}
+    <button class="btn full" id="hwp-done" style="margin-top:12px;">✓ Klaar — volgende</button>
+    <div class="speak-row" style="margin-top:8px;">
+      <button class="btn small ghost" id="hwp-skip">⏭ Overslaan</button>
+      <button class="btn small ghost" id="hwp-stop">⏹ Stop reeks</button>
+    </div>`;
+  wrap.appendChild(card);
+  bindHwVideo(card, s);
+  const valIn = card.querySelector(".hw-val"), wtIn = card.querySelector(".hw-wt");
+  const timerBtn = card.querySelector("#hwp-timer");
+  if (timerBtn) timerBtn.onclick = () => {
+    clearInterval(hwTimerInt);
+    let left = sug.reps;
+    const out = card.querySelector("#hwp-timer-val");
+    out.textContent = left + " sec";
+    hwTimerInt = setInterval(() => {
+      left--;
+      if (left <= 3 && left > 0) beep(660, 0.1);
+      if (left <= 0) { clearInterval(hwTimerInt); out.textContent = "Klaar! 💪"; beep(990, 0.28); if (valIn.value === "") valIn.value = sug.reps; return; }
+      out.textContent = left + " sec";
+    }, 1000);
+  };
+  card.querySelector("#hwp-done").onclick = () => {
+    clearInterval(hwTimerInt);
+    save(w => {
+      const rr = Object.assign({ metric }, w.results[s.name] || {});
+      rr.done = true;
+      rr.value = valIn.value !== "" ? parseFloat(valIn.value) : sug.reps;
+      if (weighted) rr.weight = wtIn && wtIn.value !== "" ? parseFloat(wtIn.value) : sug.kg;
+      w.results[s.name] = rr;
+      w.playIdx = idx + 1;
+    });
+    voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  card.querySelector("#hwp-skip").onclick = () => { clearInterval(hwTimerInt); save(w => { w.playIdx = idx + 1; }); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  card.querySelector("#hwp-stop").onclick = () => { clearInterval(hwTimerInt); save(w => { w.playing = false; }); };
 }
 function renderHwSetup(hw) {
   const box = document.getElementById("hw-setup");
@@ -3342,6 +3713,7 @@ function renderHwSetup(hw) {
       </div>
       <div class="muted" style="font-weight:600; font-size:0.9rem;">Voorstel: <b>${hw.plan.length} oefening${hw.plan.length === 1 ? "" : "en"}</b> · ~${total} van ${h.workoutMin || 30} min${rehab ? " · veilig bij achillesherstel 🩹" : ""}</div>
       <details class="tip inline-tip" style="margin-top:10px;"><summary>🧰 Wat heb je thuis?</summary><div class="tip-body" id="hw-equip"></div></details>
+      ${hw.plan.length ? `<button class="btn full" id="hw-play" style="margin-top:12px;">▶️ Start workout — oefeningen achter elkaar</button>` : ""}
     </div>`;
   const eq = box.querySelector("#hw-equip");
   eq.innerHTML = EQUIPMENT_OPTIONS.map(e => `<label class="machine-check"><input type="checkbox" value="${e}" ${(h.equipment || []).includes(e) ? "checked" : ""}/> ${equipLabel(e)}</label>`).join("");
@@ -3361,6 +3733,16 @@ function renderHwSetup(hw) {
     renderHomeWorkout();
   });
   box.querySelector("#hw-regen").onclick = () => { regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1); renderHomeWorkout(); };
+  const play = box.querySelector("#hw-play");
+  if (play) play.onclick = () => {
+    const w = store.homeWorkout(); if (!w) return;
+    w.playing = true;
+    w.playIdx = w.plan.findIndex(n => !(w.results[n] || {}).done);
+    if (w.playIdx < 0) w.playIdx = w.plan.length;
+    store.setHomeWorkout(w);
+    renderHomeWorkout();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 }
 function hwCard(s, hw) {
   const r = hw.results[s.name] || {};
@@ -3380,10 +3762,17 @@ function hwCard(s, hw) {
     </div>
     <div class="sn-desc">${esc(s.description)}</div>
     <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}</div>
+    ${hwVideoBtns(s)}
+    <div class="hw-target">🎯 Voorstel: <b class="hw-target-txt">${esc(hwSuggest(s).txt)}</b>
+      <div class="hw-target-btns">
+        <div class="stepper"><span class="st-label">${metric === "sec" ? "sec" : "reps"}</span><button data-tgt="reps" data-d="-1">−</button><span class="st-val" data-tval="reps">${hwSuggest(s).reps}</span><button data-tgt="reps" data-d="1">+</button></div>
+        ${weighted ? `<div class="stepper"><span class="st-label">kg</span><button data-tgt="kg" data-d="-1">−</button><span class="st-val" data-tval="kg">${hwSuggest(s).kg}</span><button data-tgt="kg" data-d="1">+</button></div>` : ""}
+      </div>
+    </div>
     <div class="hw-log">
       <label>${metric === "sec" ? "Seconden" : "Reps"}</label>
-      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${hwDoseNum(s) != null ? hwDoseNum(s) : ""}" />
-      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="kg" />` : ""}
+      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${hwSuggest(s).reps}" />
+      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${hwSuggest(s).kg}" />` : ""}
     </div>
     ${(last || pr) ? `<div class="hw-prog">${last ? `Vorige: <b>${last.value} ${last.metric === "sec" ? "sec" : "reps"}</b>${last.weight ? ` @ ${last.weight}kg` : ""}` : ""}${pr ? `${last ? " · " : ""}<span class="hw-pr">PR: ${pr} ${unitLbl}</span>` : ""}</div>` : ""}
     <div class="hw-rate-row">
@@ -3413,6 +3802,23 @@ function hwCard(s, hw) {
     renderHomeWorkout();
   };
   card.querySelectorAll(".hw-rate").forEach(b => b.onclick = () => setHwRating(s.name, b.dataset.rate));
+  // 🎯 doel bijstellen: reps/sec en kg (kettlebell klikt op 16/20)
+  card.querySelectorAll("[data-tgt]").forEach(b => b.onclick = () => {
+    const cur = hwSuggest(s);
+    const d = parseInt(b.dataset.d);
+    if (b.dataset.tgt === "reps") setHwTarget(s.name, { reps: Math.max(1, cur.reps + d * (metric === "sec" ? 5 : 1)) });
+    else {
+      const kg = s.equipment === "kettlebell" ? (d > 0 ? stackNext(KETTLEBELL_WEIGHTS, cur.kg) : stackPrev(KETTLEBELL_WEIGHTS, cur.kg)) : Math.max(0.5, Math.round((cur.kg + d * 0.5) * 2) / 2);
+      setHwTarget(s.name, { kg });
+    }
+    const next = hwSuggest(s);
+    card.querySelector(".hw-target-txt").textContent = next.txt;
+    const rv = card.querySelector('[data-tval="reps"]'); if (rv) rv.textContent = next.reps;
+    const kv = card.querySelector('[data-tval="kg"]'); if (kv) kv.textContent = next.kg;
+    valIn.placeholder = next.reps;
+    if (wtIn) wtIn.placeholder = next.kg;
+  });
+  bindHwVideo(card, s);
   return card;
 }
 function renderHwPlan(hw) {
