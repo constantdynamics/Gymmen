@@ -3270,7 +3270,6 @@ function renderSnacksBox() {
         ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       </div></details>` : ""}`;
     card.querySelector(".sn-check").onclick = () => { toggleSnackDone(s.name); renderSnacksBox(); };
-    bindHwVideo(card, s);
     list.appendChild(card);
   });
   box.querySelectorAll("[data-snmin]").forEach(b => b.onclick = () => {
@@ -3480,50 +3479,10 @@ function setHwTarget(name, patch) {
 function hwVideoBtns(s) {
   const mw = exVideo(s);
   return `
-    ${mw ? `<details class="tip inline-tip hw-embed" style="margin-top:8px;"><summary>🎥 Demo-video (zonder gepraat)</summary><div class="tip-body">
-      <video class="hw-video" controls muted loop playsinline preload="none" style="width:100%; border-radius:12px; background:#000;"></video>
-      <div class="muted" style="font-weight:600; font-size:0.8rem; margin-top:6px;">Stille demo via MuscleWiki — laadt de video niet? Gebruik de knoppen hieronder.</div>
-    </div></details>` : ""}
     <div class="speak-row" style="margin-top:8px;">
-      ${mw ? `<a class="btn small ghost" href="${mw}" target="_blank" rel="noopener">🎥 Demo-pagina</a>` : ""}
+      ${mw ? `<a class="btn small ghost" href="${mw}" target="_blank" rel="noopener">🎥 Demo-video</a>` : ""}
       <a class="btn small ghost" href="${exVideoSearch(s)}" target="_blank" rel="noopener">🔎 Video zoeken</a>
     </div>`;
-}
-/* Ingebedde demo-video: probeer de stille MuscleWiki-mp4 in een paar bekende URL-varianten;
-   lukt geen enkele, dan verdwijnt de speler en blijven de linkknoppen over. */
-function exVideoMp4Candidates(s) {
-  const url = exVideo(s);
-  if (!url) return [];
-  const slug = url.split("/").pop();
-  const base = "https://media.musclewiki.com/media/uploads/videos/branded/";
-  return [`${base}male-${slug}-front.mp4`, `${base}male-${slug}-side.mp4`, `${base}female-${slug}-front.mp4`];
-}
-function bindHwVideo(root, s) {
-  const det = root.querySelector(".hw-embed");
-  if (!det) return;
-  const vid = det.querySelector(".hw-video");
-  let started = false;
-  det.addEventListener("toggle", () => {
-    if (!det.open || started) return;
-    started = true;
-    const cands = exVideoMp4Candidates(s);
-    let i = 0, timer = null;
-    const tryNext = () => {
-      clearTimeout(timer);
-      if (i >= cands.length) {
-        // insluiten lukt niet: leg uit wat er aan de hand is in plaats van stilletjes verdwijnen
-        det.querySelector(".tip-body").innerHTML = `<div class="muted" style="font-weight:600;">De video kan hier niet ingesloten worden. Open hem via de knop <b>🎥 Demo-pagina</b> hieronder — die toont dezelfde stille demonstratie.</div>`;
-        return;
-      }
-      vid.src = cands[i++];
-      vid.load();
-      vid.play().catch(() => {});
-      timer = setTimeout(() => { if (vid.readyState === 0) tryNext(); }, 8000); // hangend verzoek: probeer de volgende
-    };
-    vid.addEventListener("error", tryNext);
-    vid.addEventListener("loadeddata", () => { clearTimeout(timer); vid.removeEventListener("error", tryNext); });
-    tryNext();
-  });
 }
 function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
 function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell" || s.equipment === "fitnessbank"; }
@@ -3679,7 +3638,6 @@ function renderHwPlayer(hw) {
       <button class="btn small ghost" id="hwp-stop">⏹ Stop reeks</button>
     </div>`;
   wrap.appendChild(card);
-  bindHwVideo(card, s);
   const valIn = card.querySelector(".hw-val"), wtIn = card.querySelector(".hw-wt");
   const timerBtn = card.querySelector("#hwp-timer");
   if (timerBtn) timerBtn.onclick = () => {
@@ -3828,7 +3786,6 @@ function hwCard(s, hw) {
     valIn.placeholder = next.reps;
     if (wtIn) wtIn.placeholder = next.kg;
   });
-  bindHwVideo(card, s);
   return card;
 }
 function renderHwPlan(hw) {
