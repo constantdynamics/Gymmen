@@ -192,6 +192,7 @@ input[type="range"] { touch-action: pan-y; }
 .photo-banner { font-size: 0.9rem; font-weight: 600; line-height: 1.4; opacity: 0.85; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
 .photo-ask { font-size: 0.92rem; font-weight: 600; line-height: 1.4; margin-bottom: 12px; padding: 8px 12px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
 .kb-lbl { font-size: 0.85rem; font-weight: 800; margin: 6px 0 2px; opacity: 0.85; }
+.speak-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 @keyframes flipDone { 0% { transform: rotateX(0) scale(1); } 50% { transform: rotateX(85deg) scale(0.95); } 100% { transform: rotateX(0) scale(1); } }
 .done-collapsed { display: flex; align-items: center; justify-content: space-between; }
 .done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
@@ -716,6 +717,8 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
     <button class="btn ghost full small" id="load-preset-settings" style="margin-top:8px;">↺ Standaardschema (her)laden</button>
     <div class="section-title">Audio-coach</div>
     <div id="coach-settings"></div>
+    <div class="section-title">📍 Sportschool</div>
+    <div id="location-settings"></div>
     <div class="section-title">Garmin &amp; hartslag</div>
     <div id="garmin-settings"></div>
     <div class="section-title">AI-coach (vragen)</div>
@@ -1209,6 +1212,19 @@ function migrateMachines() {
     prof.kbMigrated = true;
     localStorage.setItem("gymwave_profile", JSON.stringify(prof)); // zonder touch: migratie mag geen cloud-push uitlokken
   }
+  // Op verzoek: chest press de volgende sessie op 23 kg zetten (eenmalig)
+  if (machines.length && !prof.chestPress23) {
+    const cp = machines.find(mm => /chest press/i.test(mm.name || "") && !mm.cardio);
+    if (cp) {
+      const cur = Math.round(cp.lastWeight || 0);
+      if (cur !== 23) {
+        cp.nextUp = { from: cur, suggested: 23, dir: cur > 23 ? "down" : "up", sid: null };
+        changed = true;
+      }
+      prof.chestPress23 = true;
+      localStorage.setItem("gymwave_profile", JSON.stringify(prof));
+    }
+  }
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
 }
 // Thuis-workouts staan apart: verplaats eventuele oude thuis-sessies uit de gym-lijst
@@ -1618,18 +1634,34 @@ function updateHrDisplay() {
 /* ============================================================
    DRUKTE-METER + BUITENTEMPERATUUR (open-meteo, gratis, geen sleutel)
    ============================================================ */
+/* Buitentemperatuur op basis van de (eenmalig ingevulde) postcode van de sportschool —
+   géén locatietoestemming meer nodig. Coördinaten worden per postcode gecachet. */
+async function gymCoords() {
+  const p = store.profile();
+  const pc = (p.gymPostcode || "").replace(/\s/g, "").toUpperCase();
+  if (!pc) return null;
+  if (p.gymCoords && p.gymCoords.pc === pc) return p.gymCoords;
+  const digits = (pc.match(/\d{4}/) || [])[0];
+  if (!digits) return null;
+  try {
+    const r = await fetch(`https://api.zippopotam.us/nl/${digits}`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    const place = d && d.places && d.places[0];
+    if (!place) return null;
+    const coords = { pc, lat: parseFloat(place.latitude), lon: parseFloat(place.longitude) };
+    const np = store.profile(); np.gymCoords = coords; store.setProfile(np);
+    return coords;
+  } catch { return null; }
+}
 async function fetchOutsideTemp() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) { resolve(null); return; }
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const { latitude, longitude } = pos.coords;
-        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude.toFixed(3)}&longitude=${longitude.toFixed(3)}&current=temperature_2m`);
-        const d = await r.json();
-        resolve(d && d.current ? Math.round(d.current.temperature_2m) : null);
-      } catch { resolve(null); }
-    }, () => resolve(null), { timeout: 8000, maximumAge: 600000 });
-  });
+  const c = await gymCoords();
+  if (!c) return null;
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat.toFixed(3)}&longitude=${c.lon.toFixed(3)}&current=temperature_2m`);
+    const d = await r.json();
+    return d && d.current ? Math.round(d.current.temperature_2m) : null;
+  } catch { return null; }
 }
 const CROWD_LABELS = ["", "Uitgestorven", "Rustig", "Gemiddeld", "Druk", "Overvol"];
 const CROWD_ICONS = ["", "🌵", "🙂", "😐", "😅", "🥵"];
@@ -1653,7 +1685,7 @@ function renderCrowdCard() {
       <div class="crowd-meta">
         <span>📅 ${["zo","ma","di","wo","do","vr","za"][new Date(currentSession.date + "T12:00:00").getDay()]}</span>
         ${c.time ? `<span>🕐 ${esc(c.time)}</span>` : ""}
-        ${c.temp != null ? `<span>🌡️ ${c.temp}°C</span>` : ""}
+        ${c.temp != null ? `<span>🌡️ ${c.temp}°C</span>` : (store.profile().gymPostcode ? "" : `<span style="opacity:0.6;">🌡️ vul je postcode in bij Instellingen</span>`)}
       </div>
       <div class="crowd-scale">${[1,2,3,4,5].map(i => `<button class="crowd-btn ${c.level === i ? "sel" : ""}" data-crowd="${i}" title="${CROWD_LABELS[i]}">${CROWD_ICONS[i]}</button>`).join("")}</div>
       <div class="feel-caption">${c.level ? CROWD_ICONS[c.level] + " " + CROWD_LABELS[c.level] : "Tik aan hoe druk het was (🌵 = uitgestorven, 🥵 = overvol)"}</div>
@@ -2090,7 +2122,11 @@ function renderSession() {
         <details class="tip inline-tip"><summary>✅ Do's &amp; don'ts</summary><div class="tip-body">
           ${extraTips.length ? `<div class="sub">✅ Do's — zo doe je het goed</div><ul>${extraTips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
           ${mistakes.length ? `<div class="sub" style="margin-top:6px;">🚫 Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-          <button class="btn small ghost speak-tips" style="margin-top:10px;">🔊 Lees voor</button>
+          <div class="speak-row">
+            ${extraTips.length ? `<button class="btn small ghost speak-dos">🔊 Do's</button>` : ""}
+            ${mistakes.length ? `<button class="btn small ghost speak-donts">🔊 Don'ts</button>` : ""}
+            <button class="btn small ghost speak-tips">🔊 Alles</button>
+          </div>
         </div></details>` : "";
       const kbHtml = /kettlebell/i.test(m.name) ? `
         <details class="tip inline-tip"><summary>🏋️ Kettlebell-oefeningen: do's &amp; don'ts</summary><div class="tip-body">
@@ -2227,6 +2263,24 @@ function renderSession() {
           persistCurrent();
           body.querySelectorAll("[data-feel]").forEach(b2 => { b2.classList.toggle("sel", parseInt(b2.dataset.feel) === p.feeling); b2.textContent = parseInt(b2.dataset.feel) === p.feeling ? "✓" : ""; });
           body.querySelector(".feel-caption").textContent = p.feeling ? FEEL_LABELS[p.feeling] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)";
+          // groen of donkergroen: vraag of het volgende keer zwaarder mag
+          if (p.feeling >= 4 && !m.cardio) {
+            const machines2 = store.machines();
+            const target = machines2.find(x => x.id === m.id);
+            if (target && !(target.nextUp && target.nextUp.dir !== "down")) {
+              const { weight } = readExerciseInputs(m, body);
+              const w = weight || Math.round(target.lastWeight);
+              const sug = suggestNextFor(target, w);
+              showModal("Zwaarder de volgende keer? 📈", `Dit voelde ${FEEL_LABELS[p.feeling].toLowerCase()}. Wil je volgende keer ${sug} ${target.unit || "kg"} proberen (nu ${w} ${target.unit || "kg"})?`, () => {
+                target.nextUp = { from: w, suggested: sug, dir: "up", sid: currentSession ? currentSession.id : null };
+                store.setMachines(machines2);
+                m.nextUp = target.nextUp;
+                toast(`📈 Genoteerd! Volgende keer: ${sug} ${target.unit || "kg"}`);
+                const nuBtn2 = body.querySelector(".nextup-btn");
+                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.textContent = "📈 Genoteerd voor volgende keer ✓ (tik om te annuleren)"; }
+              });
+            }
+          }
         });
         // opslaan zonder afronden
         const saveBtn = body.querySelector(".save-btn");
@@ -2262,6 +2316,11 @@ function renderSession() {
         machineMistakes(m).forEach(x => parts.push("Let op: " + x));
         voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
       };
+      // do's en don'ts los te herhalen — elke druk leest opnieuw voor
+      const sd = body.querySelector(".speak-dos");
+      if (sd) sd.onclick = () => voiceCoach.speak("De do's. " + machineExtraTips(m).join(" "), { force: true, interrupt: true });
+      const sn = body.querySelector(".speak-donts");
+      if (sn) sn.onclick = () => voiceCoach.speak("De don'ts, dit gaat vaak mis. " + machineMistakes(m).join(" "), { force: true, interrupt: true });
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
       const undo = body.querySelector(".undo-btn");
       if (undo) undo.onclick = () => undoMachine(m);
@@ -2304,17 +2363,20 @@ function completeMachine(m, body) {
     if (!m.cardio) {
       const best = historicalBest(m.id);
       isPr = best > 0 && weight > best;
+      const prevWeight = target.lastWeight; // gewicht vóór deze sessie, om dubbel verlagen te herkennen
       target.lastWeight = weight;
       if (sets) target.sets = sets;
       if (reps) target.reps = reps;
-      // 📈/🔻-advies afhandelen op basis van vlag en gevoel
+      // 🔻-advies afhandelen op basis van vlag en gevoel (📈 wordt al gevraagd bij het aantikken van groen)
       if (target.nextUp && ((target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) || (target.nextUp.dir === "down" && weight <= target.nextUp.suggested))) delete target.nextUp;
-      if (entry.feeling >= 4 && !target.nextUp) {
-        target.nextUp = { from: weight, suggested: suggestNextFor(target, weight), dir: "up", sid: currentSession ? currentSession.id : null };
-        toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} → volgende keer ${target.nextUp.suggested} ${target.unit || "kg"} 📈`);
-      } else if (entry.feeling <= 2 && entry.feeling > 0 && !target.nextUp) {
-        target.nextUp = { from: weight, suggested: suggestPrevFor(target, weight), dir: "down", sid: currentSession ? currentSession.id : null };
-        toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} → volgende keer ${target.nextUp.suggested} ${target.unit || "kg"} 🔻`);
+      if (entry.feeling <= 2 && entry.feeling > 0 && !target.nextUp) {
+        if (weight < prevWeight) {
+          // al verlaagd tijdens deze sessie: niet nóg een keer verlagen — het nieuwe gewicht blijft staan
+          toast(`Gewicht al verlaagd naar ${weight} ${target.unit || "kg"} — dat blijft zo (niet dubbel verlaagd)`);
+        } else {
+          target.nextUp = { from: weight, suggested: suggestPrevFor(target, weight), dir: "down", sid: currentSession ? currentSession.id : null };
+          toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} → volgende keer ${target.nextUp.suggested} ${target.unit || "kg"} 🔻`);
+        }
       }
     }
     settings.forEach((s, i) => { if (target.settings[i]) target.settings[i].lastValue = s.value; });
@@ -3502,7 +3564,11 @@ function renderTips() {
     html += blocks.map(({ m, mistakes, tips }) => `<details class="tip"><summary>${esc(m.name)}</summary><div class="tip-body">
       ${tips.length ? `<div class="sub">✅ Do's — zo doe je het goed</div><ul>${tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       ${mistakes.length ? `<div class="sub" style="margin-top:6px;">🚫 Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      <button class="btn small ghost tips-speak" data-mid="${m.id}" style="margin-top:10px;">🔊 Lees voor</button>
+      <div class="speak-row">
+        ${tips.length ? `<button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="dos">🔊 Do's</button>` : ""}
+        ${mistakes.length ? `<button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="donts">🔊 Don'ts</button>` : ""}
+        <button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="alles">🔊 Alles</button>
+      </div>
     </div></details>`).join("");
   }
   if (GENERAL_MISTAKES.length) {
@@ -3525,8 +3591,13 @@ function renderTips() {
     const m = store.machines().find(x => x.id === b.dataset.mid);
     if (!m) return;
     const parts = [m.name + "."];
-    machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
-    machineMistakes(m).forEach(x => parts.push("Let op: " + x));
+    const part = b.dataset.part || "alles";
+    if (part === "dos") { parts.push("De do's."); machineExtraTips(m).forEach(x => parts.push(x)); }
+    else if (part === "donts") { parts.push("De don'ts, dit gaat vaak mis."); machineMistakes(m).forEach(x => parts.push(x)); }
+    else {
+      machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
+      machineMistakes(m).forEach(x => parts.push("Let op: " + x));
+    }
     voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
   });
   wrap.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => {
@@ -3586,7 +3657,28 @@ document.getElementById("reset-checklist").addEventListener("click", () => {
 /* ============================================================
    INSTELLINGEN
    ============================================================ */
-function renderSettings() { renderThemeGrid(); renderManageMachines(); renderCoachSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
+function renderSettings() { renderThemeGrid(); renderManageMachines(); renderCoachSettings(); renderLocationSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
+function renderLocationSettings() {
+  const box = document.getElementById("location-settings");
+  if (!box) return;
+  const p = store.profile();
+  box.innerHTML = `
+    <div class="card">
+      <label>Postcode van je sportschool</label>
+      <input type="text" id="gym-postcode" placeholder="bijv. 1234 AB" maxlength="7" value="${esc(p.gymPostcode || "")}" autocomplete="postal-code" />
+      <div class="muted" style="font-weight:600; font-size:0.85rem; margin-top:8px;">Wordt alleen gebruikt voor de buitentemperatuur bij de drukte-meter — er is geen locatietoestemming nodig.${p.gymCoords && p.gymCoords.pc === (p.gymPostcode || "").replace(/\s/g, "").toUpperCase() ? " ✓ Postcode gevonden." : ""}</div>
+    </div>`;
+  const inp = box.querySelector("#gym-postcode");
+  inp.onchange = async () => {
+    const np = store.profile();
+    np.gymPostcode = inp.value.trim();
+    delete np.gymCoords; // opnieuw opzoeken bij gewijzigde postcode
+    store.setProfile(np);
+    const c = await gymCoords();
+    renderLocationSettings();
+    toast(c ? "📍 Postcode gevonden — buitentemperatuur doet weer mee" : (np.gymPostcode ? "Postcode niet gevonden — check de 4 cijfers" : "Postcode gewist"));
+  };
+}
 function renderCoachSettings() {
   const box = document.getElementById("coach-settings");
   const s = store.coach();
