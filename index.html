@@ -141,6 +141,11 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
   animation: pulse 2s infinite ease-in-out; text-transform: uppercase; letter-spacing: 2px; transition: transform 0.25s ease;
 }
 .hero-btn:hover { transform: scale(1.03); } .hero-btn:active { transform: scale(0.97); }
+.hero-btn.hero-home {
+  margin-top: 14px; font-size: 1.15rem; padding: 20px 24px; animation: none;
+  background: transparent; color: var(--primary); border: 2px solid var(--primary);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 30%, transparent);
+}
 @keyframes pulse {
   0%,100% { box-shadow: 0 0 34px color-mix(in srgb, var(--glow) 55%, transparent); transform: scale(1); }
   50% { box-shadow: 0 0 60px color-mix(in srgb, var(--glow) 95%, transparent); transform: scale(1.025); }
@@ -598,7 +603,7 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <!-- ============ HOME ============ -->
   <section id="view-home" class="view">
     <div class="date-big" id="home-date">—</div>
-    <div class="hero-wrap"><button class="hero-btn" id="enter-gym">De Gym In</button><div id="hero-extra" style="margin-top:12px;"></div></div>
+    <div class="hero-wrap"><button class="hero-btn" id="enter-gym">🏋️ De Gym In</button><button class="hero-btn hero-home" id="enter-home">🏠 Thuis Gymmen</button><div id="hero-extra" style="margin-top:12px;"></div></div>
     <div class="last-session" id="home-last"></div>
     <div class="stat-pills">
       <div class="pill"><div class="label">SESSIES TOTAAL</div><div class="stat-num" id="stat-sessions">0</div></div>
@@ -749,19 +754,6 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <button class="nav-item" data-view="tips"><span class="nav-icon">📖</span><span class="nav-label">TIPS</span></button>
   <button class="nav-item" data-view="settings"><span class="nav-icon">⚙️</span><span class="nav-label">INSTEL</span></button>
 </nav>
-
-<!-- ============ LOCATIEKEUZE ============ -->
-<div class="modal-overlay" id="loc-modal">
-  <div class="modal">
-    <h3>Waar train je vandaag?</h3>
-    <p>Kies je locatie — je programma past zich aan.</p>
-    <div class="modal-actions loc-actions">
-      <button class="btn full" id="loc-gym">🏋️ De Gym In</button>
-      <button class="btn full ghost" id="loc-home">🏠 Thuis trainen</button>
-      <button class="btn ghost small" id="loc-cancel">Annuleren</button>
-    </div>
-  </div>
-</div>
 
 <!-- ============ SESSIE-SAMENVATTING ============ -->
 <div class="modal-overlay" id="summary-modal">
@@ -2046,7 +2038,10 @@ function renderHome() {
   const lastLabel = last ? (last.name ? `${last.name} · ${fmtNice(last.date)}` : fmtNice(last.date)) : null;
   document.getElementById("home-last").textContent = lastLabel ? `Laatste sessie: ${lastLabel}` : "Nog geen sessies — tijd om te beginnen!";
   // lopende sessie? dan wordt de grote knop "verder gaan" en kan een nieuwe alleen via bevestiging
-  document.getElementById("enter-gym").textContent = currentSession ? "Verder met je sessie ▶" : "De Gym In";
+  document.getElementById("enter-gym").textContent = currentSession ? "Verder met je sessie ▶" : "🏋️ De Gym In";
+  const hwToday = store.homeWorkout();
+  const busyHome = hwToday && hwToday.date === todayISO() && (hwToday.playing || Object.keys(hwToday.results || {}).length);
+  document.getElementById("enter-home").textContent = busyHome ? "🏠 Verder met thuis-workout ▶" : "🏠 Thuis Gymmen";
   const extra = document.getElementById("hero-extra");
   extra.innerHTML = "";
   if (currentSession) {
@@ -2138,16 +2133,12 @@ function startNewSession() {
   const goals = activeGoals().filter(g => g.type !== "afvallen" && !/afval|vet|calorie|gewicht.*(kwijt|verlie)/i.test(g.title || ""));
   if (goals.length) setTimeout(() => voiceCoach.say("goal", { goal: goals[Math.floor(Math.random() * goals.length)].title }, { minGap: 0 }), 4000);
 }
+// twee losse keuzes op het homescherm: gym of thuis (geen tussenvenster meer)
 document.getElementById("enter-gym").addEventListener("click", () => {
   if (currentSession) { route("session"); return; } // lopende sessie nooit stilzwijgend weggooien
-  const hw = store.homeWorkout();
-  if (hw && hw.date === todayISO()) { route("homeworkout"); return; } // lopende thuis-workout hervatten
-  openLocationChoice();
+  startNewSession();
 });
-function openLocationChoice() { document.getElementById("loc-modal").classList.add("show"); }
-document.getElementById("loc-cancel").onclick = () => document.getElementById("loc-modal").classList.remove("show");
-document.getElementById("loc-gym").onclick = () => { document.getElementById("loc-modal").classList.remove("show"); startNewSession(); };
-document.getElementById("loc-home").onclick = () => { document.getElementById("loc-modal").classList.remove("show"); route("homeworkout"); };
+document.getElementById("enter-home").addEventListener("click", () => route("homeworkout"));
 
 /* ============================================================
    SESSIE
