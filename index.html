@@ -189,6 +189,9 @@ input[type="range"] { touch-action: pan-y; }
 .machine-card.done { opacity: 0.55; filter: grayscale(0.7); border-color: rgba(120,120,140,0.4); box-shadow: none; animation: flipDone 0.5s ease; }
 .machine-card.skipped { opacity: 0.6; border-style: dashed; box-shadow: none; }
 .skip-tag { font-family: "Orbitron", sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
+.photo-banner { font-size: 0.9rem; font-weight: 600; line-height: 1.4; opacity: 0.85; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
+.photo-ask { font-size: 0.92rem; font-weight: 600; line-height: 1.4; margin-bottom: 12px; padding: 8px 12px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
+.kb-lbl { font-size: 0.85rem; font-weight: 800; margin: 6px 0 2px; opacity: 0.85; }
 @keyframes flipDone { 0% { transform: rotateX(0) scale(1); } 50% { transform: rotateX(85deg) scale(0.95); } 100% { transform: rotateX(0) scale(1); } }
 .done-collapsed { display: flex; align-items: center; justify-content: space-between; }
 .done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
@@ -271,6 +274,27 @@ details.tip[open] > summary::after { content: "−"; }
 .modal p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 22px; }
 .modal-actions { display: flex; gap: 12px; }
 .modal-actions .btn { flex: 1; }
+
+/* Sessie-samenvatting: barchart met stippellijn-referenties */
+.ss-kg { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.9rem; text-align: center; color: var(--primary); text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent); }
+.ss-sub { text-align: center; font-size: 0.85rem; opacity: 0.7; font-weight: 600; margin-bottom: 8px; }
+.ss-chart-wrap { position: relative; height: 200px; margin: 14px 0 8px; }
+.ss-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 4px; overflow-x: auto; padding: 0 2px; }
+.ss-bar { flex: 1 0 16px; max-width: 44px; border-radius: 4px 4px 0 0; background: color-mix(in srgb, var(--primary) 40%, transparent); }
+.ss-bar.cur { background: linear-gradient(180deg, var(--accent), var(--primary)); box-shadow: 0 0 14px color-mix(in srgb, var(--glow) 70%, transparent); }
+.ss-line { position: absolute; left: 0; right: 0; height: 0; pointer-events: none; }
+.ss-line.avg { border-top: 2.5px dashed var(--primary); }
+.ss-line.d30 { border-top: 3px dotted var(--accent); }
+.ss-line.prev { height: 2.5px; border-top: none; background: repeating-linear-gradient(90deg, var(--text) 0 14px, transparent 14px 22px); opacity: 0.75; }
+.ss-legend { display: flex; flex-direction: column; gap: 7px; font-size: 0.88rem; font-weight: 600; margin-top: 10px; }
+.ss-legend .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ss-swatch { display: inline-block; width: 26px; height: 0; flex-shrink: 0; }
+.ss-swatch.avg { border-top: 2.5px dashed var(--primary); }
+.ss-swatch.d30 { border-top: 3px dotted var(--accent); }
+.ss-swatch.prev { height: 2.5px; background: repeating-linear-gradient(90deg, var(--text) 0 10px, transparent 10px 16px); opacity: 0.75; }
+.ss-delta { margin-left: auto; font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 0.85rem; padding: 2px 10px; border-radius: 20px; background: rgba(0,0,0,0.35); }
+.ss-delta.up { color: #4dffa6; }
+.ss-delta.down { color: #ff6b81; }
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2000; }
 .confetti-piece { position: absolute; width: 10px; height: 16px; opacity: 0.95; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
@@ -732,6 +756,17 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   </div>
 </div>
 
+<!-- ============ SESSIE-SAMENVATTING ============ -->
+<div class="modal-overlay" id="summary-modal">
+  <div class="modal" style="max-width:420px; text-align:left;">
+    <h3 style="text-align:center;">🏁 Sessie afgerond!</h3>
+    <div id="summary-content"></div>
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn full" id="summary-close">Naar Home 🏠</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ MODAL ============ -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
@@ -889,6 +924,156 @@ const MACHINE_OPEN_QUESTIONS = {
   "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
 };
 const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
+/* Kettlebell-oefeningen met do's & don'ts — getoond op de Kettlebell-kaart in de sessie (squat eerst) */
+const KETTLEBELL_EXERCISES = [
+  { name: "Kettlebell squat (goblet)", dose: "3×10",
+    dos: ["Houd de kettlebell met twee handen tegen je borst, ellebogen naar beneden.", "Zak vanuit je heupen, borst trots vooruit, en duw je knieën licht naar buiten in lijn met je tenen.", "Duw jezelf door je hele voet weer omhoog en adem uit tijdens het opkomen.", "Zak zo diep als comfortabel gaat met een rechte rug — diepte bouw je op."],
+    donts: ["De kettlebell van je lichaam af laten hangen waardoor je rug rond trekt.", "Hielen die loskomen op het diepste punt.", "Knieën naar binnen laten zakken.", "Te snel zakken zonder spanning in je romp."] },
+  { name: "Kettlebell deadlift", dose: "3×10",
+    dos: ["Zet de kettlebell tussen je voeten en buig vanuit je heupen met een rechte rug.", "Houd de kettlebell dicht bij je lichaam.", "Kom krachtig rechtop door je heupen naar voren te duwen en knijp bovenaan je billen samen.", "Span je buik aan vóór je tilt."],
+    donts: ["Een bolle onderrug bij het oppakken of neerzetten.", "De beweging uit je knieën halen alsof het een squat is.", "Met je armen tillen in plaats van met heupen en benen.", "Achterover leunen aan het einde van de beweging."] },
+  { name: "Kettlebell swing", dose: "3×12",
+    dos: ["Zwaai vanuit je heupen: heupen naar achteren, dan krachtig naar voren knallen.", "Houd je voeten plat en je hakken aan de grond — goed voor je achillespees.", "Houd je armen ontspannen; de kracht komt uit je heupen, niet uit je schouders.", "Eindig elke zwaai rechtop met aangespannen billen en buik."],
+    donts: ["Squatten in plaats van hip-hingen: het is een zwaai, geen kniebuiging.", "De kettlebell met je armen omhoog tillen.", "Je rug hol of bol trekken tijdens de zwaai.", "Hoger zwaaien dan borsthoogte terwijl je de controle verliest."] },
+  { name: "Single-arm press", dose: "3×8 per arm",
+    dos: ["Start met de kettlebell in de rack-positie tegen borst en onderarm.", "Span je buik en billen aan zodat je onderrug niet hol trekt.", "Druk in een rechte lijn omhoog en laat gecontroleerd zakken.", "Wissel netjes van arm en doe links evenveel als rechts."],
+    donts: ["Opzij leunen om het gewicht omhoog te duwen.", "Met je benen meeveren (dat is een push press).", "De pols laten knikken — houd hem recht in het verlengde van je onderarm.", "De kettlebell laten terugvallen in plaats van af te remmen."] },
+  { name: "Kettlebell row", dose: "3×10 per arm",
+    dos: ["Steun met één hand op een bank of je knie en houd je rug als een plank.", "Trek de kettlebell met je elleboog langs je lichaam richting je heup.", "Knijp bovenaan je schouderblad naar achteren.", "Laat in 2 tot 3 tellen gecontroleerd zakken."],
+    donts: ["Een bolle rug tijdens het vooroverbuigen.", "De kettlebell omhoog zwaaien met momentum.", "Je schouder naar je oor optrekken.", "Draaien met je romp om hoger te komen."] },
+  { name: "Suitcase carry", dose: "3×30 sec per kant",
+    dos: ["Draag de kettlebell als een koffer in één hand en loop kaarsrecht.", "Span de zij zonder gewicht aan om niet scheef te hangen.", "Loop rustig en bewust met je schouders laag.", "Wissel elke ronde van hand."],
+    donts: ["Naar de kant van het gewicht overhellen.", "Te snel lopen waardoor je gaat zwaaien.", "De schouder van de draagkant laten hangen.", "Je adem inhouden tijdens het lopen."] },
+  { name: "Kettlebell halo", dose: "2×8 per richting",
+    dos: ["Houd de kettlebell ondersteboven bij de hoorns voor je borst.", "Cirkel hem rustig en dicht om je hoofd heen.", "Houd je romp stil en je buik aangespannen.", "Mooi als warming-up voor je schouders."],
+    donts: ["Grote wijde cirkels ver van je hoofd maken.", "Je onderrug hol trekken tijdens het cirkelen.", "Te zwaar gaan — dit is een controle-oefening, geen krachtoefening.", "Haasten: langzaam cirkelen is juist het werk."] },
+];
+/* Extra thuis-oefeningen: meer kettlebell + fitnessbank met dumbbells (elk met do's in tips en don'ts in mistakes) */
+SNACK_POOL = SNACK_POOL.concat([
+  { name: "Kettlebell swing", equipment: "kettlebell", minutes: 3, dose: "3×12",
+    description: "Zet de kettlebell iets voor je neer, buig vanuit je heupen en zwaai hem tussen je benen door naar borsthoogte door je heupen krachtig naar voren te duwen. Laat hem in dezelfde boog terugzwaaien.",
+    tips: ["De kracht komt uit je heupen, niet uit je armen — die zijn alleen het touw", "Houd je voeten plat en je hakken aan de grond, vriendelijk voor je achillespees", "Eindig elke zwaai rechtop met aangespannen billen en buik"],
+    mistakes: ["Squatten in plaats van hip-hingen", "De kettlebell met je armen omhoog tillen", "Je rug bol trekken tijdens de zwaai"],
+    focus: "full body", achillesSafe: true },
+  { name: "Single-arm kettlebell press", equipment: "kettlebell", minutes: 3, dose: "3×8 per arm",
+    description: "Breng de kettlebell naar de rack-positie tegen je borst en druk hem in een rechte lijn boven je hoofd uit. Laat gecontroleerd zakken en wissel na de set van arm.",
+    tips: ["Span je buik en billen aan zodat je onderrug niet hol trekt", "Houd je pols recht in het verlengde van je onderarm", "Doe met je zwakkere arm evenveel herhalingen als met je sterke"],
+    mistakes: ["Opzij leunen om het gewicht omhoog te krijgen", "Met de benen meeveren", "De kettlebell laten terugvallen in plaats van af te remmen"],
+    focus: "schouders/armen", achillesSafe: true },
+  { name: "Kettlebell row (steunend)", equipment: "kettlebell", minutes: 3, dose: "3×10 per arm",
+    description: "Steun met één hand op een stoel of bank, houd je rug recht en trek de kettlebell met je elleboog langs je lichaam omhoog richting je heup. Laat rustig zakken.",
+    tips: ["Knijp bovenaan je schouderblad naar achteren", "Trek in 1 tel omhoog, laat in 2-3 tellen zakken", "Houd je romp stil: alleen je arm beweegt"],
+    mistakes: ["Een bolle rug tijdens het buigen", "Het gewicht omhoog zwaaien met een rukje", "Je romp meedraaien om hoger te komen"],
+    focus: "rug", achillesSafe: true },
+  { name: "Kettlebell halo", equipment: "kettlebell", minutes: 2, dose: "2×8 per richting",
+    description: "Houd de kettlebell ondersteboven bij de hoorns voor je borst en cirkel hem rustig en dichtbij om je hoofd heen. Wissel na acht rondjes van richting.",
+    tips: ["Houd de cirkel klein en dicht bij je hoofd", "Buik aangespannen, romp stil — alleen je armen bewegen", "Perfecte warming-up voor schouders en bovenrug"],
+    mistakes: ["Grote wijde cirkels maken", "Je onderrug hol trekken", "Te zwaar kiezen: dit is een controle-oefening"],
+    focus: "schouders/armen", achillesSafe: true },
+  { name: "Dumbbell bench press (fitnessbank)", equipment: "fitnessbank", minutes: 4, dose: "3×10",
+    description: "Ga op je rug op de bank liggen met in elke hand een dumbbell op borsthoogte. Druk ze recht omhoog tot je armen gestrekt zijn en laat ze in 2-3 tellen gecontroleerd zakken.",
+    tips: ["Houd je voeten plat op de grond en je schouderbladen naar achteren geknepen", "Laat de dumbbells zakken tot net naast je borst voor volledig bereik", "Adem in bij het zakken, krachtig uit bij het drukken — zelfde techniek als de chest press in de gym"],
+    mistakes: ["De dumbbells op elkaar laten klappen bovenin", "Je onderrug ver hol trekken van de bank", "Ongelijk drukken doordat één arm voorloopt"],
+    focus: "schouders/armen", achillesSafe: true },
+  { name: "Dumbbell chest fly (fitnessbank)", equipment: "fitnessbank", minutes: 3, dose: "3×10",
+    description: "Lig op de bank met de dumbbells boven je borst, handpalmen naar elkaar. Open je armen in een wijde boog tot borsthoogte en knijp ze weer samen alsof je een boom omhelst.",
+    tips: ["Houd een lichte buiging in je ellebogen gedurende de hele beweging", "Kies lichter dan bij de bench press — techniek boven gewicht", "Voel de rek in je borst onderin en knijp bovenin bewust samen"],
+    mistakes: ["Armen volledig strekken waardoor je ellebogen op slot staan", "Te diep zakken en de schouders overbelasten", "Van een fly een press maken door je ellebogen te buigen"],
+    focus: "schouders/armen", achillesSafe: true },
+  { name: "One-arm dumbbell row (fitnessbank)", equipment: "fitnessbank", minutes: 4, dose: "3×10 per arm",
+    description: "Zet je linkerknie en linkerhand op de bank, houd je rug horizontaal en recht. Trek de dumbbell met je rechterarm langs je lichaam omhoog richting je heup en laat rustig zakken; wissel daarna van kant.",
+    tips: ["Houd je rug als een tafelblad: recht van hoofd tot stuit", "Trek met je elleboog langs je lichaam, niet wijd naar buiten", "Knijp bovenaan je schouderblad richting je wervelkolom"],
+    mistakes: ["Je romp meedraaien om het gewicht hoger te krijgen", "Een bolle rug", "De schouder naar het oor optrekken"],
+    focus: "rug", achillesSafe: true },
+  { name: "Dumbbell pullover (fitnessbank)", equipment: "fitnessbank", minutes: 3, dose: "3×10",
+    description: "Lig op de bank en houd één dumbbell met beide handen boven je borst. Laat hem met licht gebogen armen in een boog achter je hoofd zakken tot je rek voelt, en trek hem terug boven je borst.",
+    tips: ["Beweeg langzaam en houd je onderrug in contact met de bank", "Ga niet verder terug dan waar je de rek comfortabel voelt", "Mooie combinatie-oefening voor borst én rug"],
+    mistakes: ["Je onderrug hol laten trekken bij het zakken", "Te zwaar kiezen waardoor je de controle verliest achter je hoofd", "Je armen ver buigen waardoor het een triceps-oefening wordt"],
+    focus: "rug", achillesSafe: true },
+  { name: "Bulgarian split squat (fitnessbank)", equipment: "fitnessbank", minutes: 4, dose: "3×8 per been",
+    description: "Sta een grote stap voor de bank en leg je achterste voet erop. Zak recht naar beneden tot je voorste bovenbeen bijna horizontaal is en duw jezelf door je voorste voet weer omhoog. Dumbbells in de handen voor extra gewicht.",
+    tips: ["Houd je voorste knie boven je middenvoet en je romp rechtop", "Begin zonder gewicht om de balans te vinden", "Begin met je linkerbeen voor en laat dat been het aantal bepalen"],
+    mistakes: ["Te dicht bij de bank staan waardoor je knie ver over je tenen schiet", "Afzetten met je achterste been", "Doorzakken met een klappende knie in plaats van gecontroleerd zakken"],
+    focus: "benen", achillesSafe: true },
+  { name: "Hip thrust (fitnessbank)", equipment: "fitnessbank", minutes: 3, dose: "3×12",
+    description: "Zet je schouderbladen op de rand van de bank, voeten plat op de grond en een dumbbell op je heupen. Duw je heupen omhoog tot je lichaam een rechte lijn vormt en zak rustig terug.",
+    tips: ["Knijp bovenaan je billen bewust 1-2 tellen samen", "Houd je kin licht ingetrokken en kijk schuin naar voren", "Duw door je hielen, niet door je tenen"],
+    mistakes: ["Je onderrug hol trekken in plaats van je billen te gebruiken", "Te hoog willen komen waardoor je ribben uitsteken", "De beweging snel en klein maken in plaats van vol en gecontroleerd"],
+    focus: "benen", achillesSafe: true },
+  { name: "Bench dips (fitnessbank)", equipment: "fitnessbank", minutes: 3, dose: "3×8",
+    description: "Zet je handen naast je heupen op de rand van de bank, schuif je billen ervan af en zak met gebogen ellebogen naar beneden. Duw jezelf krachtig terug omhoog.",
+    tips: ["Houd je ellebogen recht naar achteren wijzen, niet naar buiten", "Hoe verder je voeten van je af, hoe zwaarder — bouw op", "Houd je schouders laag, weg van je oren"],
+    mistakes: ["Te diep zakken waardoor je schouders klemmen", "Je heupen ver van de bank laten zweven", "Schokkerig omhoog duwen in plaats van vloeiend"],
+    focus: "schouders/armen", achillesSafe: true },
+  { name: "Seated shoulder press (fitnessbank)", equipment: "fitnessbank", minutes: 3, dose: "3×10",
+    description: "Ga rechtop op de bank zitten (rugleuning omhoog als die er is) met de dumbbells op schouderhoogte. Druk ze recht boven je hoofd uit en laat gecontroleerd zakken.",
+    tips: ["Zelfde beweging als de shoulder press in de gym — zittend is je onderrug beschermd", "Druk de dumbbells bovenin licht naar elkaar toe", "Houd je buik aangespannen en je rug tegen de leuning"],
+    mistakes: ["Je onderrug hol laten trekken door te zwaar gewicht", "De dumbbells voor je gezicht laten zakken in plaats van naast je oren", "Met een rukje uit de schouders drukken"],
+    focus: "schouders/armen", achillesSafe: true },
+]);
+/* Extra variatie in de "oefening afgerond"-zinnen (op verzoek: veel meer afwisseling) */
+COACH_LINES = COACH_LINES.concat([
+  { event: "exerciseDone", intensity: "rustig", text: "Netjes gedaan. Neem even een slokje water." },
+  { event: "exerciseDone", intensity: "rustig", text: "Weer eentje klaar. Je bent lekker bezig vandaag." },
+  { event: "exerciseDone", intensity: "rustig", text: "Goed uitgevoerd. Adem rustig door en loop verder." },
+  { event: "exerciseDone", intensity: "rustig", text: "Die zit erop. Voel je even hoe je spieren gewerkt hebben?" },
+  { event: "exerciseDone", intensity: "rustig", text: "Prima tempo. De volgende staat voor je klaar." },
+  { event: "exerciseDone", intensity: "rustig", text: "Mooi werk. Kwaliteit gaat boven snelheid, en dat zag je hier." },
+  { event: "exerciseDone", intensity: "rustig", text: "Afgerond. Je lichaam bedankt je hier later voor." },
+  { event: "exerciseDone", intensity: "rustig", text: "Goed zo. Stap voor stap word je sterker." },
+  { event: "exerciseDone", intensity: "rustig", text: "Klaar is klaar. Gun jezelf een momentje rust." },
+  { event: "exerciseDone", intensity: "rustig", text: "Weer een stukje sterker. Rustig door naar de volgende." },
+  { event: "exerciseDone", intensity: "rustig", text: "Dat ging soepel. Hou dit ritme maar vast." },
+  { event: "exerciseDone", intensity: "rustig", text: "Heel netjes. Je techniek wordt elke keer beter." },
+  { event: "exerciseDone", intensity: "rustig", text: "Die kan je afstrepen. Lekker gewerkt." },
+  { event: "exerciseDone", intensity: "rustig", text: "Rustig en gecontroleerd, precies zoals het hoort." },
+  { event: "exerciseDone", intensity: "rustig", text: "Weer een oefening in de pocket. Ga zo door." },
+  { event: "exerciseDone", intensity: "rustig", text: "Goed gedaan. Even schudden met die spieren en door." },
+  { event: "exerciseDone", intensity: "rustig", text: "Zo, die staat. Je mag trots zijn op je inzet." },
+  { event: "exerciseDone", intensity: "rustig", text: "Keurig afgewerkt. Neem de tijd voor de overstap." },
+  { event: "exerciseDone", intensity: "rustig", text: "Alweer klaar. Je routine begint er lekker in te zitten." },
+  { event: "exerciseDone", intensity: "rustig", text: "Fijn gedaan. Elke herhaling telt, en jij deed ze allemaal." },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Bam, die staat! Lekker doorpakken nu!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Weer een apparaat getemd! Op naar de volgende!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Wat een uitvoering! Je vliegt door je schema heen!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Yes! Die spieren hebben gewerkt vandaag!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Strak gedaan! Hou die energie vast!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Geweldig! Je wordt hier elke week beter in!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Afgevinkt! Het momentum is helemaal van jou!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Sterk hoor! Even water en dan knallen we verder!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Die zat er lekker in! Volgende uitdaging wacht!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Top gedaan! Zo bouw je aan een ijzersterk lijf!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Weer eentje minder! Jij bent niet te stoppen vandaag!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Wauw, mooie set! Door naar het volgende station!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Zo doe je dat! Je lijstje wordt steeds korter!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Dikke prima! Voel je die kracht toenemen?" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Klaar en netjes! Jouw discipline is goud waard!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Lekker bezig kampioen! De volgende machine trilt al!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Weer gedaan wat je moest doen! Zo win je de dag!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Supersterk! Even doorademen en weer aanvallen!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Die ging als een speer! Wat een vorm vandaag!" },
+  { event: "exerciseDone", intensity: "fanatiek", text: "Check! Elke oefening brengt je dichter bij je doel!" },
+  { event: "exerciseDone", intensity: "beest", text: "Gesloopt. Volgende machine, nu." },
+  { event: "exerciseDone", intensity: "beest", text: "Die telt. Maar het echte werk begint pas." },
+  { event: "exerciseDone", intensity: "beest", text: "Afgemaakt. Zwak was gisteren." },
+  { event: "exerciseDone", intensity: "beest", text: "Weer een obstakel opgeruimd. Blijf jagen." },
+  { event: "exerciseDone", intensity: "beest", text: "Klaar. Het ijzer weet nu wie de baas is." },
+  { event: "exerciseDone", intensity: "beest", text: "Die machine heeft respect voor je. Doorlopen." },
+  { event: "exerciseDone", intensity: "beest", text: "Afgehandeld. Geen rust voor de sterken." },
+  { event: "exerciseDone", intensity: "beest", text: "Zo. Nu laten zien dat dit geen toeval was." },
+  { event: "exerciseDone", intensity: "beest", text: "Vernietigd. De volgende staat al te wachten." },
+  { event: "exerciseDone", intensity: "beest", text: "Weggezet. Discipline verslaat talent, elke dag." },
+  { event: "exerciseDone", intensity: "beest", text: "Die was voor jou. Pak nu de volgende." },
+  { event: "exerciseDone", intensity: "beest", text: "Klaar mee. Comfort is de vijand, blijf duwen." },
+  { event: "exerciseDone", intensity: "beest", text: "Erdoorheen gebeukt. Dit is jouw uur." },
+  { event: "exerciseDone", intensity: "beest", text: "Neergelegd. Elke rep was verdiend." },
+  { event: "exerciseDone", intensity: "beest", text: "Machine leeg. Jij nog lang niet." },
+  { event: "exerciseDone", intensity: "beest", text: "Afgerond als een prof. Nu niet verslappen." },
+  { event: "exerciseDone", intensity: "beest", text: "Die staat op je naam. Volgende slachtoffer kiezen." },
+  { event: "exerciseDone", intensity: "beest", text: "Gedaan. Praten is voor straks, werken is voor nu." },
+  { event: "exerciseDone", intensity: "beest", text: "Weer een stap. Beesten stoppen niet halverwege." },
+  { event: "exerciseDone", intensity: "beest", text: "Klaar. Kijk niet achterom, de sessie is nog niet af." },
+]);
 /* Tips voor de kettlebell-oefening in het gym-schema (los van de content-blobs hierboven) */
 EXERCISE_MISTAKES["Kettlebell"] = EXERCISE_MISTAKES["Kettlebell"] || {
   mistakes: [
@@ -940,7 +1125,7 @@ const store = {
   clearCurrentSession: () => { localStorage.removeItem("gymwave_current_session"); touch(); },
   goals: () => { const v = jget("gymwave_goals", "[]"); return Array.isArray(v) ? v : []; },
   setGoals: (g) => { localStorage.setItem("gymwave_goals", JSON.stringify(g)); touch(); },
-  coach: () => Object.assign({ enabled: true, intensity: "fanatiek", restSec: 60, voiceURI: "", rate: 1.05, speakSettings: false }, jget("gymwave_coach", "{}")),
+  coach: () => Object.assign({ enabled: true, intensity: "fanatiek", restSec: 60, voiceURI: "", rate: 1.05, speakSettings: false, speakSettingsTimes: 2 }, jget("gymwave_coach", "{}")),
   setCoach: (c) => { localStorage.setItem("gymwave_coach", JSON.stringify(c)); touch(); },
   profile: () => Object.assign({}, jget("gymwave_profile", "{}")),
   setProfile: (p) => { localStorage.setItem("gymwave_profile", JSON.stringify(p)); touch(); },
@@ -1187,7 +1372,11 @@ const voiceCoach = {
       last = match.index + match[0].length;
     }
     if (last < text.length) out.push({ text: text.slice(last), en: false });
-    return out.filter(s => s.text.trim());
+    // losse interpunctie niet als eigen segment laten uitspreken ("punt"): begin-interpunctie
+    // strippen en segmenten zonder letters/cijfers laten vervallen — de utterance-wissel geeft de pauze
+    return out
+      .map(s => ({ text: s.text.replace(/^[\s.,;:!?·—-]+/, ""), en: s.en }))
+      .filter(s => /[0-9a-zà-ÿ]/i.test(s.text));
   },
   _gen: 0,     // generatie-teller: onderscheidt geannuleerde van lopende spraak
   _queued: 0,  // aantal speak()-beurten dat nog loopt of wacht
@@ -1444,10 +1633,20 @@ async function fetchOutsideTemp() {
 }
 const CROWD_LABELS = ["", "Uitgestorven", "Rustig", "Gemiddeld", "Druk", "Overvol"];
 const CROWD_ICONS = ["", "🌵", "🙂", "😐", "😅", "🥵"];
+let crowdOpen = false; // heropend na afvinken (net als een oefening)
 function renderCrowdCard() {
   const box = document.getElementById("crowd-card");
   if (!box || !currentSession) { if (box) box.innerHTML = ""; return; }
   const c = currentSession.crowd || {};
+  // afgevinkt en niet heropend: compacte kaart, tik om te heropenen en aan te passen
+  if (currentSession.crowdDone && !crowdOpen) {
+    box.innerHTML = `
+      <div class="card machine-card done" style="cursor:pointer;">
+        <div class="mc-header"><div class="m-name" style="font-size:1.05rem;">Drukte-meter</div><div class="m-hint"><span>${c.level ? CROWD_ICONS[c.level] : ""}</span><span class="chk">✓</span></div></div>
+      </div>`;
+    box.querySelector(".machine-card").onclick = () => { crowdOpen = true; renderCrowdCard(); };
+    return;
+  }
   box.innerHTML = `
     <div class="card">
       <div class="section-title" style="margin:0 0 8px; font-size:1.05rem;">Hoe druk is het?</div>
@@ -1459,6 +1658,7 @@ function renderCrowdCard() {
       <div class="crowd-scale">${[1,2,3,4,5].map(i => `<button class="crowd-btn ${c.level === i ? "sel" : ""}" data-crowd="${i}" title="${CROWD_LABELS[i]}">${CROWD_ICONS[i]}</button>`).join("")}</div>
       <div class="feel-caption">${c.level ? CROWD_ICONS[c.level] + " " + CROWD_LABELS[c.level] : "Tik aan hoe druk het was (🌵 = uitgestorven, 🥵 = overvol)"}</div>
       <input type="text" id="crowd-note" placeholder="Bijzonderheden (optioneel)…" value="${esc(c.note || "")}" style="margin-top:8px;" />
+      ${c.level ? `<button class="btn full small" id="crowd-done" style="margin-top:10px;">KLAAR ✓</button>` : ""}
     </div>`;
   box.querySelectorAll("[data-crowd]").forEach(b => b.onclick = async () => {
     if (!currentSession) return;
@@ -1473,6 +1673,8 @@ function renderCrowdCard() {
   });
   const note = box.querySelector("#crowd-note");
   note.oninput = () => { if (!currentSession) return; currentSession.crowd = currentSession.crowd || {}; currentSession.crowd.note = note.value; persistCurrent(); };
+  const doneBtn = box.querySelector("#crowd-done");
+  if (doneBtn) doneBtn.onclick = () => { currentSession.crowdDone = true; crowdOpen = false; persistCurrent(); renderCrowdCard(); };
 }
 function dayPart(time) {
   const h = parseInt((time || "12:00").slice(0, 2));
@@ -1681,10 +1883,12 @@ document.getElementById("open-calf").addEventListener("click", () => {
 function startNewSession() {
   currentSession = { id: uuid(), date: todayISO(), name: "", entries: [], partial: {}, startedAt: new Date().toISOString() };
   expandedMachineId = null;
+  crowdOpen = false;
   persistCurrent();
   route("session");
   voiceCoach.say("sessionStart", {}, { minGap: 0, interrupt: true });
-  const goals = activeGoals();
+  // geen aanmoedigingen over afvallen/vetverbranding bij de start van een sessie
+  const goals = activeGoals().filter(g => g.type !== "afvallen" && !/afval|vet|calorie|gewicht.*(kwijt|verlie)/i.test(g.title || ""));
   if (goals.length) setTimeout(() => voiceCoach.say("goal", { goal: goals[Math.floor(Math.random() * goals.length)].title }, { minGap: 0 }), 4000);
 }
 document.getElementById("enter-gym").addEventListener("click", () => {
@@ -1760,7 +1964,9 @@ function speakMachineSettings(m) {
     parts.push("Gewicht " + Math.round(m.lastWeight) + " " + (m.unit === "lbs" ? "pond" : "kilo") + ".");
     parts.push((m.sets || 3) + " sets van " + (m.reps || 12) + ".");
   }
-  voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
+  const txt = parts.join(" ");
+  voiceCoach.speak(txt, { force: true, interrupt: true });
+  if (store.coach().speakSettingsTimes === 2) voiceCoach.speak("Nog een keer. " + txt, { force: true });
 }
 function renderSession() {
   const list = document.getElementById("machine-list");
@@ -1778,6 +1984,14 @@ function renderSession() {
 
   const entryOf = id => currentSession.entries.find(e => e.machineId === id);
   const isSkipped = id => !entryOf(id) && !!(currentSession.skipped && currentSession.skipped[id]);
+  // welke toestellen missen nog een foto van de gewichtsstapel?
+  const photoNeeded = machines.filter(m => MACHINE_OPEN_QUESTIONS[m.name] && !entryOf(m.id));
+  if (photoNeeded.length) {
+    const banner = document.createElement("div");
+    banner.className = "photo-banner";
+    banner.innerHTML = `📸 Nog foto's van de gewichtsstapel nodig bij: <b>${photoNeeded.map(m => esc(m.name)).join(", ")}</b> — de precieze vraag staat bij de oefening.`;
+    list.appendChild(banner);
+  }
   // te doen eerst (oorspronkelijke volgorde), dan overgeslagen, afgevinkt helemaal onderaan
   const ordered = [
     ...machines.filter(m => !entryOf(m.id) && !isSkipped(m.id)),
@@ -1800,7 +2014,7 @@ function renderSession() {
       ? (expanded ? `<span class="chev">▾</span>` : `<span class="chk">✓</span>`)
       : skipped
         ? `<span class="skip-tag">⏭ overgeslagen</span><span class="chev">▾</span>`
-        : `${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">▾</span>`;
+        : `${MACHINE_OPEN_QUESTIONS[m.name] ? `<span title="Foto van de gewichtsstapel nodig">📸</span>` : ""}${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? "🔻 " : "📈 ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">▾</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
     header.innerHTML = `<div class="m-name">${esc(m.name)}</div><div class="m-hint">${hint}</div>`;
@@ -1873,10 +2087,17 @@ function renderSession() {
       const mistakes = machineMistakes(m);
       const extraTips = machineExtraTips(m);
       const mistakesHtml = (mistakes.length || extraTips.length) ? `
-        <details class="tip inline-tip"><summary>⚠️ Tips &amp; wat vaak misgaat</summary><div class="tip-body">
-          ${mistakes.length ? `<div class="sub">Wat vaak misgaat</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-          ${extraTips.length ? `<div class="sub">Extra tips</div><ul>${extraTips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+        <details class="tip inline-tip"><summary>✅ Do's &amp; don'ts</summary><div class="tip-body">
+          ${extraTips.length ? `<div class="sub">✅ Do's — zo doe je het goed</div><ul>${extraTips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+          ${mistakes.length ? `<div class="sub" style="margin-top:6px;">🚫 Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
           <button class="btn small ghost speak-tips" style="margin-top:10px;">🔊 Lees voor</button>
+        </div></details>` : "";
+      const kbHtml = /kettlebell/i.test(m.name) ? `
+        <details class="tip inline-tip"><summary>🏋️ Kettlebell-oefeningen: do's &amp; don'ts</summary><div class="tip-body">
+          ${KETTLEBELL_EXERCISES.map(k => `
+            <div class="sub">${esc(k.name)} · ${esc(k.dose)}</div>
+            <div class="kb-lbl">✅ Do's</div><ul>${k.dos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+            <div class="kb-lbl">🚫 Don'ts</div><ul>${k.donts.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
         </div></details>` : "";
       const uni = machineUnilateral(m);
       const uniHtml = uni.length ? `
@@ -1900,8 +2121,10 @@ function renderSession() {
         : `<div class="nextup-badge">📈 Vorige keer aangegeven: meer gewicht! Probeer <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`) : "";
       body.innerHTML = `
         ${nextupBadge}
+        ${MACHINE_OPEN_QUESTIONS[m.name] ? `<div class="photo-ask">📸 <b>Foto nodig:</b> ${esc(MACHINE_OPEN_QUESTIONS[m.name])}</div>` : ""}
         ${m.note ? `<div class="m-note">${esc(m.note)}</div>` : ""}
         ${mistakesHtml}
+        ${kbHtml}
         ${uniHtml}
         ${histHtml}
         ${weightHtml}
@@ -2035,8 +2258,8 @@ function renderSession() {
       if (st) st.onclick = () => {
         const parts = [];
         if (m.note) parts.push(m.note);
-        machineMistakes(m).forEach(x => parts.push("Let op: " + x));
         machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
+        machineMistakes(m).forEach(x => parts.push("Let op: " + x));
         voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
       };
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
@@ -2116,6 +2339,15 @@ function completeMachine(m, body) {
   }
   renderSession();
   scrollSessionToTop();
+  // Cooling-down afgerond = sessie afronden (met confetti); bevestigen als er nog oefeningen openstaan
+  if (/cooling/i.test(m.name) && currentSession) {
+    const open = store.machines().filter(x => x.id !== m.id
+      && !currentSession.entries.some(e => e.machineId === x.id)
+      && !(currentSession.skipped && currentSession.skipped[x.id]));
+    if (!open.length) finishSession();
+    else showModal("Sessie afronden?", `Je cooling-down is klaar, maar er ${open.length === 1 ? "staat nog 1 oefening" : `staan nog ${open.length} oefeningen`} open. Sessie toch afronden?`, () => finishSession());
+    return;
+  }
   // "op de helft"-melding: geskipte oefeningen tellen niet mee, en niet melden bij de laatste oefening
   const machinesNow = store.machines();
   const skippedNow = currentSession && currentSession.skipped
@@ -2187,7 +2419,7 @@ document.getElementById("sess-coach-toggle").addEventListener("click", () => {
   toast(c.enabled ? "🔊 Audio-coach staat aan" : "🔇 Audio-coach staat uit");
   if (c.enabled) voiceCoach.speak("Ik doe weer mee. Kom op!", { force: true, interrupt: true });
 });
-document.getElementById("finish-session").addEventListener("click", () => {
+function finishSession() {
   if (!currentSession || currentSession.entries.length === 0) { alert("Rond minstens één apparaat af voordat je de sessie afsluit!"); return; }
   if (!currentSession.name || !currentSession.name.trim()) currentSession.name = `Training ${fmtNice(currentSession.date)}`;
   restTimer.stop();
@@ -2199,12 +2431,61 @@ document.getElementById("finish-session").addEventListener("click", () => {
     currentSession.avgHr = Math.round(currentSession.hrSum / currentSession.hrCount);
     currentSession.maxHrSeen = currentSession.hrMax;
   }
-  delete currentSession.hrSum; delete currentSession.hrCount; delete currentSession.hrMax; delete currentSession.partial; delete currentSession.skipped;
+  delete currentSession.hrSum; delete currentSession.hrCount; delete currentSession.hrMax; delete currentSession.partial; delete currentSession.skipped; delete currentSession.crowdDone;
   const sessions = store.sessions(); sessions.push(currentSession); store.setSessions(sessions);
   const hrTxt = currentSession.avgHr ? ` Gemiddelde hartslag ${currentSession.avgHr}.` : "";
-  currentSession = null; store.clearCurrentSession(); celebrate();
+  const finished = currentSession;
+  currentSession = null; store.clearCurrentSession(); crowdOpen = false; celebrate();
   voiceCoach.speak((voiceCoach.line("sessionEnd") || "Training klaar!") + ` ${nEntries} oefeningen, ${Math.round(totalKg)} kilo totaal.${hrTxt}`, { interrupt: true });
-  setTimeout(() => { route("home"); toast("🏁 Sessie opgeslagen — je hersteltijdlijn staat op Home"); }, 700);
+  setTimeout(() => { route("home"); showSessionSummary(finished); }, 700);
+}
+document.getElementById("finish-session").addEventListener("click", finishSession);
+
+/* Sessie-samenvatting: barchart van alle sessies met stippellijn-referenties + delta's */
+function sessionTotalKg(s) { return (s.entries || []).reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0); }
+function showSessionSummary(fin) {
+  const box = document.getElementById("summary-content");
+  const modal = document.getElementById("summary-modal");
+  if (!box || !modal) return;
+  const sessions = store.sessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
+  const totals = sessions.map(s => ({ id: s.id, kg: Math.round(sessionTotalKg(s)), date: s.date }));
+  const curKg = Math.round(sessionTotalKg(fin));
+  const others = totals.filter(t => t.id !== fin.id);
+  const avgAll = Math.round(totals.reduce((a, t) => a + t.kg, 0) / Math.max(1, totals.length));
+  const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const last30 = totals.filter(t => t.date >= cutoff);
+  const avg30 = last30.length ? Math.round(last30.reduce((a, t) => a + t.kg, 0) / last30.length) : avgAll;
+  const prevKg = others.length ? others[others.length - 1].kg : null;
+  const H = 200;
+  const maxVal = Math.max(1, ...totals.map(t => t.kg), avgAll, avg30, prevKg || 0) * 1.12; // koppie ruimte boven de hoogste
+  const y = v => Math.round(v / maxVal * H);
+  const deltaTag = (ref) => {
+    const d = curKg - ref;
+    if (!d) return `<span class="ss-delta">± 0 kg</span>`;
+    return `<span class="ss-delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ −"}${Math.abs(d)} kg</span>`;
+  };
+  box.innerHTML = `
+    <div class="ss-kg">${curKg} kg</div>
+    <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen</div>
+    <div class="ss-chart-wrap">
+      <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
+      <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
+      <div class="ss-line d30" style="bottom:${y(avg30)}px;"></div>
+      ${prevKg != null ? `<div class="ss-line prev" style="bottom:${y(prevKg)}px;"></div>` : ""}
+    </div>
+    ${totals.length > 1 ? `
+    <div class="ss-legend">
+      <div class="row"><span class="ss-swatch avg"></span> Gemiddeld totaal: <b>${avgAll} kg</b> ${deltaTag(avgAll)}</div>
+      <div class="row"><span class="ss-swatch d30"></span> Gemiddeld 30 dagen: <b>${avg30} kg</b> ${deltaTag(avg30)}</div>
+      ${prevKg != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige sessie: <b>${prevKg} kg</b> ${deltaTag(prevKg)}</div>` : ""}
+    </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste sessie staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt! 💪</div>`}`;
+  modal.classList.add("show");
+  const bars = box.querySelector(".ss-bars");
+  bars.scrollLeft = bars.scrollWidth; // nieuwste sessie in beeld
+}
+document.getElementById("summary-close").addEventListener("click", () => {
+  document.getElementById("summary-modal").classList.remove("show");
+  toast("🏁 Sessie opgeslagen — je hersteltijdlijn staat op Home");
 });
 
 /* ============================================================
@@ -2602,7 +2883,7 @@ document.getElementById("chat-file").addEventListener("change", (e) => {
 /* ============================================================
    THUIS: BEWEEGSNACKS + CALF-TRACKER + FOTO'S + MATERIALEN
    ============================================================ */
-const EQUIPMENT_OPTIONS = ["geen", "dumbbells", "kettlebell", "weerstandsband", "mat", "stoel/verhoging"];
+const EQUIPMENT_OPTIONS = ["geen", "dumbbells", "kettlebell", "fitnessbank", "weerstandsband", "mat", "stoel/verhoging"];
 function mulberry32(a) {
   return function () {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -2891,7 +3172,7 @@ function equipLabel(e) {
     : e === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(e);
 }
 function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
-function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell"; }
+function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell" || s.equipment === "fitnessbank"; }
 function hwDoseNum(s) { const m = String(s.dose || "").match(/\d+/g); return m ? parseInt(m[m.length - 1]) : null; }
 function exByName(name) { return SNACK_POOL.find(x => x.name === name); }
 function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s = exByName(n); return t + (s ? s.minutes : 0); }, 0); }
@@ -3217,10 +3498,10 @@ function renderTips() {
   const machines = store.machines();
   const blocks = machines.map(m => ({ m, mistakes: machineMistakes(m), tips: machineExtraTips(m) })).filter(x => x.mistakes.length || x.tips.length);
   if (blocks.length) {
-    html += `<div class="section-title">⚠️ Per oefening: tips &amp; wat vaak misgaat</div>`;
+    html += `<div class="section-title">✅ Per oefening: do's &amp; don'ts</div>`;
     html += blocks.map(({ m, mistakes, tips }) => `<details class="tip"><summary>${esc(m.name)}</summary><div class="tip-body">
-      ${mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      ${tips.length ? `<div class="sub">Tips</div><ul>${tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${tips.length ? `<div class="sub">✅ Do's — zo doe je het goed</div><ul>${tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${mistakes.length ? `<div class="sub" style="margin-top:6px;">🚫 Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
       <button class="btn small ghost tips-speak" data-mid="${m.id}" style="margin-top:10px;">🔊 Lees voor</button>
     </div></details>`).join("");
   }
@@ -3244,8 +3525,8 @@ function renderTips() {
     const m = store.machines().find(x => x.id === b.dataset.mid);
     if (!m) return;
     const parts = [m.name + "."];
-    machineMistakes(m).forEach(x => parts.push("Let op: " + x));
     machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
+    machineMistakes(m).forEach(x => parts.push("Let op: " + x));
     voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
   });
   wrap.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => {
@@ -3321,6 +3602,10 @@ function renderCoachSettings() {
       <label>Rust tussen sets (seconden, standaard)</label>
       <input type="number" id="coach-rest" min="10" max="600" step="5" value="${s.restSec}" />
       <label style="display:flex; align-items:center; gap:10px; cursor:pointer;"><input type="checkbox" id="coach-speaksettings" style="width:auto; transform:scale(1.3); accent-color:var(--primary);" ${s.speakSettings ? "checked" : ""}/> Lees standen &amp; gewicht hardop voor bij het openen van een oefening</label>
+      <label>Hoe vaak voorlezen?</label>
+      <div class="filter-pills" style="justify-content:flex-start; margin-bottom:6px;">
+        ${[[1, "1× voorlezen"], [2, "2× voorlezen"]].map(([k, lbl]) => `<button data-stimes="${k}" class="${(s.speakSettingsTimes || 2) === k ? "active" : ""}">${lbl}</button>`).join("")}
+      </div>
       ${voices.length ? `<label>Stem</label><select id="coach-voice" style="width:100%; padding:12px; border-radius:var(--field-radius); background:rgba(0,0,0,0.45); color:var(--text); border:1.5px solid color-mix(in srgb, var(--accent) 55%, transparent); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem;">${voices.map(v => `<option value="${esc(v.voiceURI)}" ${v.voiceURI === s.voiceURI ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select>` : `<div class="muted" style="margin-top:8px; font-weight:600;">Geen Nederlandse stem gevonden — de standaardstem wordt gebruikt.</div>`}
       <button class="btn ghost full small" id="coach-test" style="margin-top:12px;">🔊 Test de coach</button>
     </div>`;
@@ -3331,6 +3616,7 @@ function renderCoachSettings() {
   });
   box.querySelector("#coach-rest").onchange = (e) => { const c = store.coach(); c.restSec = Math.max(10, Math.min(600, parseInt(e.target.value) || 60)); store.setCoach(c); };
   box.querySelector("#coach-speaksettings").onchange = (e) => { const c = store.coach(); c.speakSettings = e.target.checked; store.setCoach(c); };
+  box.querySelectorAll("[data-stimes]").forEach(b => b.onclick = () => { const c = store.coach(); c.speakSettingsTimes = parseInt(b.dataset.stimes); store.setCoach(c); renderCoachSettings(); });
   const vs = box.querySelector("#coach-voice");
   if (vs) vs.onchange = () => { const c = store.coach(); c.voiceURI = vs.value; store.setCoach(c); };
   box.querySelector("#coach-test").onclick = () => voiceCoach.speak(voiceCoach.line("sessionStart") || "Kom op, we gaan knallen!", { force: true, interrupt: true });
