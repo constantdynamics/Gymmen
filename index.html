@@ -683,6 +683,10 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <!-- ============ STATS ============ -->
   <section id="view-stats" class="view">
     <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:16px;">Statistieken</h2>
+    <div class="filter-pills" id="stat-scope" style="margin-bottom:8px;">
+      <button data-scope="gym" class="active">🏋️ GYM</button>
+      <button data-scope="thuis">🏠 THUIS</button>
+    </div>
     <div class="filter-pills" id="stat-filters">
       <button data-range="week">WEEK</button>
       <button data-range="month" class="active">MAAND</button>
@@ -694,9 +698,9 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
       <label>Tot</label><input type="date" id="range-to" />
       <button class="btn small full" id="apply-range" style="margin-top:12px;">Toepassen</button>
     </div>
-    <div class="section-title">Totale voortgang</div>
+    <div class="section-title" id="stat-total-title">Totale voortgang</div>
     <div class="card" id="total-chart-card"></div>
-    <div class="section-title">Voortgang per apparaat</div>
+    <div class="section-title" id="stat-per-title">Voortgang per apparaat</div>
     <div id="waffle-section"></div>
   </section>
 
@@ -2871,11 +2875,13 @@ function finishSession() {
 document.getElementById("finish-session").addEventListener("click", finishSession);
 
 /* Sessie-samenvatting: barchart van alle sessies met stippellijn-referenties + delta's */
+let summaryToast = "🏁 Sessie opgeslagen";
 function sessionTotalKg(s) { return (s.entries || []).reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0); }
 function showSessionSummary(fin) {
   const box = document.getElementById("summary-content");
   const modal = document.getElementById("summary-modal");
   if (!box || !modal) return;
+  summaryToast = "🏁 Sessie opgeslagen — je hersteltijdlijn staat op Home";
   const sessions = store.sessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
   const totals = sessions.map(s => ({ id: s.id, kg: Math.round(sessionTotalKg(s)), date: s.date }));
   const curKg = Math.round(sessionTotalKg(fin));
@@ -2914,7 +2920,7 @@ function showSessionSummary(fin) {
 }
 document.getElementById("summary-close").addEventListener("click", () => {
   document.getElementById("summary-modal").classList.remove("show");
-  toast("🏁 Sessie opgeslagen — je hersteltijdlijn staat op Home");
+  toast(summaryToast);
 });
 
 /* ============================================================
@@ -3361,33 +3367,8 @@ function renderThuisProgress() {
   if (!wrap || !title) return;
   wrap.innerHTML = "";
   const home = store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date));
-  const names = [];
-  home.forEach(s => (s.entries || []).forEach(e => { if (e.exerciseName && e.value != null && !names.includes(e.exerciseName)) names.push(e.exerciseName); }));
-  if (!names.length) { title.style.display = "none"; return; }
-  title.style.display = "";
-  names.sort((a, b) => a.localeCompare(b, "nl"));
-  names.forEach(name => {
-    const pts = [];
-    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
-    if (!pts.length) return;
-    const block = document.createElement("div"); block.className = "card";
-    const pb = Math.max(...pts.map(p => p.value));
-    const minV = Math.min(...pts.map(p => p.value));
-    const unit = pts[0].metric === "sec" ? "sec" : "reps";
-    const weights = pts.map(p => p.weight).filter(w => w != null);
-    const wPr = weights.length ? Math.max(...weights) : null;
-    const cells = pts.map(p => {
-      const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
-      const intensity = 0.35 + ratio * 0.65;
-      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity * 100)}%, var(--accent))`;
-      const glow = `0 0 ${Math.round(intensity * 14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity * 70)}%, transparent)`;
-      const star = p.value >= pb && pb > minV ? `<span class="star">★</span>` : "";
-      return `<div class="waffle-cell" title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}" style="background:${color}; box-shadow:${glow};">${star}</div>`;
-    }).join("");
-    block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
-      <div class="legend">★ = beste (${pb} ${unit})${wPr != null ? ` · zwaarste ${wPr} kg` : ""} · ${pts.length}× gedaan</div>`;
-    wrap.appendChild(block);
-  });
+  const n = homeWafflesInto(wrap, home);
+  title.style.display = n ? "" : "none";
 }
 function renderSnacksBox() {
   const box = document.getElementById("snacks-box");
@@ -3962,15 +3943,61 @@ function finishHomeWorkout() {
   store.clearHomeWorkout();
   celebrate();
   voiceCoach.speak((voiceCoach.line("sessionEnd") || "Workout klaar!") + ` ${entries.length} oefening${entries.length === 1 ? "" : "en"} thuis gedaan. Sterk bezig!`, { interrupt: true });
-  setTimeout(() => { route("thuis"); toast("🏁 Thuis-workout opgeslagen — voortgang staat bij Thuis"); }, 700);
+  setTimeout(() => { route("thuis"); showHomeSummary(session); }, 700);
+}
+/* Samenvatting na een thuis-workout — zelfde bord als de gym, maar dan in oefeningen (+ kg als je met gewicht werkte) */
+function showHomeSummary(fin) {
+  const box = document.getElementById("summary-content");
+  const modal = document.getElementById("summary-modal");
+  if (!box || !modal) return;
+  summaryToast = "🏁 Thuis-workout opgeslagen — voortgang staat bij Thuis en in Statistieken";
+  const all = store.homeSessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
+  const totals = all.map(s => ({ id: s.id, n: (s.entries || []).length, date: s.date }));
+  const curN = (fin.entries || []).length;
+  const curKg = Math.round((fin.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0));
+  const others = totals.filter(t => t.id !== fin.id);
+  const avgAll = Math.round(totals.reduce((a, t) => a + t.n, 0) / Math.max(1, totals.length));
+  const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const last30 = totals.filter(t => t.date >= cutoff);
+  const avg30 = last30.length ? Math.round(last30.reduce((a, t) => a + t.n, 0) / last30.length) : avgAll;
+  const prevN = others.length ? others[others.length - 1].n : null;
+  const H = 200;
+  const maxVal = Math.max(1, ...totals.map(t => t.n), avgAll, avg30, prevN || 0) * 1.12;
+  const y = v => Math.round(v / maxVal * H);
+  const deltaTag = (ref) => {
+    const d = curN - ref;
+    if (!d) return `<span class="ss-delta">± 0</span>`;
+    return `<span class="ss-delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ −"}${Math.abs(d)}</span>`;
+  };
+  box.innerHTML = `
+    <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
+    <div class="ss-sub">🏠 Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}</div>
+    <div class="ss-chart-wrap">
+      <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>
+      <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
+      <div class="ss-line d30" style="bottom:${y(avg30)}px;"></div>
+      ${prevN != null ? `<div class="ss-line prev" style="bottom:${y(prevN)}px;"></div>` : ""}
+    </div>
+    ${totals.length > 1 ? `
+    <div class="ss-legend">
+      <div class="row"><span class="ss-swatch avg"></span> Gemiddeld: <b>${avgAll} oef.</b> ${deltaTag(avgAll)}</div>
+      <div class="row"><span class="ss-swatch d30"></span> Gemiddeld 30 dagen: <b>${avg30} oef.</b> ${deltaTag(avg30)}</div>
+      ${prevN != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige workout: <b>${prevN} oef.</b> ${deltaTag(prevN)}</div>` : ""}
+    </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste thuis-workout staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt! 💪</div>`}`;
+  modal.classList.add("show");
+  const bars = box.querySelector(".ss-bars");
+  bars.scrollLeft = bars.scrollWidth;
 }
 
 /* ============================================================
    STATISTIEKEN
    ============================================================ */
 let statRange = "month";
-function filterSessions() {
-  const sessions = store.sessions().slice().sort((a, b) => a.date.localeCompare(b.date));
+let statScope = "gym"; // 🏋️ gym of 🏠 thuis — zelfde periodefilters, eigen data
+function filterSessions() { return filterByRange(store.sessions()); }
+function filterHomeSessions() { return filterByRange(store.homeSessions()); }
+function filterByRange(list) {
+  const sessions = list.slice().sort((a, b) => a.date.localeCompare(b.date));
   const now = new Date();
   let from = null, to = null;
   if (statRange === "week") { from = new Date(now); from.setDate(now.getDate() - 7); }
@@ -3985,7 +4012,61 @@ function filterSessions() {
     if (from && d < from) return false; if (to && d > to) return false; return true;
   });
 }
-function renderStats() { const sessions = filterSessions(); renderTotalChart(sessions); renderWaffles(sessions); }
+function renderStats() {
+  const perTitle = document.getElementById("stat-per-title");
+  if (perTitle) perTitle.textContent = statScope === "thuis" ? "Voortgang per oefening" : "Voortgang per apparaat";
+  if (statScope === "thuis") { const hs = filterHomeSessions(); renderHomeTotalChart(hs); renderHomeWaffles(hs); return; }
+  const sessions = filterSessions(); renderTotalChart(sessions); renderWaffles(sessions);
+}
+/* 🏠 Thuis-statistieken: zelfde grafieken als de gym, gevoed door je thuis-workouts */
+function renderHomeTotalChart(list) {
+  const card = document.getElementById("total-chart-card");
+  if (!list.length) { card.innerHTML = `<div class="empty-state">Geen thuis-workouts in dit bereik.</div>`; return; }
+  const totals = list.map(s => ({ date: s.date, n: (s.entries || []).length, kg: (s.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0) }));
+  const max = Math.max(...totals.map(t => t.n), 1);
+  const bars = totals.map(t => {
+    const h = Math.max(6, (t.n / max) * 100);
+    const md = t.date.slice(5).replace("-", "/");
+    const tip = `${t.date}: ${t.n} oefening${t.n === 1 ? "" : "en"}${t.kg ? ` · ${Math.round(t.kg)} kg` : ""}`;
+    return `<div class="wave-bar" style="height:0%" data-h="${h}" title="${tip}"><span class="bar-val">${t.n}</span><span class="bar-date">${md}</span></div>`;
+  }).join("");
+  card.innerHTML = `<div class="wave-chart">${bars}</div><div class="legend" style="margin-top:8px;">Aantal afgeronde oefeningen per thuis-workout</div>`;
+  requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
+}
+function renderHomeWaffles(list) {
+  const wrap = document.getElementById("waffle-section");
+  wrap.innerHTML = "";
+  if (!homeWafflesInto(wrap, list)) wrap.innerHTML = `<div class="empty-state">Geen thuis-oefeningen in dit bereik.</div>`;
+}
+/* deelt de waffle-weergave tussen de Thuis-tab en de Statistieken-pagina; geeft aantal blokken terug */
+function homeWafflesInto(wrap, home) {
+  const names = [];
+  home.forEach(s => (s.entries || []).forEach(e => { if (e.exerciseName && e.value != null && !names.includes(e.exerciseName)) names.push(e.exerciseName); }));
+  names.sort((a, b) => a.localeCompare(b, "nl"));
+  names.forEach(name => {
+    const pts = [];
+    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+    if (!pts.length) return;
+    const block = document.createElement("div"); block.className = "card";
+    const pb = Math.max(...pts.map(p => p.value));
+    const minV = Math.min(...pts.map(p => p.value));
+    const unit = pts[0].metric === "sec" ? "sec" : "reps";
+    const weights = pts.map(p => p.weight).filter(w => w != null);
+    const wPr = weights.length ? Math.max(...weights) : null;
+    const cells = pts.map(p => {
+      const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
+      const intensity = 0.35 + ratio * 0.65;
+      const color = `color-mix(in srgb, var(--primary) ${Math.round(intensity * 100)}%, var(--accent))`;
+      const glow = `0 0 ${Math.round(intensity * 14)}px color-mix(in srgb, var(--glow) ${Math.round(intensity * 70)}%, transparent)`;
+      const star = p.value >= pb && pb > minV ? `<span class="star">★</span>` : "";
+      return `<div class="waffle-cell" title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}" style="background:${color}; box-shadow:${glow};">${star}</div>`;
+    }).join("");
+    block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
+      <div class="legend">★ = beste (${pb} ${unit})${wPr != null ? ` · zwaarste ${wPr} kg` : ""} · ${pts.length}× gedaan</div>`;
+    wrap.appendChild(block);
+  });
+  return names.length;
+}
 function renderTotalChart(sessions) {
   const card = document.getElementById("total-chart-card");
   if (sessions.length === 0) { card.innerHTML = `<div class="empty-state">Geen sessies in dit bereik.</div>`; return; }
@@ -4034,6 +4115,11 @@ function renderWaffles(sessions) {
     wrap.appendChild(block);
   });
 }
+document.querySelectorAll("#stat-scope button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("#stat-scope button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); statScope = b.dataset.scope;
+  renderStats();
+}));
 document.querySelectorAll("#stat-filters button").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll("#stat-filters button").forEach(x => x.classList.remove("active"));
   b.classList.add("active"); statRange = b.dataset.range;
