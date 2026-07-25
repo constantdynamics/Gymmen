@@ -3,7 +3,7 @@ const { openApp, goto, visibleGlyphs } = require('./helpers');
 
 /* ============================================================
    Push-ups en sit-ups — zelfde tracker als calf raises,
-   zonder standenrij, in donker- en lichtroze.
+   zonder standenrij, als vierde en vijfde stap van de paarse schaal.
    ============================================================ */
 
 /** Vult een paar pogingen zodat PR's en wachttijd-kleuren data hebben. */
@@ -29,14 +29,28 @@ test.describe('Home: vijf activiteitsrijen', () => {
     await expect(page.locator('.hero-count')).toHaveCount(10);
   });
 
-  test('de roze rijen dragen hun eigen kleurtokens', async ({ page }) => {
+  test('de vijf rijen vormen een paarse schaal van donker naar licht', async ({ page }) => {
     await openApp(page);
-    const push = await page.locator('.hero-push').evaluate(el => getComputedStyle(el).backgroundImage);
-    const situp = await page.locator('.hero-situp').evaluate(el => getComputedStyle(el).backgroundImage);
-    expect(push).toContain('rgb(168, 20, 90)');    // --push-a  donkerroze
-    expect(push).toContain('rgb(224, 43, 120)');   // --push-b
-    expect(situp).toContain('rgb(232, 85, 158)');  // --situp-a lichtroze
-    expect(situp).toContain('rgb(255, 168, 207)'); // --situp-b
+    const lum = c => {
+      const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+    };
+    const steps = await page.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      return ['gym', 'home', 'calf', 'push', 'situp'].map(k => ({
+        a: cs.getPropertyValue('--' + k + '-a').trim(),
+        b: cs.getPropertyValue('--' + k + '-b').trim(),
+      }));
+    });
+    const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    // elke stap is lichter dan de vorige, en blauw blijft het sterkste kanaal
+    const ls = steps.map(s => lum(hex(s.a)));
+    for (let i = 1; i < ls.length; i++) expect(ls[i]).toBeGreaterThan(ls[i - 1]);
+    steps.forEach(s => {
+      const [r, g, b] = hex(s.b);
+      expect(b).toBeGreaterThan(r);   // paars, niet roze
+      expect(r).toBeGreaterThan(g);
+    });
   });
 
   test('wachttijd schuift een stap per dag, net als calf', async ({ page }) => {
@@ -50,9 +64,9 @@ test.describe('Home: vijf activiteitsrijen', () => {
     await page.waitForTimeout(250);
     const push = page.locator('.hero-row.row-push .wait-val');
     const situp = page.locator('.hero-row.row-situp .wait-val');
-    await expect(push).toHaveText('0 D');
+    await expect(push).toHaveText('0');
     expect(await push.evaluate(el => getComputedStyle(el).color)).toBe('rgb(125, 255, 188)');
-    await expect(situp).toHaveText('4 D');
+    await expect(situp).toHaveText('4');
     expect(await situp.evaluate(el => getComputedStyle(el).color)).toBe('rgb(255, 167, 140)');
   });
 
@@ -174,7 +188,7 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
     expect(dangling).toEqual([]);
   });
 
-  test('tekst op de lichtroze rij haalt minstens 4,5:1', async ({ page }) => {
+  test('tekst op de lichtste rij haalt minstens 4,5:1', async ({ page }) => {
     await openApp(page);
     const lum = c => {
       const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
@@ -185,9 +199,11 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
       const el = document.querySelector('.hero-situp');
       const t = el.querySelector('.hero-title');
       const rgb = s => s.match(/\d+/g).slice(0, 3).map(Number);
+      const cs = getComputedStyle(document.documentElement);
+      const b = cs.getPropertyValue('--situp-b').trim();
       return {
         ink: rgb(getComputedStyle(t).color),
-        light: [255, 168, 207],           // --situp-b, het lichtste uiteinde
+        light: [1, 3, 5].map(i => parseInt(b.slice(i, i + 2), 16)), // lichtste uiteinde
       };
     });
     const [hi, lo] = [lum(ink), lum(light)].sort((a, b) => b - a);

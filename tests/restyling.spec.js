@@ -137,7 +137,7 @@ test.describe('§3.1 home: activiteitsrijen met wachttijd-kleur', () => {
     });
     await page.waitForTimeout(200);
     const val = page.locator('.wait-chip').first().locator('.wait-val');
-    await expect(val).toHaveText('1 D');
+    await expect(val).toHaveText('1');
     expect(await val.evaluate(el => getComputedStyle(el).color)).toBe('rgb(125, 255, 188)');
     // thuis zonder data: streepje en de rode stap
     const homeVal = page.locator('.wait-chip').nth(1).locator('.wait-val');
