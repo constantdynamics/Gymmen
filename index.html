@@ -2935,7 +2935,7 @@ function renderHeroRows(sessions, homeSess) {
   // --- rij 3: calf raises ---
   const calfBtn = document.getElementById("enter-calf");
   const calfToday = calf.filter(a => a.date === todayISO()).length;
-  calfBtn.innerHTML = heroBtnHtml("calf", "Calf raises-tracker",
+  calfBtn.innerHTML = heroBtnHtml("calf", "Calf raises",
     calfToday ? `${CALF_MODES[calfMode]} · ${calfToday}× vandaag` : `${CALF_MODES[calfMode]} · vandaag nog niets`);
   const lastCalf = calf.length ? calf[calf.length - 1].date : null;
   calfBtn.parentElement.querySelector(".hero-side").innerHTML =
@@ -3315,8 +3315,8 @@ function renderSession() {
         ${feelHtml}
         ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
         <div class="exercise-actions">
-          ${m.cardio ? "" : `<button class="btn ghost full small save-btn">${icon("save",15)}Opslaan zonder af te ronden</button>
-          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? icon("check",15) + "Genoteerd voor volgende keer (tik om te annuleren)" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer meer gewicht"}</button>`}
+          ${m.cardio ? "" : `<button class="btn ghost full small save-btn">${icon("save",15)}Opslaan</button>
+          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? icon("check",15) + "Genoteerd" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Next time more"}</button>`}
           <button class="btn full done-btn">${icon("check",20)}${done ? "OPSLAAN" : "KLAAR"}</button>
           ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">${icon("undo",15)}Heropenen (vink uit)</button>`
                  : `<button class="btn ghost full small skip-btn" style="margin-top:0;">${skipped ? icon("undo",15) + "Toch doen — zet terug in de lijst" : icon("skip",15) + "Deze keer overslaan"}</button>`}
@@ -3435,7 +3435,7 @@ function renderSession() {
                 m.nextUp = target.nextUp;
                 toast(`Genoteerd! Volgende keer: ${sug} ${target.unit || "kg"}`);
                 const nuBtn2 = body.querySelector(".nextup-btn");
-                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("check",15) + "Genoteerd voor volgende keer (tik om te annuleren)"; }
+                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("check",15) + "Genoteerd"; }
               });
             }
           }
@@ -3463,7 +3463,7 @@ function renderSession() {
           m.nextUp = target.nextUp;
           const active = !!(target.nextUp && target.nextUp.dir !== "down");
           nuBtn.classList.toggle("active", active);
-          nuBtn.innerHTML = active ? icon("check",15) + "Genoteerd voor volgende keer (tik om te annuleren)" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer meer gewicht";
+          nuBtn.innerHTML = active ? icon("check",15) + "Genoteerd" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Next time more";
         };
       }
       const st = body.querySelector(".speak-tips");
