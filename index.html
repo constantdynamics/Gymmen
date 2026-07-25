@@ -1208,8 +1208,169 @@ const EXERCISE_VIDEOS = {
   "Hip thrust (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-hip-thrust",
   "Step-up": "https://musclewiki.com/exercise/dumbbell-step-up",
   "Step-up op de bank": "https://musclewiki.com/exercise/dumbbell-step-up",
+  "Staande calf raise (twee benen)": "https://musclewiki.com/exercise/calf-raises",
+  "Excentrische calf raise op een traptrede": "https://musclewiki.com/exercise/bodyweight-single-leg-calf-raise",
+  "Single-leg calf raise": "https://musclewiki.com/exercise/bodyweight-single-leg-calf-raise",
+  "Seated calf raise met kettlebell": "https://musclewiki.com/exercise/dumbbell-seated-calf-raise",
+  "Calf raise met dumbbells": "https://musclewiki.com/exercise/dumbbell-calf-raise",
+  "Wall sit": "https://musclewiki.com/exercise/wall-sit",
+  "Zijwaartse bandwandeling (monster walk)": "https://musclewiki.com/exercise/side-walks-resisted",
+  "Pallof press": "https://musclewiki.com/exercise/band-pallof-press",
+  "Band pull-apart": "https://musclewiki.com/exercise/band-pull-apart",
+  "Row met weerstandsband": "https://musclewiki.com/exercise/band-row",
+  "Side raise + front raise combo": "https://musclewiki.com/exercise/dumbbell-lateral-raise",
+  "Incline push-up": "https://musclewiki.com/exercise/incline-push-up",
+  "Dumbbell thruster": "https://musclewiki.com/exercise/dumbbell-thruster",
+  "Jumping jacks": "https://musclewiki.com/exercise/cardio-jumping-jacks",
+  "Single-arm kettlebell press": "https://musclewiki.com/exercise/kettlebell-single-arm-press",
+  "Kettlebell row (steunend)": "https://musclewiki.com/exercise/kettlebell-single-arm-row-on-bench",
+  "Kettlebell halo": "https://musclewiki.com/exercise/halo",
+  "Dumbbell pullover (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-pullover",
+  "Bulgarian split squat (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-bulgarian-split-squat",
+  "Bench dips (fitnessbank)": "https://musclewiki.com/exercise/bench-dips",
+  "Seated shoulder press (fitnessbank)": "https://musclewiki.com/exercise/dumbbell-seated-overhead-press",
+  "Good morning (lichaamsgewicht)": "https://musclewiki.com/exercise/good-mornings",
+  "Sumo squat": "https://musclewiki.com/exercise/dumbbell-sumo-squat",
+  "Reverse crunch": "https://musclewiki.com/exercise/reverse-crunch",
+  "Clamshell": "https://musclewiki.com/exercise/clamshells-1-side-lying",
+  "Triceps kickback": "https://musclewiki.com/exercise/dumbbell-tricep-kickback",
+  "Overhead triceps extension": "https://musclewiki.com/exercise/dumbbell-overhead-tricep-extension",
+  "Arnold press": "https://musclewiki.com/exercise/dumbbell-arnold-press",
+  "Lateral lunge": "https://musclewiki.com/exercise/dumbbell-goblet-lateral-lunge",
+  "Dumbbell floor press": "https://musclewiki.com/exercise/dumbbell-floor-press",
+  "Dumbbell shrug": "https://musclewiki.com/exercise/dumbbell-shrug",
+  "Concentration curl": "https://musclewiki.com/exercise/dumbbell-concentration-curl",
+  "Decline push-up (voeten op bank)": "https://musclewiki.com/exercise/decline-push-up",
+  "Chest-supported row (schuine bank)": "https://musclewiki.com/exercise/dumbbell-laying-incline-row",
+  "Split squat (voet op bank optioneel)": "https://musclewiki.com/exercise/split-squat",
+  "Split squat met stoel": "https://musclewiki.com/exercise/bulgarian-split-squat",
+  "Face pull met band": "https://musclewiki.com/exercise/band-face-pull",
+  "Overhead press met band": "https://musclewiki.com/exercise/band-overhead-press",
+  "Squat met band": "https://musclewiki.com/exercise/band-squat",
+  "Glute kickback met band": "https://musclewiki.com/exercise/band-glute-kickback",
+  "Triceps pushdown met band": "https://musclewiki.com/exercise/band-pushdown",
+  "Band biceps curl 21s": "https://musclewiki.com/exercise/band-curl",
+  "Statische dumbbell lunge": "https://musclewiki.com/exercise/dumbbell-forward-lunge",
+  "Renegade row": "https://musclewiki.com/exercise/dumbbell-renegade-row",
+  "Dumbbell upright row": "https://musclewiki.com/exercise/dumbbell-upright-row",
+  "Dumbbell side bend": "https://musclewiki.com/exercise/dumbbell-side-bend",
+  "Kettlebell floor press": "https://musclewiki.com/exercise/kettlebell-single-arm-floor-press",
+  "Band woodchopper": "https://musclewiki.com/exercise/band-wood-chopper",
+  "Band pull-through": "https://musclewiki.com/exercise/band-pullthrough",
+  "Marching glute bridge": "https://musclewiki.com/exercise/glute-bridge-isometric-hold-single-alternate",
+};
+/* Uitvoering in stappen, per oefening (feedbackronde 7: "duidelijker en completer, in bullets").
+   Op de kaart en in de speler verschijnt dit als: 📋 Zo voer je hem uit → ✅ do's → 🚫 don'ts. */
+const EXERCISE_STEPS = {
+  "Staande calf raise (twee benen)": ["Sta rechtop met je voeten op heupbreedte, eventueel met één hand steun aan een muur of stoel", "Duw jezelf rustig omhoog tot je zo hoog mogelijk op je tenen staat", "Houd bovenin 1 tel vast", "Laat je hielen langzaam (2-3 tellen) weer tot de grond zakken"],
+  "Excentrische calf raise op een traptrede": ["Ga met je voorvoeten op de rand van een traptrede staan, hielen vrij, hand aan de leuning", "Duw jezelf met twee benen omhoog tot je op je tenen staat", "Til één voet op en zak op het andere been in 3-5 tellen door tot je hiel ónder de trede hangt", "Zet je tweede voet terug en duw weer met twee benen omhoog"],
+  "Single-leg calf raise": ["Sta op één been, met één hand licht steun aan muur of stoel", "Duw jezelf op dat ene been zo hoog mogelijk op je tenen", "Houd bovenin even vast en zak langzaam terug", "Maak de set af en wissel dan van been"],
+  "Seated calf raise met kettlebell": ["Ga op een stoel zitten met je voeten plat op de grond", "Zet de kettlebell rechtop op je knieën (kussentje of handdoek ertussen is prettig)", "Duw je hielen zo hoog mogelijk van de vloer terwijl de bal van je voet blijft staan", "Zak langzaam terug tot je hielen de grond weer raken"],
+  "Calf raise met dumbbells": ["Sta rechtop met in elke hand een dumbbell langs je lichaam", "Duw jezelf omhoog tot je zo hoog mogelijk op je tenen staat", "Houd bovenin 1 tel vast", "Zak in 2-3 tellen gecontroleerd terug"],
+  "Squat (lichaamsgewicht)": ["Zet je voeten op schouderbreedte, tenen iets naar buiten", "Duw je heupen naar achteren en zak alsof je op een stoel gaat zitten", "Zak tot je bovenbenen (ongeveer) horizontaal zijn, knieën in lijn met je tenen", "Duw jezelf via je hielen krachtig terug omhoog"],
+  "Goblet squat": ["Houd de kettlebell met twee handen tegen je borst, ellebogen naar beneden", "Zet je voeten iets breder dan schouderbreedte", "Zak rustig in een diepe squat terwijl je romp rechtop blijft", "Duw jezelf via je hielen terug omhoog"],
+  "Reverse lunge met dumbbells": ["Sta rechtop met een dumbbell in elke hand langs je lichaam", "Stap ruim naar achteren met één been", "Zak tot je achterste knie bijna de grond raakt en je voorste knie 90 graden buigt", "Duw jezelf via je voorste hiel terug omhoog en sluit aan"],
+  "Glute bridge": ["Lig op je rug met gebogen knieën en je voeten plat op heupbreedte", "Span je billen aan en duw je heupen omhoog tot een rechte lijn van knieën tot schouders", "Knijp bovenin 1-2 tellen extra in je billen", "Laat je heupen langzaam weer zakken zonder de spanning helemaal los te laten"],
+  "Step-up": ["Ga voor een stevige verhoging (trede of opstapje) staan", "Zet je hele voet op de verhoging", "Duw jezelf omhoog via het bovenste been tot je gestrekt staat", "Stap rustig en gecontroleerd terug naar beneden"],
+  "Wall sit": ["Zet je rug plat tegen een muur en loop met je voeten naar voren", "Zak tot je knieën ongeveer 90 graden gebogen zijn, knieën boven je enkels", "Houd deze positie vast en blijf rustig doorademen", "Kom omhoog door via je hielen terug tegen de muur op te schuiven"],
+  "Zijwaartse bandwandeling (monster walk)": ["Doe de band om je benen, net boven of onder je knieën", "Zak in een kwart squat met je voeten op heupbreedte", "Stap zijwaarts terwijl de band de hele tijd op spanning blijft", "Loop een aantal stappen naar links en daarna terug naar rechts"],
+  "Plank": ["Zet je onderarmen op de grond, ellebogen recht onder je schouders", "Strek je benen naar achteren, alleen tenen aan de grond", "Span je buik en billen aan zodat je lichaam één rechte lijn vormt van hoofd tot hielen", "Houd vast en blijf rustig doorademen"],
+  "Dead bug": ["Lig op je rug met je armen recht omhoog en je knieën gebogen boven je heupen", "Druk je onderrug in de mat en houd hem daar de hele oefening", "Strek langzaam één arm achter je hoofd en het tegenovergestelde been naar voren", "Kom terug naar het midden en wissel van kant"],
+  "Side plank": ["Lig op je zij en zet je elleboog recht onder je schouder", "Stapel je voeten op elkaar (of zet de bovenste ervoor)", "Til je heupen op tot je lichaam één rechte lijn vormt", "Houd vast, en wissel na de tijd van kant"],
+  "Pallof press": ["Maak de band vast op borsthoogte en ga er haaks naast staan", "Houd het uiteinde met twee handen tegen je borst, voeten op heupbreedte", "Strek je armen langzaam recht vooruit terwijl de band je opzij probeert te trekken", "Houd 2 tellen vast en breng je handen rustig terug"],
+  "Suitcase carry": ["Til de kettlebell met een rechte rug op in één hand", "Sta rechtop: schouders laag, buik aangespannen", "Loop rustige rondjes zonder opzij te hangen", "Wissel halverwege de tijd van hand"],
+  "Band pull-apart": ["Houd de band met gestrekte armen op schouderhoogte voor je, handen op schouderbreedte", "Trek de band uit elkaar tot hij je borst raakt", "Knijp je schouderbladen naar elkaar toe", "Laat de band langzaam en gecontroleerd terugkomen"],
+  "Row met weerstandsband": ["Ga op het midden van de band staan en pak de uiteinden vast", "Buig licht door je knieën en kantel je romp voorover met een rechte rug", "Trek je ellebogen langs je lichaam naar achteren richting je heupen", "Knijp je schouderbladen samen en laat rustig terug"],
+  "Bent-over dumbbell row": ["Houd in elke hand een dumbbell en buig je romp voorover met een rechte rug", "Laat je armen recht naar beneden hangen", "Trek de dumbbells langs je lichaam naar je heupen, ellebogen dicht bij je zij", "Knijp je schouderbladen samen en laat langzaam zakken"],
+  "Superman": ["Lig op je buik met je armen gestrekt voor je", "Til tegelijk je armen, borst en benen een stukje van de grond", "Houd 2-3 tellen vast terwijl je naar de vloer blijft kijken", "Laat alles rustig weer zakken"],
+  "Staande dumbbell shoulder press": ["Sta rechtop met de dumbbells op schouderhoogte, handpalmen naar voren", "Span je buik en billen aan", "Druk de dumbbells recht boven je hoofd tot je armen gestrekt zijn", "Laat ze rustig terugzakken tot schouderhoogte"],
+  "Side raise + front raise combo": ["Sta rechtop met een lichte dumbbell in elke hand", "Hef je armen zijwaarts tot schouderhoogte en laat rustig zakken", "Hef je armen daarna recht naar voren tot schouderhoogte en laat zakken", "Wissel de twee richtingen om en om af"],
+  "Incline push-up": ["Zet je handen iets breder dan schouderbreedte op een stoel, bank of tafelrand", "Loop met je voeten naar achteren tot je lichaam één rechte lijn is", "Zak met je borst richting de rand terwijl je ellebogen schuin langs je lichaam gaan", "Duw jezelf krachtig terug omhoog"],
+  "Biceps curl met weerstandsband": ["Ga met beide voeten op het midden van de band staan", "Houd de uiteinden vast met je handpalmen naar voren, ellebogen tegen je zij", "Krul je handen rustig naar je schouders", "Laat in 2-3 tellen weer zakken tot je armen gestrekt zijn"],
+  "Kettlebell deadlift": ["Zet de kettlebell tussen je voeten, voeten op schouderbreedte", "Zak met je heupen naar achteren en pak het handvat met twee handen, rug recht", "Kom krachtig rechtop door je hielen in de grond te duwen en je heupen naar voren te brengen", "Breng de kettlebell met een rechte rug weer naar de grond"],
+  "Dumbbell thruster": ["Houd de dumbbells op schouderhoogte, voeten op schouderbreedte", "Zak in een volledige squat met je romp rechtop", "Kom krachtig omhoog en gebruik dat momentum om de dumbbells boven je hoofd uit te drukken", "Laat ze terugzakken naar je schouders en ga direct door naar de volgende squat"],
+  "Halve Turkish get-up": ["Lig op je rug met de kettlebell in één hand recht boven je schouder gestrekt", "Buig het been aan dezelfde kant, het andere been en de vrije arm liggen schuin op de grond", "Rol omhoog op je vrije elleboog en dan op je hand, terwijl de kettlebell boven je blijft", "Kom gecontroleerd terug naar liggend en wissel na de helft van kant"],
+  "Marcheren met hoge knieën": ["Sta rechtop en marcheer op de plaats", "Til je knieën om en om tot heuphoogte", "Beweeg je armen ritmisch mee", "Zet je voeten steeds zacht en gecontroleerd neer"],
+  "Jumping jacks": ["Sta rechtop met je voeten bij elkaar en armen langs je lichaam", "Spring je voeten zijwaarts uit elkaar en zwaai tegelijk je armen boven je hoofd", "Spring terug naar de beginpositie", "Houd een rustig, constant ritme aan — zacht landen op de voorvoet"],
+  "Schaduwboksen": ["Sta in bokshouding: één voet voor, handen bij je kin", "Stoot afwisselend links en rechts, draai je romp mee met elke stoot", "Blijf licht op je voorvoeten bewegen met kleine schuifstapjes", "Houd je handen tussen de stoten hoog bij je kin"],
+  "Knee-to-wall enkelmobilisatie": ["Sta met je gezicht naar een muur, één voet ongeveer een handbreedte van de muur", "Duw je knie rustig naar voren richting de muur terwijl je hiel op de grond blijft", "Raakt je knie de muur makkelijk? Schuif je voet dan iets naar achteren", "Veer rustig heen en terug en wissel na de herhalingen van been"],
+  "Kuitstretch tegen de muur": ["Zet je handen tegen de muur en stap één been ruim naar achteren", "Duw de hiel van je achterste been in de grond, been gestrekt", "Leun naar voren tot je rek voelt in je kuit en houd dat vast", "Wissel na de tijd van been"],
+  "World's greatest stretch": ["Stap in een diepe uitvalspas en zet beide handen binnen je voorste voet op de grond", "Draai je binnenste arm omhoog richting het plafond en kijk mee", "Kom terug, en breng je heupen naar achteren om de hamstring te rekken", "Wissel na de herhalingen van kant"],
+  "Kettlebell swing": ["Sta met je voeten iets breder dan schouderbreedte, kettlebell met twee handen voor je", "Zwaai de kettlebell tussen je benen door terwijl je je heupen naar achteren duwt (rug recht)", "Knal je heupen naar voren zodat de kettlebell tot borsthoogte zwaait — je armen zijn alleen haken", "Vang hem op en ga vloeiend door naar de volgende zwaai"],
+  "Single-arm kettlebell press": ["Breng de kettlebell naar de rack-positie: tegen je borst, elleboog laag", "Span je buik en billen aan zodat je niet opzij hangt", "Druk de kettlebell recht boven je hoofd tot je arm gestrekt is", "Laat hem rustig terugzakken naar de rack-positie en wissel na de set van arm"],
+  "Kettlebell row (steunend)": ["Zet één hand en dezelfde knie op een stoel of bank, andere voet op de grond", "Houd je rug recht en horizontaal, kettlebell in de vrije hand", "Trek de kettlebell langs je lichaam omhoog richting je heup", "Laat hem langzaam zakken tot je arm gestrekt hangt"],
+  "Kettlebell halo": ["Houd de kettlebell ondersteboven met twee handen bij de hoorns, op borsthoogte", "Beweeg hem rustig in een cirkel om je hoofd heen, dicht langs je nek", "Houd je romp stil en je buik aangespannen", "Wissel na de helft van de herhalingen van richting"],
+  "Dumbbell bench press (fitnessbank)": ["Lig op de bank met in elke hand een dumbbell op borsthoogte", "Zet je voeten plat op de grond en trek je schouderbladen naar elkaar", "Druk de dumbbells recht omhoog tot je armen gestrekt zijn", "Laat ze in 2-3 tellen gecontroleerd terugzakken tot naast je borst"],
+  "Dumbbell chest fly (fitnessbank)": ["Lig op de bank met de dumbbells recht boven je borst, handpalmen naar elkaar", "Houd een lichte buiging in je ellebogen", "Open je armen langzaam zijwaarts tot je rek op je borst voelt", "Knijp je borstspieren aan en breng de dumbbells in een boog weer samen"],
+  "One-arm dumbbell row (fitnessbank)": ["Zet één hand en dezelfde knie op de bank, andere voet op de grond", "Houd je rug recht en horizontaal, dumbbell in de vrije hand", "Trek de dumbbell langs je lichaam omhoog richting je heup", "Laat langzaam zakken en wissel na de set van kant"],
+  "Dumbbell pullover (fitnessbank)": ["Lig op de bank en houd één dumbbell met twee handen recht boven je borst", "Houd je ellebogen licht gebogen", "Laat de dumbbell in een boog achter je hoofd zakken tot je rek voelt in borst en rug", "Trek hem in dezelfde boog terug tot boven je borst"],
+  "Bulgarian split squat (fitnessbank)": ["Sta een ruime stap voor de bank en leg de wreef van je achterste voet op de zitting", "Houd je romp rechtop (dumbbells in de hand voor extra gewicht)", "Zak recht naar beneden tot je voorste bovenbeen horizontaal is", "Duw jezelf via je voorste hiel terug omhoog; wissel na de set van been"],
+  "Hip thrust (fitnessbank)": ["Zet je bovenrug op de rand van de bank, voeten plat op de grond, knieën gebogen", "Leg eventueel een dumbbell op je heupen en houd die vast", "Duw je heupen omhoog tot je lichaam van knieën tot schouders één lijn is", "Knijp bovenin je billen aan en zak langzaam terug"],
+  "Bench dips (fitnessbank)": ["Ga met je rug naar de bank staan en pak de rand met je handen naast je heupen", "Loop met je voeten naar voren zodat je billen vrij hangen", "Zak door je ellebogen tot ongeveer 90 graden, ellebogen recht naar achteren", "Duw jezelf via je triceps weer omhoog"],
+  "Seated shoulder press (fitnessbank)": ["Zet de rugleuning (bijna) rechtop en ga zitten met de dumbbells op schouderhoogte", "Druk je onderrug tegen de leuning en span je buik aan", "Druk de dumbbells recht boven je hoofd tot je armen gestrekt zijn", "Laat ze rustig terugzakken tot schouderhoogte"],
+  "Wall push-up": ["Zet je handen op schouderhoogte en -breedte tegen de muur", "Stap een flink stuk naar achteren zodat je schuin tegen de muur leunt", "Buig je ellebogen en breng je borst richting de muur, lichaam als één plank", "Duw jezelf krachtig terug tot je armen gestrekt zijn"],
+  "Good morning (lichaamsgewicht)": ["Sta rechtop met je handen achter je hoofd, knieën licht gebogen", "Duw je heupen naar achteren en buig je romp voorover met een rechte rug", "Zak tot je romp bijna horizontaal is en je rek voelt in je hamstrings", "Kom rechtop door je billen aan te spannen en je heupen naar voren te brengen"],
+  "Standing knee raise + twist": ["Sta rechtop met je handen naast je hoofd", "Til één knie op tot heuphoogte", "Draai je romp zodat je tegenovergestelde elleboog richting die knie komt", "Kom terug naar het midden en wissel van kant"],
+  "Squat pulse": ["Zak in een halve squat met je voeten op schouderbreedte", "Veer in kleine pulsjes een paar centimeter op en neer", "Blijf de hele set laag — kom niet helemaal omhoog", "Houd je hielen plat en je romp rechtop"],
+  "Sumo squat": ["Zet je voeten ruim breder dan je schouders, tenen schuin naar buiten", "Zak recht naar beneden tussen je knieën, romp rechtop", "Duw je knieën actief naar buiten, in lijn met je tenen", "Duw jezelf via je hielen terug omhoog"],
+  "Reverse snow angels": ["Lig op je buik met je armen langs je lichaam, duimen omhoog", "Til je armen en borst iets van de grond", "Beweeg je gestrekte armen in een trage boog tot boven je hoofd, net boven de vloer", "Beweeg ze in dezelfde boog weer terug naar je heupen"],
+  "Bird dog": ["Kom op handen en knieën: handen onder je schouders, knieën onder je heupen", "Strek tegelijk je rechterarm naar voren en je linkerbeen naar achteren tot horizontaal", "Houd 2 tellen vast met een stil, horizontaal bekken", "Kom rustig terug en wissel van kant"],
+  "Bicycle crunch": ["Lig op je rug met je handen naast je hoofd en je benen opgetild", "Breng je elleboog naar de tegenovergestelde knie terwijl je het andere been strekt", "Draai vanuit je romp, niet vanuit je nek", "Wissel in een rustig fietsritme van kant"],
+  "Russian twist": ["Zit op de mat met gebogen knieën en leun iets naar achteren met een rechte rug", "Houd je handen (of een gewicht) voor je borst", "Draai je romp rustig naar één kant tot je handen naast je heup wijzen", "Draai door het midden naar de andere kant"],
+  "Reverse crunch": ["Lig op je rug met je knieën gebogen boven je heupen", "Kantel je bekken en trek je knieën richting je borst tot je heupen iets loskomen", "Adem uit terwijl je heupen loskomen", "Laat je heupen langzaam zakken zonder je onderrug hol te trekken"],
+  "Single-leg glute bridge": ["Lig op je rug met één voet plat op de grond en het andere been gestrekt", "Span je billen aan en duw je heupen omhoog via het standbeen", "Houd je bekken de hele beweging horizontaal", "Zak langzaam terug; wissel na de set van been"],
+  "Clamshell": ["Lig op je zij met je knieën gebogen en je voeten op elkaar", "Houd je bekken stil en je buik licht aangespannen", "Open je bovenste knie als een schelp terwijl je voeten op elkaar blijven", "Sluit langzaam en wissel na de set van kant"],
+  "Swimmer": ["Lig op je buik met je armen gestrekt voor je en benen gestrekt", "Til je armen, borst en benen licht van de grond", "Maak kleine wisselslag-bewegingen: rechterarm + linkerbeen omhoog, dan wisselen", "Blijf rustig doorademen en houd je nek neutraal"],
+  "Dumbbell romanian deadlift": ["Sta rechtop met de dumbbells voor je bovenbenen, voeten op heupbreedte", "Duw je heupen naar achteren en schuif de dumbbells langs je benen naar beneden, rug recht", "Zak tot je duidelijke rek in je hamstrings voelt (knieën licht gebogen)", "Kom krachtig rechtop door je heupen naar voren te brengen"],
+  "Hammer curl": ["Sta rechtop met de dumbbells langs je lichaam, handpalmen naar elkaar toe", "Houd je ellebogen tegen je zij", "Krul de dumbbells rustig omhoog richting je schouders", "Laat ze in 2-3 tellen weer zakken tot je armen gestrekt zijn"],
+  "Triceps kickback": ["Buig voorover met een rechte rug, dumbbell in één hand, andere hand op je knie of de bank", "Breng je bovenarm horizontaal langs je lichaam en houd hem daar stil", "Strek je onderarm naar achteren tot je hele arm recht is", "Knijp je triceps aan en buig rustig terug"],
+  "Overhead triceps extension": ["Houd één dumbbell met twee handen recht boven je hoofd", "Houd je ellebogen dicht bij je hoofd en je buik aangespannen", "Laat de dumbbell langzaam achter je hoofd zakken door je ellebogen te buigen", "Strek je armen weer volledig boven je hoofd"],
+  "Arnold press": ["Start met de dumbbells voor je borst, handpalmen naar je toe", "Druk de dumbbells omhoog terwijl je je handpalmen vloeiend naar voren draait", "Eindig met gestrekte armen boven je hoofd, handpalmen naar voren", "Draai op de terugweg je handpalmen weer naar je toe"],
+  "Lateral lunge": ["Sta rechtop met de dumbbell(s) voor je borst of langs je lichaam", "Stap ruim opzij en duw je heupen naar achteren terwijl je op dat been zakt", "Houd het andere been gestrekt en beide voeten naar voren wijzend", "Duw jezelf krachtig terug naar het midden; wissel na de herhalingen van kant"],
+  "Dumbbell floor press": ["Lig op je rug op de mat met gebogen knieën, dumbbells op borsthoogte", "Druk de dumbbells recht omhoog tot je armen gestrekt zijn", "Laat ze langzaam zakken tot je bovenarmen de vloer licht raken", "Pauzeer heel even op de vloer en druk weer omhoog"],
+  "Dumbbell shrug": ["Sta rechtop met de dumbbells langs je lichaam", "Trek je schouders recht omhoog richting je oren", "Knijp bovenin 1 tel vast", "Laat je schouders langzaam weer zakken — geen rondjes draaien"],
+  "Farmer's walk (dumbbells)": ["Pak in elke hand een zware dumbbell", "Sta rechtop: borst vooruit, schouders laag en iets naar achteren", "Loop rustige, gecontroleerde rondjes door de kamer", "Houd je buik aangespannen en blijf rechtop tot de tijd om is"],
+  "Concentration curl": ["Zit op een stoel met je voeten plat en je benen iets uit elkaar", "Laat je elleboog op de binnenkant van je bovenbeen rusten, dumbbell in de hand", "Krul de dumbbell rustig omhoog richting je schouder", "Laat hem extra traag weer zakken tot je arm gestrekt is; wissel na de set van arm"],
+  "Kettlebell goblet reverse lunge": ["Houd de kettlebell met twee handen tegen je borst", "Stap ruim naar achteren in een uitvalspas", "Zak tot je achterste knie bijna de grond raakt, romp rechtop", "Duw jezelf via je voorste been terug omhoog en sluit aan"],
+  "Kettlebell march (rack hold)": ["Breng de kettlebell naar de rack-positie: tegen je borst, elleboog laag", "Sta kaarsrecht en span je buik aan", "Marcheer rustig op de plaats met hoge knieën", "Wissel halverwege de tijd de kettlebell naar je andere arm"],
+  "Kettlebell single-leg deadlift": ["Sta op één been met de kettlebell in de tegenovergestelde hand", "Buig vanuit je heup voorover terwijl je vrije been naar achteren strekt", "Houd je rug recht en je heupen recht naar de vloer gericht", "Kom gecontroleerd terug rechtop; wissel na de herhalingen van been"],
+  "Kettlebell around-the-body pass": ["Sta rechtop met de kettlebell in één hand langs je lichaam", "Geef hem achter je rug door aan je andere hand", "Geef hem voor je lichaam weer terug — één vloeiende cirkel om je middel", "Houd je romp stil; wissel na de herhalingen van richting"],
+  "Step-up op de bank": ["Ga voor de bank staan en controleer of hij stevig staat", "Zet je hele voet op de bank (dumbbells in de hand voor extra gewicht)", "Duw jezelf omhoog via het bovenste been tot je gestrekt op de bank staat", "Stap rustig terug naar beneden; wissel na de herhalingen van been"],
+  "Decline push-up (voeten op bank)": ["Zet je voeten op de bank en je handen iets breder dan schouderbreedte op de grond", "Maak je lichaam één rechte lijn van hoofd tot hielen", "Zak met je borst richting de vloer, ellebogen schuin langs je lichaam", "Duw jezelf krachtig terug omhoog"],
+  "Chest-supported row (schuine bank)": ["Zet de rugleuning schuin (30-45 graden) en ga met je borst op de leuning liggen", "Laat de dumbbells recht onder je schouders hangen", "Roei de dumbbells naar je heupen en knijp je schouderbladen samen", "Laat ze langzaam weer zakken tot je armen gestrekt hangen"],
+  "Seated dumbbell curl (bank)": ["Zit rechtop op de bank met de dumbbells langs je lichaam, handpalmen naar voren", "Houd je ellebogen tegen je zij", "Krul de dumbbells rustig omhoog richting je schouders", "Laat ze traag weer zakken tot je armen gestrekt zijn"],
+  "Split squat (voet op bank optioneel)": ["Neem een ruime uitvalspositie in; zwaarder? achtervoet op de bank", "Houd je romp rechtop met je gewicht op de voorste hiel", "Zak recht naar beneden tot je achterste knie bijna de grond raakt", "Duw jezelf recht omhoog zonder van plek te komen; wissel na de set van been"],
+  "Face pull met band": ["Maak de band vast op ooghoogte en pak de uiteinden met beide handen", "Stap naar achteren tot de band op spanning staat", "Trek de uiteinden naar je gezicht met hoge, wijde ellebogen", "Eindig met je handen naast je oren en laat rustig terug"],
+  "Overhead press met band": ["Ga met beide voeten op het midden van de band staan", "Breng de uiteinden naar schouderhoogte, handpalmen naar voren", "Druk de band recht boven je hoofd tot je armen gestrekt zijn", "Laat rustig terugzakken tot schouderhoogte"],
+  "Squat met band": ["Ga met beide voeten op de band staan en leg de uiteinden op je schouders", "Zet je voeten op schouderbreedte", "Zak in een volledige squat terwijl de band spanning houdt", "Kom krachtig omhoog tegen de weerstand van de band in"],
+  "Glute kickback met band": ["Doe de band om je enkels en houd lichte steun vast (muur of stoel)", "Verplaats je gewicht naar één been", "Trap het andere been rustig gestrekt naar achteren tot je je bil voelt", "Kom gecontroleerd terug; wissel na de herhalingen van been"],
+  "Triceps pushdown met band": ["Hang de band over een deur of hoog punt en pak de uiteinden", "Klem je ellebogen tegen je zij, onderarmen omhoog", "Strek je armen recht naar beneden tot ze gestrekt zijn", "Laat de band langzaam terugkomen terwijl je ellebogen op hun plek blijven"],
+  "Band biceps curl 21s": ["Ga op het midden van de band staan en pak de uiteinden, handpalmen naar voren", "Doe 7 halve curls van onder tot halverwege", "Doe 7 halve curls van halverwege tot boven", "Sluit af met 7 volledige curls in één rustige beweging"],
+  "Chair squat (opstaan-zitten)": ["Ga vlak voor een stoel staan met je voeten op schouderbreedte", "Zak rustig naar achteren alsof je gaat zitten", "Tik de zitting licht aan met je billen — niet echt zitten", "Sta zonder je handen te gebruiken weer op via je hielen"],
+  "Split squat met stoel": ["Sta een ruime stap voor de stoel en leg de wreef van je achterste voet op de zitting", "Houd je romp rechtop", "Zak recht naar beneden tot je voorste bovenbeen horizontaal is", "Duw jezelf via je voorste hiel omhoog; wissel na de set van been"],
+  "Boks-combinaties met tempo": ["Sta in bokshouding met je handen hoog bij je kin", "Stoot 45 seconden combinaties: jab, directe, hoeken — draai je romp mee", "Verplaats tussendoor met kleine schuifstapjes", "Neem kort pauze en start de volgende ronde"],
+  "March met dumbbells (loaded march)": ["Pak in elke hand een dumbbell en laat ze langs je lichaam hangen", "Sta kaarsrecht met je buik aangespannen", "Marcheer op de plaats met hoge knieën", "Zet je voeten zacht neer en blijf rechtop onder het gewicht"],
+  "Statische dumbbell lunge": ["Neem een ruime uitvalspositie in met de dumbbells langs je lichaam", "Houd je romp rechtop met je gewicht op de voorste hiel", "Zak recht naar beneden tot je achterste knie bijna de grond raakt", "Duw jezelf recht omhoog zonder van plek te komen; wissel na de set van been"],
+  "Renegade row": ["Kom in push-up-houding met je handen op twee dumbbells, voeten iets breder", "Duw actief in de steunende dumbbell", "Roei één dumbbell naar je heup terwijl je romp en heupen stil blijven", "Zet rustig terug en wissel van arm"],
+  "Dumbbell upright row": ["Sta rechtop met de dumbbells voor je bovenbenen, handpalmen naar je toe", "Trek de dumbbells dicht langs je lichaam omhoog tot borsthoogte", "Houd je ellebogen daarbij hoger dan je polsen", "Laat langzaam en gecontroleerd weer zakken"],
+  "Dumbbell side bend": ["Sta rechtop met één dumbbell langs je zij, andere hand op je heup of naast je hoofd", "Buig langzaam puur zijwaarts richting de dumbbell", "Kom terug omhoog via de spanning in je andere zij", "Maak de herhalingen af en wissel van kant"],
+  "Kettlebell front rack carry": ["Breng de kettlebell naar de rack-positie: tegen borst en onderarm, elleboog laag", "Sta kaarsrecht met je ribben laag en je buik aangespannen", "Loop rustige, gelijkmatige rondjes", "Wissel halverwege de tijd van arm"],
+  "Kettlebell floor press": ["Lig op je rug met gebogen knieën, kettlebell in één hand op borsthoogte (bal rust op je onderarm)", "Houd je pols recht", "Druk de kettlebell recht omhoog tot je arm gestrekt is", "Laat langzaam zakken tot je bovenarm de vloer raakt; wissel na de set van arm"],
+  "Band woodchopper": ["Maak de band laag vast en ga er haaks naast staan", "Pak het uiteinde met twee gestrekte handen bij je heup", "Trek de band diagonaal omhoog naar je tegenovergestelde schouder, draai je romp en heupen mee", "Kom rustig terug langs dezelfde lijn; wissel na de herhalingen van kant"],
+  "Band pull-through": ["Maak de band laag vast en ga er met je rug naartoe staan, band tussen je benen door", "Pak de band met twee handen en stap naar voren tot hij op spanning staat", "Buig vanuit je heupen voorover met een rechte rug", "Kom krachtig rechtop door je billen aan te spannen"],
+  "Marching glute bridge": ["Lig op je rug en duw je heupen omhoog in een glute bridge", "Houd je heupen hoog en horizontaal", "Til om en om één voet van de mat, alsof je marcheert", "Zet zacht neer en wissel rustig van been"],
+  "Heel taps": ["Lig op je rug met je knieën gebogen boven je heupen", "Druk je onderrug in de mat en houd hem daar", "Tik om en om één hiel rustig op de mat", "Adem uit bij elke tik en houd het tempo laag"],
+  "Incline shoulder taps": ["Zet je handen op een stoel of verhoging en loop naar achteren tot plank-houding", "Zet je voeten iets breder voor extra balans", "Tik met één hand je tegenovergestelde schouder aan terwijl je heupen stil blijven", "Zet de hand terug en wissel van kant"],
 };
 function exVideo(s) { return EXERCISE_VIDEOS[s.name] || null; }
+function hwStepsHtml(s, open) {
+  const steps = EXERCISE_STEPS[s.name] || (s.description ? [s.description] : []);
+  return `<details class="tip inline-tip" style="margin-top:8px;"${open ? " open" : ""}><summary>📋 Uitvoering, do's &amp; don'ts</summary><div class="tip-body">
+    ${steps.length ? `<div class="sub">📋 Zo voer je hem uit</div><ul>${steps.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${s.tips && s.tips.length ? `<div class="sub">✅ Zo doe je hem goed</div><ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${s.mistakes && s.mistakes.length ? `<div class="sub">🚫 Dit moet je niet doen</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+  </div></details>`;
+}
 function exVideoSearch(s) {
   const q = String(s.name).replace(/\(.*?\)/g, "").trim();
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q + " proper form shorts");
@@ -3253,13 +3414,9 @@ function renderSnacksBox() {
         <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
         <button class="btn small ${isDone ? "" : "ghost"} sn-check">${isDone ? "✓ Gedaan" : "Afvinken"}</button>
       </div>
-      <div class="sn-desc">${esc(s.description)}</div>
       <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}${s.achillesSafe === false ? "<span>⚠️ niet bij achillesherstel</span>" : ""}</div>
       ${hwVideoBtns(s)}
-      ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>💡 Tips &amp; valkuilen</summary><div class="tip-body">
-        ${s.tips.length ? `<ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-        ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      </div></details>` : ""}`;
+      ${hwStepsHtml(s)}`;
     card.querySelector(".sn-check").onclick = () => { toggleSnackDone(s.name); renderSnacksBox(); };
     list.appendChild(card);
   });
@@ -3610,8 +3767,8 @@ function renderHwPlayer(hw) {
   card.className = "card snack-card";
   card.innerHTML = `
     <div class="sn-head"><div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div></div>
-    <div class="sn-desc">${esc(s.description)}</div>
     ${hwVideoBtns(s)}
+    ${hwStepsHtml(s, true)}
     <div class="hw-target">🎯 Voorstel: <b>${esc(sug.txt)}</b></div>
     ${metric === "sec" ? `<button class="btn ghost full small" id="hwp-timer">⏱ Start ${sug.reps} sec timer</button><div class="hw-timer-big" id="hwp-timer-val"></div>` : ""}
     <div class="hw-log">
@@ -3619,10 +3776,6 @@ function renderHwPlayer(hw) {
       <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${sug.reps}" />
       ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${sug.kg}" />` : ""}
     </div>
-    ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:8px;"><summary>✅ Do's &amp; don'ts</summary><div class="tip-body">
-      ${s.tips.length ? `<div class="sub">✅ Do's</div><ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      ${s.mistakes.length ? `<div class="sub">🚫 Don'ts</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    </div></details>` : ""}
     <button class="btn full" id="hwp-done" style="margin-top:12px;">✓ Klaar — volgende</button>
     <div class="speak-row" style="margin-top:8px;">
       <button class="btn small ghost" id="hwp-skip">⏭ Overslaan</button>
@@ -3719,9 +3872,9 @@ function hwCard(s, hw) {
       <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
       <button class="btn small ${r.done ? "" : "ghost"} hw-check">${r.done ? "✓ Klaar" : "Afvinken"}</button>
     </div>
-    <div class="sn-desc">${esc(s.description)}</div>
     <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}</div>
     ${hwVideoBtns(s)}
+    ${hwStepsHtml(s)}
     <div class="hw-target">🎯 Voorstel: <b class="hw-target-txt">${esc(hwSuggest(s).txt)}</b>
       <div class="hw-target-btns">
         <div class="stepper"><span class="st-label">${metric === "sec" ? "sec" : "reps"}</span><button data-tgt="reps" data-d="-1">−</button><span class="st-val" data-tval="reps">${hwSuggest(s).reps}</span><button data-tgt="reps" data-d="1">+</button></div>
@@ -3739,10 +3892,7 @@ function hwCard(s, hw) {
       <button class="hw-rate ${rating === "super" ? "sel" : ""}" data-rate="super"><span class="hw-emoji">⭐</span>Elke keer</button>
       <button class="hw-rate dis ${rating === "dislike" ? "sel dis" : ""}" data-rate="dislike"><span class="hw-emoji">👎</span>Niet meer</button>
     </div>
-    ${(s.tips.length || s.mistakes.length) ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>💡 Tips &amp; valkuilen</summary><div class="tip-body">
-      ${s.tips.length ? `<ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      ${s.mistakes.length ? `<div class="sub">Gaat vaak mis</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    </div></details>` : ""}`;
+    `;
   const saveResult = (patch) => {
     const w = store.homeWorkout(); if (!w) return;
     const rr = Object.assign({ metric }, w.results[s.name] || {}, patch);
