@@ -202,6 +202,18 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .hw-target { font-size: 0.95rem; font-weight: 700; margin-top: 10px; }
 .hw-target-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 .hw-timer-big { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 2.2rem; text-align: center; color: var(--primary); text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent); min-height: 1em; margin: 6px 0; }
+.inc-chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.inc-chip { display: inline-flex; align-items: center; border: 2px solid color-mix(in srgb, var(--primary) 40%, transparent); border-radius: 20px; overflow: hidden; }
+.inc-chip.sel { border-color: var(--primary); box-shadow: 0 0 14px color-mix(in srgb, var(--glow) 45%, transparent); }
+.inc-chip .inc-pick { border: none; background: transparent; color: inherit; font: inherit; font-weight: 700; font-size: 0.85rem; padding: 6px 4px 6px 12px; cursor: pointer; }
+.inc-chip.sel .inc-pick { color: var(--primary); }
+.inc-chip .inc-del { border: none; background: transparent; color: inherit; opacity: 0.5; font-size: 0.8rem; padding: 6px 10px 6px 6px; cursor: pointer; }
+.inc-stars { display: flex; justify-content: center; gap: 5px; font-size: 1.9rem; margin: 8px 0 6px; }
+.inc-star { opacity: 0.35; }
+.inc-star.full { opacity: 1; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 70%, transparent); }
+.inc-summary { margin: 10px auto 0; max-width: 340px; font-weight: 700; font-size: 0.95rem; padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.inc-summary.earned { background: color-mix(in srgb, var(--primary) 25%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 50%, transparent); }
+#incentives-box input[type="text"] { background: transparent; border: 2px solid color-mix(in srgb, var(--primary) 35%, transparent); border-radius: 10px; color: inherit; font: inherit; font-weight: 600; padding: 8px 10px; }
 @keyframes flipDone { 0% { transform: rotateX(0) scale(1); } 50% { transform: rotateX(85deg) scale(0.95); } 100% { transform: rotateX(0) scale(1); } }
 .done-collapsed { display: flex; align-items: center; justify-content: space-between; }
 .done-collapsed .chk { font-size: 1.6rem; color: #4dffa6; }
@@ -658,7 +670,9 @@ details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
   <!-- ============ THUIS ============ -->
   <section id="view-thuis" class="view">
     <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:16px;">Thuis trainen</h2>
-    <div class="section-title" style="margin-top:0;">🍿 Beweegsnacks vandaag</div>
+    <div class="section-title" style="margin-top:0;">🏆 Beloningen</div>
+    <div id="incentives-box"></div>
+    <div class="section-title">🍿 Beweegsnacks vandaag</div>
     <div id="snacks-box"></div>
     <div class="section-title">🦵 Calf raises-tracker</div>
     <div id="calf-box"></div>
@@ -1565,6 +1579,8 @@ const store = {
   clearHomeWorkout: () => { localStorage.removeItem("gymwave_home_workout"); touch(); },
   homeSessions: () => { const v = jget("gymwave_home_sessions", "[]"); return Array.isArray(v) ? v : []; },
   setHomeSessions: (s) => { localStorage.setItem("gymwave_home_sessions", JSON.stringify(s)); touch(); },
+  incentives: () => Object.assign({ items: [], activeId: null, stars: 0, seeded: false }, jget("gymwave_incentives", "{}")),
+  setIncentives: (v) => { localStorage.setItem("gymwave_incentives", JSON.stringify(v)); touch(); },
   calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
@@ -2934,6 +2950,7 @@ function finishSession() {
   const sessions = store.sessions(); sessions.push(currentSession); store.setSessions(sessions);
   const hrTxt = currentSession.avgHr ? ` Gemiddelde hartslag ${currentSession.avgHr}.` : "";
   const finished = currentSession;
+  incentiveAddStar(); // ⭐ elke afgeronde workout telt richting je beloning
   currentSession = null; store.clearCurrentSession(); crowdOpen = false; celebrate();
   voiceCoach.speak((voiceCoach.line("sessionEnd") || "Training klaar!") + ` ${nEntries} oefeningen, ${Math.round(totalKg)} kilo totaal.${hrTxt}`, { interrupt: true });
   setTimeout(() => { route("home"); showSessionSummary(finished); }, 700);
@@ -2969,6 +2986,7 @@ function showSessionSummary(fin) {
   box.innerHTML = `
     <div class="ss-kg">${curKg} kg</div>
     <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    ${incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -3427,7 +3445,104 @@ function toggleSnackDone(name) {
   names = names.includes(name) ? names.filter(n => n !== name) : [...names, name];
   localStorage.setItem("gymwave_snack_done", JSON.stringify({ date: todayISO(), names }));
 }
-function renderThuis() { renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+function renderThuis() { renderIncentivesBox(); renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+/* ============================================================
+   🏆 BELONINGEN (incentives): 10 sterren sparen per beloning
+   ============================================================ */
+const INCENTIVE_STARS = 10;
+let lastStarAward = null; // meest recente ster, voor het samenvattingsbord
+function seedIncentives() {
+  const inc = store.incentives();
+  if (inc.seeded) return;
+  inc.seeded = true;
+  if (!inc.items.length) {
+    inc.items = [
+      { id: uuid(), name: "👕 Nieuw shirt (1)" },
+      { id: uuid(), name: "👕 Nieuw shirt (2)" },
+      { id: uuid(), name: "👕 Nieuw shirt (3)" },
+      { id: uuid(), name: "🏋️ Kettlebell 18 kg" },
+      { id: uuid(), name: "🏋️ Kettlebell 20 kg" },
+    ];
+    inc.activeId = inc.items[0].id;
+  }
+  store.setIncentives(inc);
+}
+function incentiveActive(inc) {
+  return inc.items.find(i => i.id === inc.activeId && !i.done) || inc.items.find(i => !i.done) || null;
+}
+function incentiveAddStar() {
+  const inc = store.incentives();
+  const act = incentiveActive(inc);
+  if (!act) { lastStarAward = null; return null; }
+  inc.activeId = act.id;
+  inc.stars = (inc.stars || 0) + 1;
+  let earned = false;
+  if (inc.stars >= INCENTIVE_STARS) {
+    act.done = true; act.earnedAt = todayISO();
+    inc.stars = 0;
+    const next = inc.items.find(i => !i.done);
+    inc.activeId = next ? next.id : null;
+    earned = true;
+  }
+  store.setIncentives(inc);
+  lastStarAward = { earned, item: act, stars: inc.stars, next: incentiveActive(store.incentives()) };
+  return lastStarAward;
+}
+function incentiveSummaryHtml() {
+  if (!lastStarAward) return "";
+  const a = lastStarAward;
+  return a.earned
+    ? `<div class="inc-summary earned">🎉 <b>${INCENTIVE_STARS} sterren vol — beloning verdiend: ${esc(a.item.name)}!</b>${a.next ? `<br>Volgende doel: ${esc(a.next.name)}` : ""}</div>`
+    : `<div class="inc-summary">⭐ Ster verdiend! <b>${a.stars}/${INCENTIVE_STARS}</b> richting ${esc(a.item.name)}</div>`;
+}
+function renderIncentivesBox() {
+  const box = document.getElementById("incentives-box");
+  if (!box) return;
+  const inc = store.incentives();
+  const act = incentiveActive(inc);
+  const open = inc.items.filter(i => !i.done);
+  const earned = inc.items.filter(i => i.done);
+  const left = INCENTIVE_STARS - (inc.stars || 0);
+  box.innerHTML = `
+    <div class="card">
+      <div class="muted" style="font-weight:600; margin-bottom:10px;">Elke afgeronde workout — gym of thuis — vult één ster. Bij ${INCENTIVE_STARS} sterren pak je je beloning! 🎁</div>
+      ${open.length ? `
+        <div class="inc-chip-row">${open.map(i => `<span class="inc-chip ${act && i.id === act.id ? "sel" : ""}"><button class="inc-pick" data-inc="${i.id}">${esc(i.name)}</button><button class="inc-del" data-del="${i.id}" title="Verwijderen">✕</button></span>`).join("")}</div>
+        <div class="inc-stars">${Array.from({ length: INCENTIVE_STARS }, (_, k) => `<span class="inc-star ${k < (inc.stars || 0) ? "full" : ""}">${k < (inc.stars || 0) ? "★" : "☆"}</span>`).join("")}</div>
+        <div class="muted" style="text-align:center; font-weight:700;">${inc.stars || 0} van ${INCENTIVE_STARS} · nog ${left} workout${left === 1 ? "" : "s"} tot: <b>${act ? esc(act.name) : ""}</b></div>`
+      : `<div class="empty-state" style="margin:0;">Alle beloningen verdiend of nog geen toegevoegd — zet iets moois op je lijst! 🎁</div>`}
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <input type="text" id="inc-new" placeholder="Nieuwe beloning (bijv. 👟 nieuwe schoenen)…" style="flex:1; min-width:0;" />
+        <button class="btn small" id="inc-add">+ Toevoegen</button>
+      </div>
+      ${earned.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>🎁 Verdiend (${earned.length})</summary><div class="tip-body"><ul>${earned.map(i => `<li>${esc(i.name)} — ${esc(fmtNice(i.earnedAt))} ✓</li>`).join("")}</ul></div></details>` : ""}
+    </div>`;
+  box.querySelectorAll("[data-inc]").forEach(b => b.onclick = () => {
+    const v = store.incentives(); v.activeId = b.dataset.inc; store.setIncentives(v); renderIncentivesBox();
+  });
+  box.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
+    const v = store.incentives();
+    const item = v.items.find(i => i.id === b.dataset.del);
+    showModal("Beloning verwijderen?", `"${item ? item.name : ""}" wordt van je spaarlijst gehaald.`, () => {
+      const v2 = store.incentives();
+      v2.items = v2.items.filter(i => i.id !== b.dataset.del);
+      if (v2.activeId === b.dataset.del) v2.activeId = (v2.items.find(i => !i.done) || {}).id || null;
+      store.setIncentives(v2);
+      renderIncentivesBox();
+    });
+  });
+  box.querySelector("#inc-add").onclick = () => {
+    const inp = box.querySelector("#inc-new");
+    const name = (inp.value || "").trim();
+    if (!name) { inp.focus(); return; }
+    const v = store.incentives();
+    v.items.push({ id: uuid(), name });
+    if (!incentiveActive(v) || !v.activeId) v.activeId = v.items[v.items.length - 1].id;
+    store.setIncentives(v);
+    toast("🏆 Beloning toegevoegd aan je spaarlijst");
+    renderIncentivesBox();
+  };
+}
 function renderThuisProgress() {
   const wrap = document.getElementById("hw-progress-box");
   const title = document.getElementById("hw-progress-title");
@@ -4031,6 +4146,7 @@ function finishHomeWorkout() {
   const session = { id: hw.id || uuid(), date: todayISO(), name: `Thuis-workout ${fmtNice(todayISO())}`, location: "thuis", entries, startedAt: hw.startedAt || new Date().toISOString(), endedAt: new Date().toISOString() };
   const hs = store.homeSessions(); hs.push(session); store.setHomeSessions(hs);
   store.clearHomeWorkout();
+  incentiveAddStar(); // ⭐ elke afgeronde workout telt richting je beloning
   celebrate();
   voiceCoach.speak((voiceCoach.line("sessionEnd") || "Workout klaar!") + ` ${entries.length} oefening${entries.length === 1 ? "" : "en"} thuis gedaan. Sterk bezig!`, { interrupt: true });
   setTimeout(() => { route("thuis"); showHomeSummary(session); }, 700);
@@ -4062,6 +4178,7 @@ function showHomeSummary(fin) {
   box.innerHTML = `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
     <div class="ss-sub">🏠 Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    ${incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -4829,6 +4946,7 @@ function boot() {
   voiceCoach.init();
   migrateMachines();
   migrateHomeSessions();
+  seedIncentives();
   renderObSettings();
   const machines = store.machines();
   if (machines.some(m => m._editing)) { machines.forEach(m => delete m._editing); localStorage.setItem("gymwave_machines", JSON.stringify(machines)); } // zonder touch: opruimen is geen inhoudelijke wijziging
