@@ -151,13 +151,13 @@ test('calf raises: poging opslaan en PR bijwerken', async ({ page }) => {
   await goto(page, 'thuis');
   for (let i = 0; i < 5; i++) await page.click('#calf-inc');
   await page.waitForTimeout(250);
-  await expect(page.locator('.cr-num')).toHaveText('5');
+  await expect(page.locator('#calf-box .cr-num')).toHaveText('5');
   await page.click('#calf-save');
   await page.waitForTimeout(500);
   const saved = await page.evaluate(() => store.calf());
   expect(saved.length).toBe(1);
   expect(saved[0].reps).toBe(5);
-  await expect(page.locator('.cr-num')).toHaveText('0');
+  await expect(page.locator('#calf-box .cr-num')).toHaveText('0');
 });
 
 test('statistieken: gym- en thuis-scope met eigen grafiek', async ({ page }) => {

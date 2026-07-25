@@ -96,19 +96,20 @@ test.describe('§3.2 bottom-nav', () => {
   });
 });
 
-test.describe('§3.1 home: drie rijen met wachttijd-kleur', () => {
-  test('drie hero-rijen, elk met chip en twee tellers', async ({ page }) => {
+test.describe('§3.1 home: activiteitsrijen met wachttijd-kleur', () => {
+  test('elke activiteit heeft een rij met chip en twee tellers', async ({ page }) => {
     await openApp(page);
     await seedHistory(page);
-    await expect(page.locator('.hero-row')).toHaveCount(3);
-    await expect(page.locator('.wait-chip')).toHaveCount(3);
-    await expect(page.locator('.hero-count')).toHaveCount(6);
+    await expect(page.locator('.hero-row')).toHaveCount(5);
+    await expect(page.locator('.wait-chip')).toHaveCount(5);
+    await expect(page.locator('.hero-count')).toHaveCount(10);
     // per chip zes segmenten in de ramp
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       await expect(page.locator('.wait-chip').nth(i).locator('.wait-ramp span')).toHaveCount(6);
     }
     const labels = await page.locator('.hc-lbl').allTextContents();
-    expect(labels).toEqual(['sessies', 'kg pr', 'sessies', 'kg pr', 'series', 'reps pr']);
+    expect(labels).toEqual(['sessies', 'kg pr', 'sessies', 'kg pr', 'series', 'reps pr',
+      'series', 'reps pr', 'series', 'reps pr']);
   });
 
   test('rampIndex: gym en thuis 3 dagen per stap, calf 1 dag', async ({ page }) => {
@@ -291,26 +292,26 @@ test.describe('§3.6 thuis en calf raises', () => {
     await openApp(page);
     await seedHistory(page);
     await goto(page, 'thuis');
-    await expect(page.locator('.calf-readout')).toHaveCount(1);
-    const size = await page.locator('.cr-num').evaluate(el => getComputedStyle(el).fontSize);
+    await expect(page.locator('#calf-box .calf-readout')).toHaveCount(1);
+    const size = await page.locator('#calf-box .cr-num').evaluate(el => getComputedStyle(el).fontSize);
     expect(size).toBe('62px');
-    await expect(page.locator('.calf-pr-row .cp-cell')).toHaveCount(3);
-    await expect(page.locator('.rep-dot.prev-mark')).toHaveCount(1);
-    await expect(page.locator('.rep-dot.pr-mark')).toHaveCount(1);
-    expect(await page.locator('.calf-hist .ch-col').count()).toBeGreaterThan(0);
+    await expect(page.locator('#calf-box .calf-pr-row .cp-cell')).toHaveCount(3);
+    await expect(page.locator('#calf-box .rep-dot.prev-mark')).toHaveCount(1);
+    await expect(page.locator('#calf-box .rep-dot.pr-mark')).toHaveCount(1);
+    expect(await page.locator('#calf-box .calf-hist .ch-col').count()).toBeGreaterThan(0);
   });
 
   test('plus-knop telt de reps op', async ({ page }) => {
     await openApp(page);
     await goto(page, 'thuis');
-    await expect(page.locator('.cr-num')).toHaveText('0');
+    await expect(page.locator('#calf-box .cr-num')).toHaveText('0');
     await page.click('#calf-inc');
     await page.click('#calf-inc');
     await page.waitForTimeout(200);
-    await expect(page.locator('.cr-num')).toHaveText('2');
+    await expect(page.locator('#calf-box .cr-num')).toHaveText('2');
     await page.click('#calf-dec');
     await page.waitForTimeout(200);
-    await expect(page.locator('.cr-num')).toHaveText('1');
+    await expect(page.locator('#calf-box .cr-num')).toHaveText('1');
   });
 });
 

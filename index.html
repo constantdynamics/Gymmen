@@ -41,6 +41,9 @@
   --gym-a: #3f10b0;  --gym-b: #6a28e8;
   --home-a: #6f22d8; --home-b: #9d55ff;
   --calf-a: #9a3df5; --calf-b: #c77bff;
+  /* trap loopt door van orchidee naar donker- en lichtroze */
+  --push-a: #a8145a;  --push-b: #e02b78;
+  --situp-a: #e8559e; --situp-b: #ffa8cf;
 
   /* ---- Wachttijd / herstel-ramp (lineair, 6 stappen) ---- */
   --ramp-0: #35d07f; --ramp-1: #9ede3a; --ramp-2: #ffd75e;
@@ -197,6 +200,17 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .hero-btn.hero-home .hero-ic { background: rgba(255,255,255,0.18); }
 .hero-btn.hero-calf { background: linear-gradient(135deg, var(--calf-a), var(--calf-b)); box-shadow: 0 12px 30px rgba(154, 61, 245, 0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
 .hero-btn.hero-calf .hero-ic { background: rgba(255,255,255,0.2); }
+.hero-btn.hero-push { background: linear-gradient(135deg, var(--push-a), var(--push-b)); box-shadow: 0 12px 30px rgba(168, 20, 90, 0.45), inset 0 1px 0 rgba(255,255,255,0.28); }
+.hero-btn.hero-push .hero-ic { background: rgba(255,255,255,0.2); }
+.hero-btn.hero-situp { background: linear-gradient(135deg, var(--situp-a), var(--situp-b)); box-shadow: 0 12px 30px rgba(232, 85, 158, 0.4), inset 0 1px 0 rgba(255,255,255,0.34); }
+.hero-btn.hero-situp .hero-ic { background: rgba(255,255,255,0.26); }
+/* Lichtroze is te licht voor witte tekst: die haalt er maar ~2,5:1 op, ver
+   onder de 4,5:1 die §1.4 vraagt voor fel buitenlicht. De laatste stap van de
+   trap draait daarom de inkt om — donkerroze tekst op licht roze, zoals je bij
+   de lichtste tint van een kleurtrap zou doen. De kleuren zelf blijven intact. */
+.hero-btn.hero-situp { color: #4a0a28; }
+.hero-btn.hero-situp .hero-ic { background: rgba(74, 10, 40, 0.16); }
+.hero-btn.hero-situp .hero-sub { color: rgba(74, 10, 40, 0.86); }
 
 /* Rechterkolom: wachttijd-chip + twee tellers, allebei 44 px hoog */
 .hero-side { flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px; }
@@ -213,11 +227,13 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .hero-count .hc-lbl { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 7px; line-height: 1; letter-spacing: 1px; text-transform: uppercase; color: rgba(244,238,251,0.8); }
 .hero-row.row-home .hero-count { border-color: rgba(157,85,255,0.6); background: rgba(111,34,216,0.28); }
 .hero-row.row-calf .hero-count { border-color: rgba(199,123,255,0.6); background: rgba(154,61,245,0.26); }
+.hero-row.row-push .hero-count { border-color: rgba(224,43,120,0.6); background: rgba(168,20,90,0.3); }
+.hero-row.row-situp .hero-count { border-color: rgba(255,168,207,0.6); background: rgba(232,85,158,0.26); }
 
 .last-session { font-size: 1rem; color: var(--text-body); margin-bottom: 12px; font-weight: 600; }
 /* De losse calf-ghostknop is vervangen door de derde hero-rij; hij blijft in de
    DOM staan met zijn handler, net als de verborgen nav-knoppen (§3.2). */
-#open-calf { display: none; }
+#open-calf, #open-pushup, #open-situp { display: none; }
 
 /* ============================================================
    SESSIE
@@ -813,6 +829,21 @@ input.weight-display { width: 100%; max-width: 150px; background: rgba(0,0,0,0.4
 .rep-dot.done { background: linear-gradient(135deg, var(--calf-a), var(--calf-b)); border-color: var(--calf-b); }
 .rep-dot.prev-mark { border-color: #7bd4ff; border-width: 2px; }
 .rep-dot.pr-mark { border-color: #ffd75e; border-width: 2px; box-shadow: 0 0 10px rgba(255,215,94,0.4); }
+/* Push-ups en sit-ups gebruiken hetzelfde tracker-blok als calf raises; alleen
+   de accentkleur verschilt. De wrapper zet twee lokale variabelen, de rest
+   van de regels erft daarvan. */
+.rt-push { --rt-a: var(--push-a); --rt-b: var(--push-b); --rt-glow: 168, 20, 90; }
+.rt-situp { --rt-a: var(--situp-a); --rt-b: var(--situp-b); --rt-glow: 232, 85, 158; }
+.rt-push .calf-readout, .rt-situp .calf-readout { background: rgba(var(--rt-glow), 0.12); }
+.rt-push .cr-num, .rt-situp .cr-num { text-shadow: 0 0 30px rgba(var(--rt-glow), 0.6); }
+.rt-push .calf-steppers .btn:not(.ghost),
+.rt-situp .calf-steppers .btn:not(.ghost) {
+  background: linear-gradient(135deg, var(--rt-a), var(--rt-b));
+  box-shadow: 0 6px 22px rgba(var(--rt-glow), 0.4);
+}
+.rt-push .rep-dot.done, .rt-situp .rep-dot.done {
+  background: linear-gradient(135deg, var(--rt-a), var(--rt-b)); border-color: var(--rt-b);
+}
 .calf-steppers { display: flex; gap: 9px; margin: 12px 0; }
 .calf-steppers .btn { flex: 1; height: 50px; min-height: 50px; border-radius: 0; padding: 0; }
 .calf-steppers .btn:not(.ghost) { background: linear-gradient(135deg, var(--calf-a), var(--calf-b)); box-shadow: 0 6px 22px rgba(154,61,245,0.4); }
@@ -994,6 +1025,8 @@ body::after { content: none; }
 <symbol id="i-biceps" viewBox="0 0 24 24"><path d="M4.5 18.5h6a5 5 0 0 0 5-5V9.6" stroke-width="3"></path><path d="M15.5 9.2V6.4a2.3 2.3 0 0 1 4.6 0V9a2.4 2.4 0 0 1-2.4 2.4h-2.2" stroke-width="1.6"></path><path d="M5.2 16.2c1-3.8 6-4.3 7-.6" stroke-width="1.5"></path></symbol>
 <symbol id="i-kettlebell" viewBox="0 0 24 24"><path d="M8.6 9.4a3.4 3.4 0 0 1 6.8 0" stroke-width="1.6"></path><path d="M7.2 11.1c0-.9.8-1.7 1.7-1.7h6.2c1 0 1.7.8 1.7 1.7a5.3 5.3 0 0 1-4.8 6.2h-.1a5.3 5.3 0 0 1-4.7-6.2z" stroke-width="1.7"></path><path d="M6.5 19.4h11" stroke-width="1.5" opacity=".5"></path></symbol>
 <symbol id="i-calf" viewBox="0 0 24 24"><path d="M12.4 4.2v8.8" stroke-width="3.2"></path><path d="M12.4 13.1l4 4.4" stroke-width="3.2"></path><path d="M11.6 6.4C7.8 8.2 7.4 12.2 10.7 14.1" stroke-width="1.5"></path><path d="M7.6 19.6h9.4" stroke-width="1.3" opacity=".5"></path></symbol>
+<symbol id="i-pushup" viewBox="0 0 24 24"><circle cx="18" cy="8.4" r="1.9"></circle><path d="M16.2 9.6 8.4 13.2M12.3 11.4v5.2M8.4 13.2 4.2 16.2M2.5 18.6h19"></path></symbol>
+<symbol id="i-situp" viewBox="0 0 24 24"><circle cx="7.2" cy="8.8" r="1.9"></circle><path d="M8.8 10.1 13.6 14.2M13.6 14.2 17.4 11.2M17.4 11.2 19 17.6M2.5 18.6h19"></path></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></symbol>
 <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M4 10h3l4-3v10l-4-3H4zM15.5 10l4.5 4M20 10l-4.5 4"></path></symbol>
 <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M7 20L12 3.6 17 20zM5.5 20h13M12 8.6v7.2M9.4 14.4h5.2" stroke-width="1.5"></path></symbol>
@@ -1081,6 +1114,8 @@ body::after { content: none; }
     <div id="home-goals" style="margin-top:18px;"></div>
     <div id="home-besttime" style="margin-top:18px;"></div>
     <button class="btn ghost full" id="open-calf" style="margin-top:18px;">Calf raises-tracker</button>
+    <button class="btn ghost full" id="open-pushup" style="margin-top:10px;">Push-ups-tracker</button>
+    <button class="btn ghost full" id="open-situp" style="margin-top:10px;">Sit-ups-tracker</button>
     <button class="btn ghost full" id="open-checklist" style="margin-top:10px;"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bag"></use></svg>Meenemen-checklist</button>
   </section>
 
@@ -1132,6 +1167,10 @@ body::after { content: none; }
     <div id="snacks-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calf"></use></svg>Calf raises-tracker</div>
     <div id="calf-box"></div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pushup"></use></svg>Push-ups-tracker</div>
+    <div id="pushup-box"></div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-situp"></use></svg>Sit-ups-tracker</div>
+    <div id="situp-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-leg"></use></svg>Trainen met één been</div>
     <div id="unilateral-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-camera"></use></svg>Benchmark-foto's</div>
@@ -2063,6 +2102,10 @@ const store = {
   setIncentives: (v) => { localStorage.setItem("gymwave_incentives", JSON.stringify(v)); touch(); },
   calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
+  pushups: () => { const v = jget("gymwave_pushups", "[]"); return Array.isArray(v) ? v : []; },
+  setPushups: (c) => { localStorage.setItem("gymwave_pushups", JSON.stringify(c)); touch(); },
+  situps: () => { const v = jget("gymwave_situps", "[]"); return Array.isArray(v) ? v : []; },
+  setSitups: (c) => { localStorage.setItem("gymwave_situps", JSON.stringify(c)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
   setChat: (c) => localStorage.setItem("gymwave_chat", JSON.stringify(c)), // lokaal, niet syncen
   apiKey: () => localStorage.getItem("gymwave_api_key") || "",
@@ -2887,15 +2930,17 @@ function buildHeroRows() {
   };
   const rowGym = mkRow("row-gym", gym);
   const rowHome = mkRow("row-home", home);
-  const calfBtn = document.createElement("button");
-  calfBtn.className = "hero-btn hero-calf";
-  calfBtn.id = "enter-calf";
-  const rowCalf = mkRow("row-calf", calfBtn);
   wrap.insertBefore(rowGym, extra);
   wrap.insertBefore(rowHome, extra);
-  wrap.insertBefore(rowCalf, extra);
-  // zelfde route als de (verborgen) ghost-knop op Home — geen nieuwe route
-  calfBtn.onclick = () => document.getElementById("open-calf").click();
+  // calf, push-ups en sit-ups delen dezelfde vorm; alleen de kleur verschilt
+  [["calf", "open-calf"], ["push", "open-pushup"], ["situp", "open-situp"]].forEach(([kind, ghost]) => {
+    const btn = document.createElement("button");
+    btn.className = "hero-btn hero-" + kind;
+    btn.id = "enter-" + kind;
+    wrap.insertBefore(mkRow("row-" + kind, btn), extra);
+    // zelfde route als de (verborgen) ghost-knop op Home — geen nieuwe route
+    btn.onclick = () => document.getElementById(ghost).click();
+  });
   wrap.dataset.rows = "1";
 }
 function heroBtnHtml(ico, title, sub) {
@@ -2941,11 +2986,26 @@ function renderHeroRows(sessions, homeSess) {
   calfBtn.parentElement.querySelector(".hero-side").innerHTML =
     waitChipHtml(daysSinceISO(lastCalf), 1) + heroCountsHtml("series", calf.length, "reps pr", calfPr);
 
+  // --- rij 4 en 5: push-ups en sit-ups, zelfde opbouw zonder standen ---
+  [["push", "pushup", "Push-ups"], ["situp", "situp", "Sit-ups"]].forEach(([kind, key, title]) => {
+    const btn = document.getElementById("enter-" + kind);
+    if (!btn) return;
+    const list = REP_TRACKERS[key].read();
+    const today = list.filter(a => a.date === todayISO()).length;
+    const best = list.reduce((mx, a) => Math.max(mx, a.reps || 0), 0);
+    btn.innerHTML = heroBtnHtml(REP_TRACKERS[key].icon, title,
+      today ? `${today}x vandaag` : "vandaag nog niets");
+    const lastDate = list.length ? list[list.length - 1].date : null;
+    btn.parentElement.querySelector(".hero-side").innerHTML =
+      waitChipHtml(daysSinceISO(lastDate), 1) + heroCountsHtml("series", list.length, "reps pr", best);
+  });
+
   // tellers aantikbaar: aantal → geschiedenis van dat type, PR → Stats
   const jump = (row, scope) => row.querySelectorAll(".hero-count").forEach(b => {
     b.onclick = (ev) => {
       ev.stopPropagation();
-      if (scope === "calf") { document.getElementById("open-calf").click(); return; }
+      const ghost = { calf: "open-calf", push: "open-pushup", situp: "open-situp" }[scope];
+      if (ghost) { document.getElementById(ghost).click(); return; }
       statScope = scope;
       document.querySelectorAll("#stat-scope button").forEach(x => x.classList.toggle("active", x.dataset.scope === scope));
       route("stats");
@@ -2953,6 +3013,10 @@ function renderHeroRows(sessions, homeSess) {
   });
   jump(gym.parentElement, "gym");
   jump(home.parentElement, "thuis");
+  ["push", "situp"].forEach(k => {
+    const b = document.getElementById("enter-" + k);
+    if (b) jump(b.parentElement, k);
+  });
   jump(calfBtn.parentElement, "calf");
 }
 
@@ -3049,9 +3113,11 @@ function renderHomeBestTime() {
   </div></details>`;
 }
 document.getElementById("open-checklist").addEventListener("click", () => route("checklist"));
-document.getElementById("open-calf").addEventListener("click", () => {
-  route("thuis");
-  setTimeout(() => { const el = document.getElementById("calf-box"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+[["open-calf", "calf-box"], ["open-pushup", "pushup-box"], ["open-situp", "situp-box"]].forEach(([btn, target]) => {
+  document.getElementById(btn).addEventListener("click", () => {
+    route("thuis");
+    setTimeout(() => { const el = document.getElementById(target); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+  });
 });
 function startNewSession() {
   currentSession = { id: uuid(), date: todayISO(), name: "", entries: [], partial: {}, startedAt: new Date().toISOString() };
@@ -4150,7 +4216,7 @@ function toggleSnackDone(name) {
   names = names.includes(name) ? names.filter(n => n !== name) : [...names, name];
   localStorage.setItem("gymwave_snack_done", JSON.stringify({ date: todayISO(), names }));
 }
-function renderThuis() { renderIncentivesBox(); renderSnacksBox(); renderCalfBox(); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+function renderThuis() { renderIncentivesBox(); renderSnacksBox(); renderCalfBox(); renderRepTracker("pushup"); renderRepTracker("situp"); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
 /* ============================================================
    BELONINGEN (incentives): 10 sterren sparen per beloning
    ============================================================ */
@@ -4367,6 +4433,87 @@ function renderCalfBox() {
     renderCalfBox();
   };
 }
+/* ============================================================
+   PUSH-UPS & SIT-UPS — zelfde tracker als calf raises, maar
+   zonder standenrij: één teller en één PR per oefening.
+   ============================================================ */
+const REP_TRACKERS = {
+  pushup: {
+    box: "pushup-box", accent: "rt-push", icon: "pushup", noun: "push-up",
+    read: () => store.pushups(), write: v => store.setPushups(v),
+    prompt: "Tik aan hoeveel push-ups je haalt — versla je vorige poging!",
+    hint: "Handen op schouderbreedte, lichaam als een plank. Zak tot je borst bijna de vloer raakt en duw gecontroleerd terug omhoog.",
+  },
+  situp: {
+    box: "situp-box", accent: "rt-situp", icon: "situp", noun: "sit-up",
+    read: () => store.situps(), write: v => store.setSitups(v),
+    prompt: "Tik aan hoeveel sit-ups je haalt — versla je vorige poging!",
+    hint: "Knieën gebogen, voeten plat. Rol je romp op vanuit je buik in plaats van te trekken aan je nek, en zak rustig terug.",
+  },
+};
+const repCurrent = { pushup: 0, situp: 0 };
+
+function repStats(key) {
+  const attempts = REP_TRACKERS[key].read();
+  const last = attempts.length ? attempts[attempts.length - 1].reps : 0;
+  const pr = attempts.reduce((mx, a) => Math.max(mx, a.reps || 0), 0);
+  return { attempts, last, pr };
+}
+function repHistHtml(attempts) {
+  const last7 = attempts.slice(-7);
+  if (!last7.length) return "";
+  const mx = Math.max(...last7.map(a => a.reps), 1);
+  return `<div class="cp-lbl" style="margin-top:12px;">laatste ${last7.length} series</div>
+    <div class="calf-hist">${last7.map(a => `<div class="ch-col"><span class="ch-val">${a.reps}</span><span class="ch-bar" style="height:${Math.max(8, a.reps / mx * 100)}%" title="${esc(a.date)}"></span></div>`).join("")}</div>`;
+}
+function renderRepTracker(key) {
+  const cfg = REP_TRACKERS[key];
+  const box = document.getElementById(cfg.box);
+  if (!box) return;
+  const { attempts, last, pr } = repStats(key);
+  const cur = repCurrent[key];
+  const gridN = Math.max(pr + 3, last + 3, 15);
+  box.innerHTML = `
+    <div class="card ${cfg.accent}">
+      <div class="calf-readout">
+        <div class="cr-num">${cur}</div>
+        <div class="cr-unit">reps</div>
+        <div class="cr-meta">vorige serie ${last} · pr ${pr}</div>
+      </div>
+      <div class="calf-steppers">
+        <button class="btn ghost" data-rt-dec="${key}" ${cur ? "" : "disabled"}>${icon("minus", 20)}</button>
+        <button class="btn" data-rt-inc="${key}">${icon("plus", 20)}REP</button>
+      </div>
+      <div class="rep-legend"><span style="color:#7bd4ff;"><span class="rep-key" style="border-color:#7bd4ff;"></span> vorige (${last})</span><span style="color:#ffd75e;"><span class="rep-key" style="border-color:#ffd75e;"></span> PR (${pr})</span></div>
+      <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < cur ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rt-rep="${i}">${i < cur ? icon("check", 15) : i + 1}</button>`).join("")}</div>
+      <div class="feel-caption">${cur ? `${cur} ${esc(cfg.noun)}${cur === 1 ? "" : "s"}${pr && cur > pr ? " — NIEUW RECORD!" : pr ? ` (PR: ${pr})` : ""}` : esc(cfg.prompt)}</div>
+      <button class="btn full small" data-rt-save="${key}" ${cur ? "" : "disabled"} style="margin-top:8px;">${icon("check", 17)}Poging opslaan</button>
+      ${repHistHtml(attempts)}
+      ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? icon("trophy", 14) : ""}</span></div>`).join("")}</div></details>` : ""}
+      <p class="muted" style="font-size:0.85rem; font-weight:600; margin-top:10px;">${esc(cfg.hint)}</p>
+    </div>`;
+  const redraw = () => renderRepTracker(key);
+  box.querySelector(`[data-rt-dec="${key}"]`).onclick = () => { repCurrent[key] = Math.max(0, repCurrent[key] - 1); beep(620, 0.06); redraw(); };
+  box.querySelector(`[data-rt-inc="${key}"]`).onclick = () => { repCurrent[key] += 1; beep(760, 0.08); redraw(); };
+  box.querySelectorAll("[data-rt-rep]").forEach(d => d.onclick = () => {
+    const i = parseInt(d.dataset.rtRep);
+    repCurrent[key] = (i + 1 === repCurrent[key]) ? i : i + 1;
+    beep(760, 0.08);
+    redraw();
+  });
+  box.querySelector(`[data-rt-save="${key}"]`).onclick = () => {
+    if (!repCurrent[key]) return;
+    const isPr = pr > 0 && repCurrent[key] > pr;
+    const list = cfg.read();
+    list.push({ date: todayISO(), reps: repCurrent[key] });
+    cfg.write(list);
+    if (isPr) { celebrate(); voiceCoach.say("pr", {}, { minGap: 0, interrupt: true }); toast(`Nieuw ${cfg.noun}-record: ${repCurrent[key]}!`); }
+    else toast("Poging opgeslagen");
+    repCurrent[key] = 0;
+    redraw();
+  };
+}
+
 function renderUnilateralBox() {
   const box = document.getElementById("unilateral-box");
   const home = UNILATERAL.filter(u => u.machineName === "thuis");
@@ -5488,7 +5635,7 @@ function exportData() {
     setupDone: store.setupDone(), theme: store.theme(),
     machines: store.machines().map(m => { const c = {...m}; delete c._editing; return c; }),
     sessions: store.sessions(), checklist: store.checklist(),
-    goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(),
+    goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(), pushups: store.pushups(), situps: store.situps(),
     currentSession: store.currentSession(), homeWorkout: store.homeWorkout(),
     homeSessions: store.homeSessions(),
   };
@@ -5523,6 +5670,8 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       if (data.profile) store.setProfile(data.profile);
       if (data.home) store.setHome(data.home);
       if (Array.isArray(data.calf)) store.setCalf(data.calf);
+      if (Array.isArray(data.pushups)) store.setPushups(data.pushups);
+      if (Array.isArray(data.situps)) store.setSitups(data.situps);
       if (data.theme && THEMES[data.theme]) applyTheme(data.theme);
       store.setSetupDone(true);
       currentSession = null; expandedMachineId = null;
@@ -5541,7 +5690,7 @@ document.getElementById("reset-data").addEventListener("click", () => {
   showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies, doelen, foto's en instellingen op dit apparaat. Cloud-sync wordt eerst uitgeschakeld, zodat je andere apparaten niets kwijtraken. Dit kan niet ongedaan worden gemaakt.", () => {
     cloud.disable(); // eerst sync los, anders wordt de lege staat naar de cloud gepusht
     ["gymwave_machines","gymwave_sessions","gymwave_setup_done","gymwave_theme","gymwave_checklist",
-     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_chat",
+     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_chat",
      "gymwave_api_key","gymwave_snack_salt","gymwave_snack_done","gymwave_current_session","gymwave_last_modified"].forEach(k => localStorage.removeItem(k));
     photoDB.clear().catch(() => {});
     currentSession = null; expandedMachineId = null; obMachines = []; applyTheme("Synthwave"); boot();
@@ -5569,7 +5718,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_home_workout","gymwave_home_sessions"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 
