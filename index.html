@@ -1373,7 +1373,68 @@ function hwStepsHtml(s, open) {
     ${steps.length ? `<div class="sub">📋 Zo voer je hem uit</div><ul>${steps.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${s.tips && s.tips.length ? `<div class="sub">✅ Zo doe je hem goed</div><ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     ${s.mistakes && s.mistakes.length ? `<div class="sub">🚫 Dit moet je niet doen</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    <div class="speak-row">
+      ${steps.length ? `<button class="btn small ghost hw-speak-steps">🔊 Uitvoering</button>` : ""}
+      ${s.tips && s.tips.length ? `<button class="btn small ghost hw-speak-dos">🔊 Do's</button>` : ""}
+      ${s.mistakes && s.mistakes.length ? `<button class="btn small ghost hw-speak-donts">🔊 Don'ts</button>` : ""}
+    </div>
   </div></details>`;
+}
+/* Voorleesknoppen (zoals in de gym-sessie): uitvoering, do's en don'ts apart voor te lezen */
+function bindHwSpeak(root, s) {
+  const steps = EXERCISE_STEPS[s.name] || (s.description ? [s.description] : []);
+  const wire = (sel, txt) => { const b = root.querySelector(sel); if (b) b.onclick = () => voiceCoach.speak(txt, { force: true, interrupt: true }); };
+  wire(".hw-speak-steps", "Zo voer je hem uit. " + steps.join(". ") + ".");
+  wire(".hw-speak-dos", "De do's. " + (s.tips || []).join(". ") + ".");
+  wire(".hw-speak-donts", "De don'ts, dit gaat vaak mis. " + (s.mistakes || []).join(". ") + ".");
+}
+/* Gevoelsschaal thuis (zelfde 5 kleuren als de gym) + gevolg voor het 🎯-doel:
+   groen/donkergroen → zwaarder-vraag, rood/oranje → doel automatisch omlaag */
+function hwFeelHtml(feel) {
+  return `<div class="feel-row" style="margin:10px 0 4px;">
+    <span class="feel-lbl">Hoe voelde dit?</span>
+    <div class="feel-scale">${[1, 2, 3, 4, 5].map(i => `<button class="feel-btn ${feel === i ? "sel" : ""}" data-feel="${i}" style="background:${FEEL_COLORS[i]};" title="${FEEL_LABELS[i]}">${feel === i ? "✓" : ""}</button>`).join("")}</div>
+    <div class="feel-caption">${feel ? FEEL_LABELS[feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)"}</div>
+  </div>`;
+}
+function bindHwFeel(root, s, metric) {
+  root.querySelectorAll("[data-feel]").forEach(fb => fb.onclick = () => {
+    const val = parseInt(fb.dataset.feel);
+    const w = store.homeWorkout(); if (!w) return;
+    const rr = Object.assign({ metric }, w.results[s.name] || {});
+    rr.feel = rr.feel === val ? null : val;
+    w.results[s.name] = rr; store.setHomeWorkout(w);
+    root.querySelectorAll("[data-feel]").forEach(b2 => { b2.classList.toggle("sel", parseInt(b2.dataset.feel) === rr.feel); b2.textContent = parseInt(b2.dataset.feel) === rr.feel ? "✓" : ""; });
+    const cap = root.querySelector(".feel-caption");
+    if (cap) cap.textContent = rr.feel ? FEEL_LABELS[rr.feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)";
+    hwFeelFollowUp(s, rr.feel, metric);
+  });
+}
+function hwFeelFollowUp(s, feel, metric) {
+  if (!feel || feel === 3) return;
+  const sug = hwSuggest(s);
+  const unit = metric === "sec" ? "seconden" : "herhalingen";
+  if (feel >= 4) {
+    if (hwWeighted(s)) {
+      const nextKg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, sug.kg) : Math.round((sug.kg + (feel === 5 ? 1 : 0.5)) * 2) / 2;
+      if (nextKg !== sug.kg) showModal("Zwaarder de volgende keer? 📈", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${nextKg} kg proberen (nu ${sug.kg} kg)?`, () => {
+        setHwTarget(s.name, { kg: nextKg }); toast(`📈 Genoteerd! Volgende keer: ${nextKg} kg`);
+      });
+    } else {
+      const nextReps = sug.reps + (metric === "sec" ? 5 : 2);
+      showModal("Meer de volgende keer? 📈", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${nextReps} ${unit} proberen (nu ${sug.reps})?`, () => {
+        setHwTarget(s.name, { reps: nextReps }); toast(`📈 Genoteerd! Volgende keer: ${nextReps} ${unit}`);
+      });
+    }
+  } else {
+    if (hwWeighted(s)) {
+      const downKg = s.equipment === "kettlebell" ? stackPrev(KETTLEBELL_WEIGHTS, sug.kg) : Math.max(0.5, Math.round((sug.kg - (feel === 1 ? 1 : 0.5)) * 2) / 2);
+      if (downKg !== sug.kg) { setHwTarget(s.name, { kg: downKg }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} → volgende keer ${downKg} kg 🔻`); }
+    } else {
+      const downReps = Math.max(1, sug.reps - (metric === "sec" ? 5 : 2));
+      if (downReps !== sug.reps) { setHwTarget(s.name, { reps: downReps }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} → volgende keer ${downReps} ${unit} 🔻`); }
+    }
+  }
 }
 function exVideoSearch(s) {
   const q = String(s.name).replace(/\(.*?\)/g, "").trim();
@@ -2195,13 +2256,18 @@ document.getElementById("ob-preset").addEventListener("click", () => { loadPrese
 function renderHome() {
   document.getElementById("home-date").textContent = fmtBigDate(new Date());
   const sessions = store.sessions();
-  document.getElementById("stat-sessions").textContent = sessions.length;
+  const homeSess = store.homeSessions();
+  document.getElementById("stat-sessions").textContent = sessions.length + homeSess.length; // gym + thuis tellen allebei mee
   let totalKg = 0;
   sessions.forEach(s => s.entries.forEach(e => totalKg += (parseFloat(e.weight) || 0)));
+  homeSess.forEach(s => (s.entries || []).forEach(e => totalKg += (parseFloat(e.weight) || 0)));
   document.getElementById("stat-kg").textContent = Math.round(totalKg);
   const last = sessions[sessions.length - 1];
   const lastLabel = last ? (last.name ? `${last.name} · ${fmtNice(last.date)}` : fmtNice(last.date)) : null;
-  document.getElementById("home-last").textContent = lastLabel ? `Laatste sessie: ${lastLabel}` : "Nog geen sessies — tijd om te beginnen!";
+  const lastH = homeSess[homeSess.length - 1];
+  document.getElementById("home-last").innerHTML =
+    (lastLabel ? `Laatste sessie: ${esc(lastLabel)}` : "Nog geen sessies — tijd om te beginnen!") +
+    (lastH ? `<br>🏠 Laatste thuis-workout: ${esc(fmtNice(lastH.date))} (${(lastH.entries || []).length} oef.)` : "");
   // lopende sessie? dan wordt de grote knop "verder gaan" en kan een nieuwe alleen via bevestiging
   document.getElementById("enter-gym").textContent = currentSession ? "Verder met je sessie ▶" : "🏋️ De Gym In";
   const hwToday = store.homeWorkout();
@@ -2877,6 +2943,7 @@ document.getElementById("finish-session").addEventListener("click", finishSessio
 /* Sessie-samenvatting: barchart van alle sessies met stippellijn-referenties + delta's */
 let summaryToast = "🏁 Sessie opgeslagen";
 function sessionTotalKg(s) { return (s.entries || []).reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0); }
+function fmtDur(a, b) { if (!a || !b) return null; const min = Math.round((new Date(b) - new Date(a)) / 60000); return min > 0 ? `${min} min` : null; }
 function showSessionSummary(fin) {
   const box = document.getElementById("summary-content");
   const modal = document.getElementById("summary-modal");
@@ -2901,7 +2968,7 @@ function showSessionSummary(fin) {
   };
   box.innerHTML = `
     <div class="ss-kg">${curKg} kg</div>
-    <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen</div>
+    <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -3621,7 +3688,7 @@ function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s =
 function homeExerciseHistory(name) {
   const pts = [];
   store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date))
-    .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+    .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight, feel: e.feeling }); });
   return pts;
 }
 function pickWeighted(list, rnd, wf) {
@@ -3713,6 +3780,7 @@ function renderHomeWorkout() {
 }
 /* ▶️ Reeks-speler: werkt het voorstel oefening voor oefening af */
 let hwTimerInt = null;
+let hwAnnounced = null; // laatste voorgelezen oefening, tegen dubbel aankondigen
 function renderHwPlayer(hw) {
   document.getElementById("hw-setup").innerHTML = "";
   const wrap = document.getElementById("hw-plan");
@@ -3742,8 +3810,19 @@ function renderHwPlayer(hw) {
   const r = hw.results[s.name] || {};
   const head = document.createElement("div");
   head.className = "card hw-summary";
-  head.innerHTML = `<span class="muted" style="font-weight:700;">Oefening ${idx + 1} van ${names.length}</span><span style="font-weight:800;">${doneN} ✓</span>`;
+  head.innerHTML = `<span class="muted" style="font-weight:700;">Oefening ${idx + 1} van ${names.length}</span>
+    <span style="display:flex; gap:10px; align-items:center;"><span style="font-weight:800;">${doneN} ✓</span><button class="coach-mute-btn" id="hwp-coach" title="Audio-coach aan/uit">${store.coach().enabled ? "🔊" : "🔇"}</button></span>`;
   wrap.appendChild(head);
+  head.querySelector("#hwp-coach").onclick = () => {
+    const c = store.coach(); c.enabled = !c.enabled; store.setCoach(c);
+    head.querySelector("#hwp-coach").textContent = c.enabled ? "🔊" : "🔇";
+    toast(c.enabled ? "🔊 Audio-coach aan" : "🔇 Audio-coach uit");
+  };
+  // kondig elke nieuwe oefening aan (zoals de gym-sessie doet)
+  if (hwAnnounced !== s.name) {
+    hwAnnounced = s.name;
+    voiceCoach.speak(`${s.name}. Voorstel: ${sug.txt}.`, { interrupt: false });
+  }
   const card = document.createElement("div");
   card.className = "card snack-card";
   card.innerHTML = `
@@ -3757,12 +3836,15 @@ function renderHwPlayer(hw) {
       <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${sug.reps}" />
       ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${sug.kg}" />` : ""}
     </div>
+    ${hwFeelHtml(r.feel)}
     <button class="btn full" id="hwp-done" style="margin-top:12px;">✓ Klaar — volgende</button>
     <div class="speak-row" style="margin-top:8px;">
       <button class="btn small ghost" id="hwp-skip">⏭ Overslaan</button>
       <button class="btn small ghost" id="hwp-stop">⏹ Stop reeks</button>
     </div>`;
   wrap.appendChild(card);
+  bindHwFeel(card, s, metric);
+  bindHwSpeak(card, s);
   const valIn = card.querySelector(".hw-val"), wtIn = card.querySelector(".hw-wt");
   const timerBtn = card.querySelector("#hwp-timer");
   if (timerBtn) timerBtn.onclick = () => {
@@ -3829,6 +3911,7 @@ function renderHwSetup(hw) {
   const play = box.querySelector("#hw-play");
   if (play) play.onclick = () => {
     const w = store.homeWorkout(); if (!w) return;
+    hwAnnounced = null;
     w.playing = true;
     w.playIdx = w.plan.findIndex(n => !(w.results[n] || {}).done);
     if (w.playIdx < 0) w.playIdx = w.plan.length;
@@ -3867,7 +3950,8 @@ function hwCard(s, hw) {
       <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${hwSuggest(s).reps}" />
       ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${hwSuggest(s).kg}" />` : ""}
     </div>
-    ${(last || pr) ? `<div class="hw-prog">${last ? `Vorige: <b>${last.value} ${last.metric === "sec" ? "sec" : "reps"}</b>${last.weight ? ` @ ${last.weight}kg` : ""}` : ""}${pr ? `${last ? " · " : ""}<span class="hw-pr">PR: ${pr} ${unitLbl}</span>` : ""}</div>` : ""}
+    ${hwFeelHtml(r.feel)}
+    ${(last || pr) ? `<div class="hw-prog">${last ? `Vorige: <b>${last.value} ${last.metric === "sec" ? "sec" : "reps"}</b>${last.weight ? ` @ ${last.weight}kg` : ""}${last.feel ? ` <span class="hist-feel" style="background:${FEEL_COLORS[last.feel]};" title="${FEEL_LABELS[last.feel]}"></span>` : ""}` : ""}${pr ? `${last ? " · " : ""}<span class="hw-pr">PR: ${pr} ${unitLbl}</span>` : ""}</div>` : ""}
     <div class="hw-rate-row">
       <button class="hw-rate ${rating === "like" ? "sel" : ""}" data-rate="like"><span class="hw-emoji">👍</span>Vaker</button>
       <button class="hw-rate ${rating === "super" ? "sel" : ""}" data-rate="super"><span class="hw-emoji">⭐</span>Elke keer</button>
@@ -3890,7 +3974,13 @@ function hwCard(s, hw) {
     if (rr.done && rr.value == null && valIn.value !== "") rr.value = parseFloat(valIn.value);
     w.results[s.name] = rr; store.setHomeWorkout(w);
     renderHomeWorkout();
+    if (rr.done) { // net als in de gym: door naar de volgende openstaande oefening
+      voiceCoach.say("exerciseDone", {}, { minGap: 2000 });
+      setTimeout(() => { const nxt = document.querySelector("#hw-plan .snack-card:not(.hw-done)"); if (nxt) nxt.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
+    }
   };
+  bindHwFeel(card, s, metric);
+  bindHwSpeak(card, s);
   card.querySelectorAll(".hw-rate").forEach(b => b.onclick = () => setHwRating(s.name, b.dataset.rate));
   // 🎯 doel bijstellen: reps/sec en kg (kettlebell klikt op 16/20)
   card.querySelectorAll("[data-tgt]").forEach(b => b.onclick = () => {
@@ -3934,7 +4024,7 @@ function finishHomeWorkout() {
   const entries = hw.plan.map(name => {
     const s = exByName(name); const r = hw.results[name] || {};
     if (!r.done) return null;
-    return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg" };
+    return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg", feeling: r.feel != null ? r.feel : null };
   }).filter(Boolean);
   if (!entries.length) { alert("Vink minstens één oefening af voordat je de workout afrondt!"); return; }
   // Thuis-workouts staan apart van je gym-sessies (eigen opslag, eigen voortgang in Thuis)
@@ -3971,7 +4061,7 @@ function showHomeSummary(fin) {
   };
   box.innerHTML = `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
-    <div class="ss-sub">🏠 Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}</div>
+    <div class="ss-sub">🏠 Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
