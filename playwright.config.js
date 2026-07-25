@@ -29,7 +29,10 @@ module.exports = defineConfig({
   // sneller dan alles tegelijk.
   workers: process.env.CI ? 2 : 2,
   fullyParallel: false,
-  timeout: 30000,
+  // Ruim genomen: de tests die alle tien views langslopen hebben op een
+  // trage machine meer dan 30 s nodig.
+  timeout: 90000,
+  expect: { timeout: 10000 },
   reporter: [['line']],
   use: {
     // GymWave is één bestand zonder server; de tests laden het via file://

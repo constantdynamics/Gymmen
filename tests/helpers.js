@@ -6,14 +6,31 @@ const APP_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 const VIEWS = ['home', 'session', 'coach', 'goals', 'thuis', 'homeworkout',
   'stats', 'tips', 'checklist', 'settings'];
 
+/**
+ * Blokkeert alles wat niet uit het bestand zelf komt.
+ * GymWave laadt Google Fonts en de Supabase-CDN; die zijn voor de tests niet
+ * nodig en laten `waitUntil: load` anders op elke navigatie hangen.
+ */
+async function blockExternal(page) {
+  if (page.__blocked) return;
+  page.__blocked = true;
+  await page.route('**/*', route => {
+    const u = route.request().url();
+    if (u.startsWith('file://') || u.startsWith('data:') || u.startsWith('blob:')) return route.continue();
+    return route.abort();
+  });
+}
+
 /** Opent de app en klikt de onboarding weg met het standaardschema. */
 async function openApp(page) {
+  await blockExternal(page);
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => {
     const t = m.text();
     // netwerkfouten van Google Fonts / de Supabase-CDN horen bij file:// draaien
-    if (m.type() === 'error' && !/ERR_TUNNEL|ERR_CONNECTION|ERR_NAME|ERR_INTERNET|fonts\.|jsdelivr/.test(t)) {
+    // ERR_FAILED komt van de geblokkeerde fonts/CDN hierboven, niet uit de app
+    if (m.type() === 'error' && !/ERR_TUNNEL|ERR_CONNECTION|ERR_NAME|ERR_INTERNET|ERR_FAILED|ERR_BLOCKED|fonts\.|jsdelivr/.test(t)) {
       errors.push('console: ' + t);
     }
   });
@@ -59,9 +76,19 @@ async function seedHistory(page) {
   await page.waitForTimeout(400);
 }
 
+/** Wisselt van view en wacht tot de slideIn-animatie is uitgespeeld —
+ *  anders meet een contrast- of maatcontrole een frame halverwege. */
 async function goto(page, view) {
   await page.evaluate(v => route(v), view);
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(120);
+  await settle(page);
+}
+
+/** Wacht tot alle lopende CSS-animaties klaar zijn. */
+async function settle(page) {
+  await page.evaluate(() => Promise.all(
+    document.getAnimations().map(a => a.finished.catch(() => {}))
+  )).catch(() => {});
 }
 
 /** Zichtbare tekstknopen die een emoji of icoon-achtig unicode-teken bevatten. */
@@ -81,4 +108,4 @@ async function visibleGlyphs(page) {
   });
 }
 
-module.exports = { APP_URL, VIEWS, openApp, seedHistory, goto, visibleGlyphs };
+module.exports = { APP_URL, VIEWS, openApp, seedHistory, goto, settle, visibleGlyphs, blockExternal };

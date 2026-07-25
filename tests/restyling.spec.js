@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { VIEWS, openApp, seedHistory, goto, visibleGlyphs } = require('./helpers');
+const { APP_URL, VIEWS, openApp, seedHistory, goto, settle, visibleGlyphs } = require('./helpers');
 
 /* ============================================================
    Restyling — de eisen uit de briefing (§1 t/m §4)
@@ -103,9 +103,9 @@ test.describe('§3.1 home: drie rijen met wachttijd-kleur', () => {
     await expect(page.locator('.hero-row')).toHaveCount(3);
     await expect(page.locator('.wait-chip')).toHaveCount(3);
     await expect(page.locator('.hero-count')).toHaveCount(6);
-    // per chip zes segmenten
+    // per chip zes segmenten in de ramp
     for (let i = 0; i < 3; i++) {
-      await expect(page.locator('.wait-chip').nth(i).locator('span[style]')).toHaveCount(6);
+      await expect(page.locator('.wait-chip').nth(i).locator('.wait-ramp span')).toHaveCount(6);
     }
     const labels = await page.locator('.hc-lbl').allTextContents();
     expect(labels).toEqual(['sessies', 'kg pr', 'sessies', 'kg pr', 'series', 'reps pr']);
@@ -395,14 +395,19 @@ test.describe('§1 randvoorwaarden', () => {
   });
 
   test('één bestand: geen nieuwe externe verzoeken behalve de al bestaande', async ({ page }) => {
+    // deze test blokkeert bewust niets, maar laat de verzoeken wel afketsen
     const hosts = new Set();
     page.on('request', r => {
       const u = r.url();
-      if (u.startsWith('file://') || u.startsWith('data:')) return;
+      if (u.startsWith('file://') || u.startsWith('data:') || u.startsWith('blob:')) return;
       hosts.add(new URL(u).host);
     });
-    await openApp(page);
-    await page.waitForTimeout(500);
+    await page.route('**/*', route => {
+      const u = route.request().url();
+      return u.startsWith('file://') ? route.continue() : route.abort();
+    });
+    await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
     // alleen de fonts en de Supabase-CDN die er al stonden
     [...hosts].forEach(h =>
       expect(['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net']).toContain(h));

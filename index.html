@@ -830,7 +830,9 @@ input.weight-display { width: 100%; max-width: 150px; background: rgba(0,0,0,0.4
 .crowd-btn { max-width: none; height: 44px; border-radius: 0; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.04); opacity: 0.6; display: flex; align-items: center; justify-content: center; color: var(--text-body); }
 .crowd-btn.sel { opacity: 1; transform: none; border-color: transparent; background: linear-gradient(135deg, var(--home-a), var(--home-b)); color: #fff; }
 .crowd-caption { text-align: center; font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 12px; color: var(--text-body); margin-top: 8px; min-height: 1.2em; }
-.hw-rate { border-color: var(--line-strong); background: rgba(255,255,255,0.04); opacity: 0.7; color: var(--text-body); gap: 4px; }
+/* Niet-gekozen knoppen niet dimmen: 0.7 × 0.78 kwam onder de 66%-ondergrens.
+   Het verschil zit nu in achtergrond en rand, de tekst blijft leesbaar. */
+.hw-rate { border-color: var(--line-strong); background: rgba(255,255,255,0.04); opacity: 1; color: var(--text-body); gap: 4px; }
 .hw-rate .hw-emoji { display: flex; align-items: center; justify-content: center; }
 .hw-rate.sel { opacity: 1; border-color: transparent; background: linear-gradient(135deg, var(--home-a), var(--home-b)); color: #fff; box-shadow: none; }
 .hw-rate.sel.dis { background: linear-gradient(135deg, #b3243f, #ff4d6a); box-shadow: none; }

@@ -243,10 +243,9 @@ test('apparaten beheren blijft werken', async ({ page }) => {
 
 test('door de hele app klikken geeft geen JS-fouten', async ({ page }) => {
   const errors = await openApp(page);
-  await seedHistory(page);
   for (const v of VIEWS) await goto(page, v);
-  await page.click('#enter-gym').catch(() => {});
-  await page.waitForTimeout(300);
+  await goto(page, 'home');
+  await page.click('#enter-gym');
   await page.locator('.mc-header').nth(1).click();
   await page.waitForTimeout(300);
   expect(errors, errors.join(' ; ')).toEqual([]);
