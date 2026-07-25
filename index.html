@@ -839,6 +839,26 @@ input.weight-display { width: 100%; max-width: 150px; background: rgba(0,0,0,0.4
 .rt-push .rep-dot.done, .rt-situp .rep-dot.done {
   background: linear-gradient(135deg, var(--rt-a), var(--rt-b)); border-color: var(--rt-b);
 }
+/* ---- Waffle van afgeronde series -------------------------------
+   Het raster groeit mee met het aantal series, maar het blok houdt
+   altijd dezelfde afmeting: alleen de bolletjes worden kleiner. */
+.sw-title { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-label); margin-top: 14px; }
+.sess-waffle {
+  display: grid; grid-template-columns: repeat(var(--n), 1fr);
+  gap: 3.2%; margin: 8px auto 0;
+  width: min(100%, 50vh); aspect-ratio: 1;
+}
+.sw-cell { border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.04); }
+.sw-cell.done {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--rt-a, var(--home-a)), var(--rt-b, var(--home-b)));
+  box-shadow: 0 0 10px rgba(var(--rt-glow, 43, 10, 117), 0.35);
+}
+.sw-cap { font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 12px; color: var(--text-body); text-align: center; margin-top: 10px; }
+.sw-cap b { font-family: "Orbitron", sans-serif; font-weight: 900; color: #fff; }
+/* calf gebruikt dezelfde accenten als de twee nieuwe trackers */
+.rt-calf { --rt-a: var(--calf-a); --rt-b: var(--calf-b); --rt-glow: 61, 18, 160; }
+
 .calf-steppers { display: flex; gap: 9px; margin: 12px 0; }
 .calf-steppers .btn { flex: 1; height: 50px; min-height: 50px; border-radius: 0; padding: 0; }
 .calf-steppers .btn:not(.ghost) { background: linear-gradient(135deg, var(--calf-a), var(--calf-b)); box-shadow: 0 6px 22px rgba(154,61,245,0.4); }
@@ -4387,7 +4407,7 @@ function renderCalfBox() {
   const { attempts, last, pr } = calfStats(calfMode);
   const gridN = Math.max(pr + 3, last + 3, 15);
   box.innerHTML = `
-    <div class="card">
+    <div class="card rt-calf">
       <div class="calf-modes">${Object.entries(CALF_MODES).map(([k, lbl]) => `<button class="btn small ${calfMode === k ? "" : "ghost"}" data-cm="${k}">${lbl}</button>`).join("")}</div>
       <div class="calf-readout">
         <div class="cr-num">${calfCurrent}</div>
@@ -4402,6 +4422,7 @@ function renderCalfBox() {
       <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < calfCurrent ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rep="${i}">${i < calfCurrent ? icon("check",15) : i + 1}</button>`).join("")}</div>
       <div class="feel-caption">${calfCurrent ? `${calfCurrent} raise${calfCurrent === 1 ? "" : "s"}${pr && calfCurrent > pr ? " — NIEUW RECORD!" : pr ? ` (PR: ${pr})` : ""}` : "Tik aan hoeveel calf raises je haalt — versla je vorige poging!"}</div>
       <button class="btn full small" id="calf-save" ${calfCurrent ? "" : "disabled"} style="margin-top:8px;">${icon("check",17)}Poging opslaan</button>
+      ${sessionWaffleHtml(store.calf().length)}
       ${calfPrRowHtml()}
       ${calfHistHtml(attempts)}
       ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? icon("trophy",14) : ""}</span></div>`).join("")}</div></details>` : ""}
@@ -4448,6 +4469,25 @@ const REP_TRACKERS = {
 };
 const repCurrent = { pushup: 0, situp: 0 };
 
+/* ============================================================
+   WAFFLE VAN AFGERONDE SERIES
+   Het raster groeit zodra het vol is: 1 t/m 3 series in een 2×2,
+   vanaf 4 een 3×3, vanaf 9 een 4×4, enzovoort. Vullen gaat in
+   leesrichting — van links naar rechts, dan de volgende rij.
+   ============================================================ */
+function waffleSide(n) { return Math.max(2, Math.floor(Math.sqrt(n)) + 1); }
+function sessionWaffleHtml(n) {
+  if (!n) return "";
+  const s = waffleSide(n);
+  const cap = s * s;
+  const cells = Array.from({ length: cap }, (_, i) =>
+    `<span class="sw-cell${i < n ? " done" : ""}"></span>`).join("");
+  const left = cap - n;
+  return `<div class="sw-title">afgeronde series</div>
+    <div class="sess-waffle" style="--n:${s}">${cells}</div>
+    <div class="sw-cap"><b>${n}</b> van ${cap} · nog ${left} tot een raster van ${s + 1} bij ${s + 1}</div>`;
+}
+
 function repStats(key) {
   const attempts = REP_TRACKERS[key].read();
   const last = attempts.length ? attempts[attempts.length - 1].reps : 0;
@@ -4483,6 +4523,7 @@ function renderRepTracker(key) {
       <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < cur ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rt-rep="${i}">${i < cur ? icon("check", 15) : i + 1}</button>`).join("")}</div>
       <div class="feel-caption">${cur ? `${cur} ${esc(cfg.noun)}${cur === 1 ? "" : "s"}${pr && cur > pr ? " — NIEUW RECORD!" : pr ? ` (PR: ${pr})` : ""}` : esc(cfg.prompt)}</div>
       <button class="btn full small" data-rt-save="${key}" ${cur ? "" : "disabled"} style="margin-top:8px;">${icon("check", 17)}Poging opslaan</button>
+      ${sessionWaffleHtml(attempts.length)}
       ${repHistHtml(attempts)}
       ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? icon("trophy", 14) : ""}</span></div>`).join("")}</div></details>` : ""}
       <p class="muted" style="font-size:0.85rem; font-weight:600; margin-top:10px;">${esc(cfg.hint)}</p>

@@ -165,6 +165,111 @@ test.describe('Tracker-blokken in Thuis', () => {
   });
 });
 
+test.describe('Waffle van afgeronde series', () => {
+  /** Zet n opgeslagen pogingen klaar voor push-ups en toont de Thuis-tab. */
+  async function withSessions(page, n) {
+    await page.evaluate(cnt => {
+      const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      store.setPushups(Array.from({ length: cnt }, (_, i) => ({ date: d(cnt - i), reps: 10 + i })));
+      route('thuis');
+    }, n);
+    await page.waitForTimeout(400);
+  }
+
+  test('het raster groeit zodra het vol zit', async ({ page }) => {
+    await openApp(page);
+    const sides = await page.evaluate(() =>
+      [1, 2, 3, 4, 5, 8, 9, 10, 15, 16, 24, 25].map(n => waffleSide(n)));
+    //  1-3 -> 2x2 | 4-8 -> 3x3 | 9-15 -> 4x4 | 16-24 -> 5x5 | 25 -> 6x6
+    expect(sides).toEqual([2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6]);
+  });
+
+  test('bij één serie een 2x2 met alleen linksboven gevuld', async ({ page }) => {
+    await openApp(page);
+    await withSessions(page, 1);
+    const w = page.locator('#pushup-box .sess-waffle');
+    await expect(w.locator('.sw-cell')).toHaveCount(4);
+    await expect(w.locator('.sw-cell.done')).toHaveCount(1);
+    // de eerste cel in de DOM is linksboven in het raster
+    await expect(w.locator('.sw-cell').first()).toHaveClass(/done/);
+    await expect(w.locator('.sw-cell').nth(1)).not.toHaveClass(/done/);
+  });
+
+  test('bij vier series een 3x3 met vier gevuld in leesrichting', async ({ page }) => {
+    await openApp(page);
+    await withSessions(page, 4);
+    const cells = page.locator('#pushup-box .sess-waffle .sw-cell');
+    await expect(cells).toHaveCount(9);
+    const filled = await cells.evaluateAll(els => els.map(e => e.classList.contains('done')));
+    // eerst vullen, dan pas leeg: geen gaten in de leesrichting
+    expect(filled).toEqual([true, true, true, true, false, false, false, false, false]);
+    const cols = await page.locator('#pushup-box .sess-waffle')
+      .evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+    expect(cols).toBe(3);
+  });
+
+  test('de chart houdt dezelfde afmeting terwijl het raster groeit', async ({ page }) => {
+    await openApp(page);
+    const sizes = [];
+    for (const n of [1, 4, 9, 16]) {
+      await withSessions(page, n);
+      sizes.push(await page.locator('#pushup-box .sess-waffle').evaluate(el => {
+        const r = el.getBoundingClientRect();
+        return [Math.round(r.width), Math.round(r.height)];
+      }));
+    }
+    // vierkant, en bij elk aantal even groot
+    sizes.forEach(([w, h]) => expect(Math.abs(w - h)).toBeLessThanOrEqual(1));
+    sizes.forEach(([w]) => expect(w).toBe(sizes[0][0]));
+    // ruwweg een half scherm: minstens een derde van de vensterhoogte
+    expect(sizes[0][0]).toBeGreaterThan(780 / 3);
+  });
+
+  test('zonder series is er geen waffle', async ({ page }) => {
+    await openApp(page);
+    await withSessions(page, 0);
+    await expect(page.locator('#pushup-box .sess-waffle')).toHaveCount(0);
+  });
+
+  test('alle drie de trackers hebben er een, in hun eigen tint', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      store.setCalf(Array.from({ length: 5 }, (_, i) => ({ date: d(5 - i), mode: 'L', reps: 10 + i })));
+      store.setPushups(Array.from({ length: 9 }, (_, i) => ({ date: d(9 - i), reps: 10 + i })));
+      store.setSitups(Array.from({ length: 2 }, (_, i) => ({ date: d(2 - i), reps: 20 + i })));
+      route('thuis');
+    });
+    await page.waitForTimeout(500);
+    const shots = {};
+    for (const box of ['calf-box', 'pushup-box', 'situp-box']) {
+      const w = page.locator(`#${box} .sess-waffle`);
+      await expect(w).toHaveCount(1);
+      shots[box] = await w.locator('.sw-cell.done').first()
+        .evaluate(el => getComputedStyle(el).backgroundImage);
+    }
+    expect(shots['calf-box']).toContain('rgb(61, 18, 160)');
+    expect(shots['pushup-box']).toContain('rgb(82, 27, 194)');
+    expect(shots['situp-box']).toContain('rgb(104, 37, 218)');
+    // elke tracker telt zijn eigen series
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(5);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(9);
+    await expect(page.locator('#situp-box .sess-waffle .sw-cell.done')).toHaveCount(2);
+  });
+
+  test('een poging opslaan vult er een bolletje bij', async ({ page }) => {
+    await openApp(page);
+    await withSessions(page, 3);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(4);
+    for (let i = 0; i < 6; i++) await page.click('[data-rt-inc="pushup"]');
+    await page.click('[data-rt-save="pushup"]');
+    await page.waitForTimeout(500);
+    // vierde serie: raster groeit naar 3x3, vier gevuld
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(9);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(4);
+  });
+});
+
 test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
   test('geen emoji of glyphs in de nieuwe onderdelen', async ({ page }) => {
     await openApp(page);
