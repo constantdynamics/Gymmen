@@ -165,14 +165,14 @@ test.describe('Tracker-blokken in Thuis', () => {
   });
 });
 
-test.describe('Waffle van afgeronde series', () => {
-  /** Zet n opgeslagen pogingen klaar voor push-ups en toont de Thuis-tab. */
-  async function withSessions(page, n) {
-    await page.evaluate(cnt => {
-      const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
-      store.setPushups(Array.from({ length: cnt }, (_, i) => ({ date: d(cnt - i), reps: 10 + i })));
+test.describe('Waffle van de beste serie', () => {
+  /** Zet één opgeslagen poging klaar met deze reps en toont de Thuis-tab. */
+  async function withPr(page, reps) {
+    await page.evaluate(r => {
+      const d = new Date().toISOString().slice(0, 10);
+      store.setPushups(r ? [{ date: d, reps: r }] : []);
       route('thuis');
-    }, n);
+    }, reps);
     await page.waitForTimeout(400);
   }
 
@@ -184,9 +184,9 @@ test.describe('Waffle van afgeronde series', () => {
     expect(sides).toEqual([2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6]);
   });
 
-  test('bij één serie een 2x2 met alleen linksboven gevuld', async ({ page }) => {
+  test('bij een PR van 1 een 2x2 met alleen linksboven gevuld', async ({ page }) => {
     await openApp(page);
-    await withSessions(page, 1);
+    await withPr(page, 1);
     const w = page.locator('#pushup-box .sess-waffle');
     await expect(w.locator('.sw-cell')).toHaveCount(4);
     await expect(w.locator('.sw-cell.done')).toHaveCount(1);
@@ -195,9 +195,9 @@ test.describe('Waffle van afgeronde series', () => {
     await expect(w.locator('.sw-cell').nth(1)).not.toHaveClass(/done/);
   });
 
-  test('bij vier series een 3x3 met vier gevuld in leesrichting', async ({ page }) => {
+  test('bij een PR van 4 een 3x3 met vier gevuld in leesrichting', async ({ page }) => {
     await openApp(page);
-    await withSessions(page, 4);
+    await withPr(page, 4);
     const cells = page.locator('#pushup-box .sess-waffle .sw-cell');
     await expect(cells).toHaveCount(9);
     const filled = await cells.evaluateAll(els => els.map(e => e.classList.contains('done')));
@@ -206,13 +206,15 @@ test.describe('Waffle van afgeronde series', () => {
     const cols = await page.locator('#pushup-box .sess-waffle')
       .evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length);
     expect(cols).toBe(3);
+    await expect(page.locator('#pushup-box .sw-title')).toHaveText('beste serie');
+    await expect(page.locator('#pushup-box .sw-cap')).toContainText('4 reps');
   });
 
   test('de chart houdt dezelfde afmeting terwijl het raster groeit', async ({ page }) => {
     await openApp(page);
     const sizes = [];
-    for (const n of [1, 4, 9, 16]) {
-      await withSessions(page, n);
+    for (const pr of [1, 4, 9, 16]) {
+      await withPr(page, pr);
       sizes.push(await page.locator('#pushup-box .sess-waffle').evaluate(el => {
         const r = el.getBoundingClientRect();
         return [Math.round(r.width), Math.round(r.height)];
@@ -225,10 +227,24 @@ test.describe('Waffle van afgeronde series', () => {
     expect(sizes[0][0]).toBeGreaterThan(780 / 3);
   });
 
-  test('zonder series is er geen waffle', async ({ page }) => {
+  test('zonder pogingen is er geen waffle', async ({ page }) => {
     await openApp(page);
-    await withSessions(page, 0);
+    await withPr(page, 0);
     await expect(page.locator('#pushup-box .sess-waffle')).toHaveCount(0);
+  });
+
+  test('het aantal pogingen doet er niet toe, alleen de beste', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      // twaalf pogingen, beste is 7
+      store.setPushups([5, 3, 7, 4, 6, 2, 5, 7, 3, 6, 4, 5]
+        .map((reps, i) => ({ date: d(12 - i), reps })));
+      route('thuis');
+    });
+    await page.waitForTimeout(450);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(7);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(9);
   });
 
   test('alle drie de trackers hebben er een, in hun eigen tint', async ({ page }) => {
@@ -251,22 +267,35 @@ test.describe('Waffle van afgeronde series', () => {
     expect(shots['calf-box']).toContain('rgb(61, 18, 160)');
     expect(shots['pushup-box']).toContain('rgb(82, 27, 194)');
     expect(shots['situp-box']).toContain('rgb(104, 37, 218)');
-    // push-ups en sit-ups tellen hun series; calf toont zijn beste serie (14)
-    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(9);
-    await expect(page.locator('#situp-box .sess-waffle .sw-cell.done')).toHaveCount(2);
+    // alle drie tonen hun eigen beste serie: 14, 18 en 21
     await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(14);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(18);
+    await expect(page.locator('#situp-box .sess-waffle .sw-cell.done')).toHaveCount(21);
+    // en alle drie dezelfde kop
+    for (const box of ['calf-box', 'pushup-box', 'situp-box']) {
+      await expect(page.locator(`#${box} .sw-title`)).toHaveText('beste serie');
+    }
   });
 
-  test('een poging opslaan vult er een bolletje bij', async ({ page }) => {
+  test('een nieuw record laat het raster groeien, een mindere poging niet', async ({ page }) => {
     await openApp(page);
-    await withSessions(page, 3);
+    await withPr(page, 3);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(3);
+
+    // eerst een mindere poging: raster blijft gelijk
+    for (let i = 0; i < 2; i++) await page.click('[data-rt-inc="pushup"]');
+    await page.click('[data-rt-save="pushup"]');
+    await page.waitForTimeout(450);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(3);
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(4);
+
+    // dan een record van 6: raster groeit naar 3x3
     for (let i = 0; i < 6; i++) await page.click('[data-rt-inc="pushup"]');
     await page.click('[data-rt-save="pushup"]');
-    await page.waitForTimeout(500);
-    // vierde serie: raster groeit naar 3x3, vier gevuld
+    await page.waitForTimeout(450);
+    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(6);
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(9);
-    await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(4);
+    expect(await page.evaluate(() => store.pushups().length)).toBe(3);
   });
 });
 

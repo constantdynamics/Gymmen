@@ -4537,7 +4537,7 @@ function renderRepTracker(key) {
       <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < cur ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rt-rep="${i}">${i < cur ? icon("check", 15) : i + 1}</button>`).join("")}</div>
       <div class="feel-caption">${cur ? `${cur} ${esc(cfg.noun)}${cur === 1 ? "" : "s"}${pr && cur > pr ? " — NIEUW RECORD!" : pr ? ` (PR: ${pr})` : ""}` : esc(cfg.prompt)}</div>
       <button class="btn full small" data-rt-save="${key}" ${cur ? "" : "disabled"} style="margin-top:8px;">${icon("check", 17)}Poging opslaan</button>
-      ${sessionWaffleHtml(attempts.length)}
+      ${sessionWaffleHtml(pr, { title: "beste serie", caption: `<b>${pr}</b> reps` })}
       ${repHistHtml(attempts)}
       ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? icon("trophy", 14) : ""}</span></div>`).join("")}</div></details>` : ""}
       <p class="muted" style="font-size:0.85rem; font-weight:600; margin-top:10px;">${esc(cfg.hint)}</p>
