@@ -251,10 +251,10 @@ test.describe('Waffle van afgeronde series', () => {
     expect(shots['calf-box']).toContain('rgb(61, 18, 160)');
     expect(shots['pushup-box']).toContain('rgb(82, 27, 194)');
     expect(shots['situp-box']).toContain('rgb(104, 37, 218)');
-    // elke tracker telt zijn eigen series
-    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(5);
+    // push-ups en sit-ups tellen hun series; calf toont zijn beste serie (14)
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(9);
     await expect(page.locator('#situp-box .sess-waffle .sw-cell.done')).toHaveCount(2);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(14);
   });
 
   test('een poging opslaan vult er een bolletje bij', async ({ page }) => {
@@ -267,6 +267,71 @@ test.describe('Waffle van afgeronde series', () => {
     // vierde serie: raster groeit naar 3x3, vier gevuld
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(9);
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(4);
+  });
+});
+
+test.describe('Calf-waffle telt de beste serie, niet de pogingen', () => {
+  /** Acht pogingen over drie standen; de hoogste PR is 32 op Links. */
+  async function seedCalfModes(page) {
+    await page.evaluate(() => {
+      const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      store.setCalf([
+        { date: d(9), mode: '2', reps: 18 }, { date: d(8), mode: 'L', reps: 12 },
+        { date: d(7), mode: 'R', reps: 15 }, { date: d(6), mode: '2', reps: 24 },
+        { date: d(5), mode: 'L', reps: 26 }, { date: d(4), mode: 'R', reps: 20 },
+        { date: d(3), mode: 'L', reps: 32 }, { date: d(2), mode: '2', reps: 22 },
+      ]);
+      route('thuis');
+    });
+    await page.waitForTimeout(450);
+  }
+
+  test('de hoogste PR over de drie standen bepaalt het aantal bolletjes', async ({ page }) => {
+    await openApp(page);
+    await seedCalfModes(page);
+    // acht losse pogingen, maar de waffle toont de beste serie: 32
+    expect(await page.evaluate(() => store.calf().length)).toBe(8);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(32);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell')).toHaveCount(36);
+    await expect(page.locator('#calf-box .sw-title')).toHaveText('beste serie');
+    await expect(page.locator('#calf-box .sw-cap')).toContainText('32 reps op Links');
+  });
+
+  test('een nieuwe poging onder de PR verandert het raster niet', async ({ page }) => {
+    await openApp(page);
+    await seedCalfModes(page);
+    const before = await page.locator('#calf-box .sess-waffle .sw-cell.done').count();
+    await page.evaluate(() => {
+      const cs = store.calf();
+      cs.push({ date: new Date().toISOString().slice(0, 10), mode: 'R', reps: 9 });
+      store.setCalf(cs);
+      renderCalfBox();
+    });
+    await page.waitForTimeout(350);
+    expect(await page.evaluate(() => store.calf().length)).toBe(9);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(before);
+  });
+
+  test('een nieuw record laat het raster wel groeien', async ({ page }) => {
+    await openApp(page);
+    await seedCalfModes(page);
+    await page.evaluate(() => {
+      const cs = store.calf();
+      cs.push({ date: new Date().toISOString().slice(0, 10), mode: '2', reps: 40 });
+      store.setCalf(cs);
+      renderCalfBox();
+    });
+    await page.waitForTimeout(350);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(40);
+    await expect(page.locator('#calf-box .sess-waffle .sw-cell')).toHaveCount(49);
+    await expect(page.locator('#calf-box .sw-cap')).toContainText('40 reps op 2 benen');
+  });
+
+  test('calfBestPr kiest de hoogste over alle standen', async ({ page }) => {
+    await openApp(page);
+    await seedCalfModes(page);
+    const best = await page.evaluate(() => calfBestPr());
+    expect(best).toEqual({ pr: 32, mode: 'L' });
   });
 });
 

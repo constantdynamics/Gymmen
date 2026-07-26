@@ -4388,6 +4388,14 @@ function calfStats(mode) {
   const pr = attempts.reduce((mx, a) => Math.max(mx, a.reps), 0);
   return { attempts, last, pr };
 }
+/* Beste serie over de drie standen samen — dat is wat de waffle toont,
+   niet het aantal losse pogingen. */
+function calfBestPr() {
+  return Object.keys(CALF_MODES).reduce((best, k) => {
+    const st = calfStats(k);
+    return st.pr > best.pr ? { pr: st.pr, mode: k } : best;
+  }, { pr: 0, mode: null });
+}
 /* PR per modus als eigen rij, en de laatste 7 series als bars (§3.6). */
 function calfPrRowHtml() {
   return `<div class="calf-pr-row">${Object.entries(CALF_MODES).map(([k, lbl]) => {
@@ -4422,7 +4430,13 @@ function renderCalfBox() {
       <div class="rep-grid">${Array.from({ length: gridN }, (_, i) => `<button class="rep-dot ${i < calfCurrent ? "done" : ""} ${i + 1 === last && last > 0 ? "prev-mark" : ""} ${i + 1 === pr && pr > 0 ? "pr-mark" : ""}" data-rep="${i}">${i < calfCurrent ? icon("check",15) : i + 1}</button>`).join("")}</div>
       <div class="feel-caption">${calfCurrent ? `${calfCurrent} raise${calfCurrent === 1 ? "" : "s"}${pr && calfCurrent > pr ? " — NIEUW RECORD!" : pr ? ` (PR: ${pr})` : ""}` : "Tik aan hoeveel calf raises je haalt — versla je vorige poging!"}</div>
       <button class="btn full small" id="calf-save" ${calfCurrent ? "" : "disabled"} style="margin-top:8px;">${icon("check",17)}Poging opslaan</button>
-      ${sessionWaffleHtml(store.calf().length)}
+      ${(() => {
+        const best = calfBestPr();
+        return sessionWaffleHtml(best.pr, {
+          title: "beste serie",
+          caption: `<b>${best.pr}</b> reps op ${esc(CALF_MODES[best.mode] || "")}`,
+        });
+      })()}
       ${calfPrRowHtml()}
       ${calfHistHtml(attempts)}
       ${attempts.length ? `<details class="tip inline-tip" style="margin-top:10px;"><summary>Vorige pogingen</summary><div class="tip-body">${attempts.slice(-8).reverse().map(a => `<div class="hist-row"><span class="h-date">${fmtNice(a.date)}</span><span class="${a.reps >= pr ? "h-pr" : ""}">${a.reps} reps${a.reps >= pr ? icon("trophy",14) : ""}</span></div>`).join("")}</div></details>` : ""}
@@ -4476,16 +4490,16 @@ const repCurrent = { pushup: 0, situp: 0 };
    leesrichting — van links naar rechts, dan de volgende rij.
    ============================================================ */
 function waffleSide(n) { return Math.max(2, Math.floor(Math.sqrt(n)) + 1); }
-function sessionWaffleHtml(n) {
+function sessionWaffleHtml(n, opts = {}) {
   if (!n) return "";
   const s = waffleSide(n);
   const cap = s * s;
   const cells = Array.from({ length: cap }, (_, i) =>
     `<span class="sw-cell${i < n ? " done" : ""}"></span>`).join("");
-  const left = cap - n;
-  return `<div class="sw-title">afgeronde series</div>
+  const grow = `nog ${cap - n} tot een raster van ${s + 1} bij ${s + 1}`;
+  return `<div class="sw-title">${opts.title || "afgeronde series"}</div>
     <div class="sess-waffle" style="--n:${s}">${cells}</div>
-    <div class="sw-cap"><b>${n}</b> van ${cap} · nog ${left} tot een raster van ${s + 1} bij ${s + 1}</div>`;
+    <div class="sw-cap">${opts.caption || `<b>${n}</b> van ${cap}`} · ${grow}</div>`;
 }
 
 function repStats(key) {
