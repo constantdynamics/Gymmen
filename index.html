@@ -228,7 +228,10 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .last-session { font-size: 1rem; color: var(--text-body); margin-bottom: 12px; font-weight: 600; }
 /* De losse calf-ghostknop is vervangen door de derde hero-rij; hij blijft in de
    DOM staan met zijn handler, net als de verborgen nav-knoppen (§3.2). */
-#open-calf, #open-pushup, #open-situp { display: none; }
+#open-calf, #open-pushup, #open-situp, #open-gym, #open-homeworkout { display: none; }
+/* …behalve als je de bijbehorende hero hebt uitgezet: dan is dit je ingang (§ Startscherm) */
+#open-calf.as-fallback, #open-pushup.as-fallback, #open-situp.as-fallback,
+#open-gym.as-fallback, #open-homeworkout.as-fallback { display: block; }
 
 /* ============================================================
    SESSIE
@@ -274,6 +277,18 @@ input[type="range"] { touch-action: pan-y; }
 .skip-tag { font-family: "Orbitron", sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
 .photo-banner { font-size: 0.9rem; font-weight: 600; line-height: 1.4; opacity: 0.85; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
 .photo-ask { font-size: 0.92rem; font-weight: 600; line-height: 1.4; margin-bottom: 12px; padding: 8px 12px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
+/* Openstaande vraag bij een oefening: vraag + foto + antwoordveld op één plek */
+.ask-box { margin-bottom: 12px; padding: 12px 14px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
+.ask-box.done { border-style: solid; border-color: color-mix(in srgb, var(--glow) 35%, transparent); }
+.ask-head { display: flex; align-items: flex-start; gap: 7px; font-size: 0.9rem; font-weight: 800; line-height: 1.35; margin-bottom: 6px; }
+.ask-head .ico { margin-top: 2px; }
+.ask-q { font-size: 0.92rem; font-weight: 600; line-height: 1.45; margin-bottom: 10px; }
+/* labelkleur uit de tokens, niet via opacity — anders stapelt hij op de tekstkleur (§1.4) */
+.ask-lbl { display: block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-label); margin: 10px 0 4px; }
+.ask-box textarea { width: 100%; }
+.ask-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ask-actions .btn { flex: 1 1 auto; }
+.ask-thumbs { margin-top: 10px; }
 .kb-lbl { font-size: 0.85rem; font-weight: 800; margin: 6px 0 2px; opacity: 0.85; }
 .speak-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 a.btn { text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
@@ -336,6 +351,15 @@ details.tip[open] > summary::after { transform: rotate(-135deg); margin-top: 2px
   content: ""; position: absolute; left: 6px; top: 15px;
   border-left: 5px solid #9d55ff; border-top: 4px solid transparent; border-bottom: 4px solid transparent;
 }
+/* Do's krijgen een neongroen driehoekje, don'ts een neonrood — meteen zichtbaar
+   waar je naar kijkt, ook als je alleen de lijst scant. */
+.tip-body ul.dos-list li::before { border-left-color: #39ff14; filter: drop-shadow(0 0 5px rgba(57,255,20,0.7)); }
+.tip-body ul.donts-list li::before { border-left-color: #ff073a; filter: drop-shadow(0 0 5px rgba(255,7,58,0.7)); }
+/* Selectiemodus: het driehoekje maakt plaats voor een vinkvakje van 44 px aantikbaar */
+.tip-body ul.picking li { padding-left: 0; }
+.tip-body ul.picking li::before { display: none; }
+.tip-pick { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; min-height: 44px; padding: 2px 0; }
+.tip-pick input { flex-shrink: 0; width: 22px; height: 22px; margin-top: 3px; accent-color: #ff073a; }
 .tip-body .sub { margin: 10px 0 2px; font-weight: 700; color: var(--text-body); font-size: 0.95rem; display: flex; align-items: center; gap: 7px; }
 
 /* ============================================================
@@ -444,6 +468,8 @@ details.tip[open] > summary::after { transform: rotate(-135deg); margin-top: 2px
 .nextup-badge { display: block; font-weight: 700; font-size: 0.98rem; padding: 10px 14px; margin-bottom: 12px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 16%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent); }
 .nextup-btn.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 55%, transparent); }
 .exercise-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+/* Eén regel die het verschil tussen bewaren en afvinken uitlegt */
+.action-hint { font-size: 0.8rem; font-weight: 600; line-height: 1.4; color: var(--text-label); text-align: center; padding: 2px 4px; }
 details.tip.inline-tip { margin: 0 0 14px; }
 details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
 
@@ -785,6 +811,12 @@ input.weight-display { width: 100%; max-width: 150px; background: rgba(0,0,0,0.4
 .waffle-legend .wl-lbl { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-label); }
 .waffle-legend .wl-ramp { flex: 1; height: 9px; border-radius: 99px; background: linear-gradient(90deg, rgba(123,47,255,0.3), #7b2fff); }
 .waffle-legend .wl-pr { display: flex; align-items: center; gap: 5px; font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: #ff8bb8; }
+/* Legenda voor de gevoelskleur onder de barcharts: de vijfpuntsschaal als balkje */
+.feel-legend { display: flex; flex-direction: column; gap: 6px; padding: 11px 13px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 13px; margin-top: 10px; }
+.feel-legend .fl-lbl { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-label); }
+.feel-legend .fl-row { display: flex; align-items: center; gap: 9px; }
+.feel-legend .fl-ramp { flex: 1; height: 9px; border-radius: 99px; background: linear-gradient(90deg, #7f1d1d, #ef4444, #eab308, #4ade80, #166534); }
+.feel-legend .fl-end { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-label); white-space: nowrap; }
 /* Kaartkop in de stats-blokken: wit en rustig, niet de magenta sessie-kop. */
 #waffle-section .m-name, #hw-progress-box .m-name {
   font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 14px !important;
@@ -932,7 +964,8 @@ input.session-name-input { border: none; border-bottom: 2px dashed rgba(123,47,2
 .snack-card .sn-desc { color: var(--text-body); opacity: 1; }
 .snack-card.sn-done { opacity: 0.6; }
 .snack-card.hw-done { border-color: rgba(255,45,120,0.5); box-shadow: 0 0 16px rgba(255,45,120,0.25); }
-.photo-banner, .photo-ask { border: 1px dashed var(--line-strong); background: rgba(0,0,0,0.25); color: var(--text-body); opacity: 1; border-radius: 13px; }
+.photo-banner, .photo-ask, .ask-box { border: 1px dashed var(--line-strong); background: rgba(0,0,0,0.25); color: var(--text-body); opacity: 1; border-radius: 13px; }
+.ask-box.done { border-style: solid; }
 .nextup-badge { background: rgba(123,47,255,0.16); border: 1px solid rgba(123,47,255,0.55); border-radius: 12px; }
 .hist-row { color: var(--text-body); }
 .hist-row .h-date { color: var(--text-label); opacity: 1; }
@@ -1128,6 +1161,8 @@ body::after { content: none; }
     <div id="home-recovery" style="margin-top:18px;"></div>
     <div id="home-goals" style="margin-top:18px;"></div>
     <div id="home-besttime" style="margin-top:18px;"></div>
+    <button class="btn ghost full" id="open-gym" style="margin-top:18px;">Gym-sessie starten</button>
+    <button class="btn ghost full" id="open-homeworkout" style="margin-top:10px;">Thuis-workout starten</button>
     <button class="btn ghost full" id="open-calf" style="margin-top:18px;">Calf raises-tracker</button>
     <button class="btn ghost full" id="open-pushup" style="margin-top:10px;">Push-ups-tracker</button>
     <button class="btn ghost full" id="open-situp" style="margin-top:10px;">Sit-ups-tracker</button>
@@ -1247,6 +1282,8 @@ body::after { content: none; }
     <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:16px;">Instellingen</h2>
     <div class="section-title">Thema</div>
     <div class="theme-grid" id="theme-grid"></div>
+    <div class="section-title">Startscherm</div>
+    <div id="hero-settings"></div>
     <div class="section-title">Apparaten beheren</div>
     <div id="machine-questions"></div>
     <div id="manage-machines"></div>
@@ -1428,7 +1465,7 @@ const CHECKLIST = {
    GEGENEREERDE CONTENT (NL)
    ============================================================ */
 /*__CONTENT_V1__*/
-let EXERCISE_MISTAKES = {"Warming-up":{"mistakes":["Je slaat de warming-up over als je weinig tijd hebt, terwijl je spieren en pezen dan nog koud aan de krachtoefeningen beginnen.","Je start te intensief, waardoor je al vermoeid bent voordat het echte werk begint.","Je houdt het korter dan 5 minuten, wat te weinig is om je lichaam echt op temperatuur te krijgen.","Je fietst met volledig gestrekte benen en alleen op je tenen, wat onnodig trekt aan je kuit en achillespees."],"tips":["Bouw rustig op: begin heel licht en verhoog het tempo geleidelijk tot ongeveer 4 van de 10 qua inspanning.","Je moet tijdens de warming-up nog makkelijk kunnen praten; ga je hijgen, dan zit je te hoog.","Houd op de fiets een knikje in je knieën en trap met de bal van je voet, zo warmt je linker kuit veilig mee op.","Wissel af en toe van apparaat (roeien, crosstrainer), dan warmen ook je bovenlichaam en rug mee op."]},"Seated Leg Press":{"mistakes":["Je strekt je knieën bovenin helemaal door ('op slot'), waardoor het gewicht op je gewrichten rust in plaats van op je spieren.","Je duwt vanaf je tenen in plaats van je hele voet, wat extra trekkracht op je achillespees zet.","Je laat je knieën tijdens het duwen naar binnen zakken in plaats van in lijn met je tenen.","Je zit te dicht op het platform, waardoor je knieën te diep buigen en je onderrug van de leuning krult.","Je houdt je adem in tijdens het duwen."],"tips":["Zet je voeten op heupbreedte plat op het platform en duw vooral vanuit je hakken.","Houd aan het einde van elke duw een lichte buiging in je knieën.","Adem uit terwijl je duwt en in terwijl je het gewicht rustig terug laat komen.","Beweeg gecontroleerd: ongeveer 2 tellen duwen en 3 tellen terug laten zakken."]},"Seated Leg Extension":{"mistakes":["Je zwiept het gewicht omhoog met een zwaai in plaats van rustig te strekken.","Je laat het gewicht op de terugweg vallen in plaats van het af te remmen.","Het kussentje ligt te hoog op je scheen in plaats van net boven je wreef, waardoor de belasting verkeerd verdeeld wordt.","Je tilt je billen van de zitting of trekt aan de handgrepen om meer gewicht te bewegen.","Je overstrekt je knieën aan het einde van de beweging."],"tips":["Stel de stoel zo af dat het draaipunt van de machine precies naast je knie zit.","Doe vooral het laatste stukje van de strekking bewust en gecontroleerd, dat is goed voor je kniestabiliteit.","Houd je voeten neutraal en ontspannen, je hoeft je tenen niet naar je toe te trekken of te strekken.","Kies liever een lager gewicht met een nette uitvoering dan zwaar en slordig."]},"Shoulder Press":{"mistakes":["Je holt je onderrug en duwt met je hele lijf omhoog in plaats van alleen met je schouders.","Je trekt je schouders tijdens het duwen op richting je oren.","Je strekt je ellebogen bovenin hard door, waardoor het gewicht op je gewrichten hangt.","Je laat de grepen te ver zakken, ver onder oorhoogte, wat je schoudergewricht onnodig belast."],"tips":["Houd je rug en achterhoofd tegen de leuning en je voeten plat op de grond.","Gebruik de buitenste grepen en houd je ellebogen iets naar voren gericht.","Adem uit tijdens het omhoog duwen en in tijdens het rustig laten zakken.","Houd je schouders laag en ontspannen, weg van je oren."]},"Leg Curl":{"mistakes":["Je tilt je heupen of billen van de zitting om het gewicht mee te trekken.","Het kussentje ligt midden op je kuit in plaats van in het holletje tussen hiel en kuit.","Je laat het gewicht ongecontroleerd terugschieten in plaats van het rustig af te remmen.","Je kiest zoveel gewicht dat je de beweging maar half afmaakt."],"tips":["Schuif de stoel zo dat je knieschijf precies ter hoogte van het draaipunt van de machine staat.","Synchroniseer de beweging met je ademhaling: uitademen bij het buigen, inademen bij het terugkomen.","Houd je bovenlichaam stil en je rug de hele set tegen de leuning gedrukt.","Buig in ongeveer 2 tellen en laat het gewicht in 3 tellen terugkomen."]},"Dumbells":{"mistakes":["Je zwaait de dumbells omhoog met een zwiep vanuit je rug of benen in plaats van pure schouderkracht.","Je tilt je armen hoger dan schouderhoogte, wat je schouderpezen kan irriteren.","Je pakt te zware dumbells, waardoor je schouders optrekken en je vorm verdwijnt.","Je laat de gewichten op de terugweg gewoon vallen in plaats van ze af te remmen.","Je houdt je ellebogen volledig gestrekt op slot tijdens de beweging."],"tips":["Til tot maximaal 90 graden (schouderhoogte) en niet hoger, zowel naar voren als opzij.","Houd een lichte buiging in je ellebogen en beweeg rustig omhoog en net zo rustig omlaag.","Sta stabiel met je knieën licht gebogen en je buikspieren aangespannen.","Houd je polsen recht, alsof je twee glazen water draagt die niet mogen morsen."]},"Seated Chest Press":{"mistakes":["Je duwt met je benen of je hele lijf mee in plaats van alleen met borst en armen.","Je schouders komen aan het einde van de duw naar voren, los van de leuning.","Je strekt je ellebogen vooraan hard door.","De handvatten staan te hoog of te laag, in plaats van halverwege je borst.","Je laat het gewicht aan het einde van de herhaling terugkletteren op de stapel."],"tips":["Houd je rug en hoofd tegen het stoeltje en trek je schouderbladen licht naar achteren.","Adem in als het gewicht naar je toe komt en uit als je het van je af duwt.","Pak de handvatten in de neutrale stand en houd je schouders ontspannen laag.","Beweeg rustig en houd het gewicht ook op de terugweg onder controle."]},"Pulldown":{"mistakes":["Je trekt de stang achter je nek langs, wat je nek en schouders onnodig belast.","Je leunt ver naar achteren en trekt met je lichaamsgewicht in plaats van met je rug.","Je trekt vooral met je armen en biceps in plaats van met je rugspieren.","Je laat de stang te snel omhoog terugschieten.","Je schouders hangen bij de start opgetrokken tegen je oren."],"tips":["Begin elke herhaling met je schouderbladen naar beneden trekken, alsof je je schouders in je achterzak stopt.","Houd je ellebogen naar buiten en denk 'ellebogen naar beneden' in plaats van 'handen trekken'.","Trek de stang rustig richting je bovenborst en laat hem in 3 tellen gecontroleerd terug.","Adem uit tijdens het naar beneden trekken en in tijdens het teruggaan."]},"Horizontal Row (Pulley)":{"mistakes":["Je zwaait met je romp naar achteren om het gewicht los te trekken in plaats van stil te blijven zitten.","Je maakt je rug bol als je het gewicht terug laat komen.","Je trekt vooral vanuit je biceps in plaats van je schouderbladen naar achteren te knijpen.","Je trekt je schouders op richting je oren tijdens de beweging."],"tips":["Houd je romp recht en stil, met je handen ongeveer op schouderhoogte.","Begin de trekbeweging vanuit je schouderbladen: knijp ze van voor naar achter samen.","Laat het gewicht langzaam terug en houd daarbij je rug recht en borst vooruit.","Adem uit tijdens het trekken en in tijdens het terug laten komen."]},"Cooling-down":{"mistakes":["Je slaat de cooling-down over en stopt abrupt na je laatste krachtoefening.","Je gaat nog even vol gas in plaats van rustig uit te bollen.","Je stopt met bewegen en gaat meteen stilzitten, waardoor je duizelig kunt worden.","Je houdt het korter dan 5 minuten, waardoor je hartslag te snel moet zakken."],"tips":["Fiets of loop 5 tot 10 minuten rustig uit op een heel laag tempo.","Laat je hartslag geleidelijk zakken tot je weer normaal en rustig ademt.","Dit is een mooi moment om je kuiten voorzichtig te rekken, goed voor je linker achillespees, maar nooit met pijn.","Drink na afloop een glas water om je vochtbalans aan te vullen."]}};
+let EXERCISE_MISTAKES = {"Warming-up":{"mistakes":["Je slaat de warming-up over als je weinig tijd hebt, terwijl je spieren en pezen dan nog koud aan de krachtoefeningen beginnen.","Je start te intensief, waardoor je al vermoeid bent voordat het echte werk begint.","Je houdt het korter dan 5 minuten, wat te weinig is om je lichaam echt op temperatuur te krijgen.","Je fietst met volledig gestrekte benen en alleen op je tenen, wat onnodig trekt aan je kuit en achillespees."],"tips":["Bouw rustig op: begin heel licht en verhoog het tempo geleidelijk tot ongeveer 4 van de 10 qua inspanning.","Je moet tijdens de warming-up nog makkelijk kunnen praten; ga je hijgen, dan zit je te hoog.","Houd op de fiets een knikje in je knieën en trap met de bal van je voet, zo warmt je linker kuit veilig mee op.","Wissel af en toe van apparaat (roeien, crosstrainer), dan warmen ook je bovenlichaam en rug mee op."]},"Seated Leg Press":{"mistakes":["Je strekt je knieën bovenin helemaal door ('op slot'), waardoor het gewicht op je gewrichten rust in plaats van op je spieren.","Je duwt vanaf je tenen in plaats van je hele voet, wat extra trekkracht op je achillespees zet.","Je laat je knieën tijdens het duwen naar binnen zakken in plaats van in lijn met je tenen.","Je zit te dicht op het platform, waardoor je knieën te diep buigen en je onderrug van de leuning krult.","Je houdt je adem in tijdens het duwen."],"tips":["Zet je voeten op heupbreedte plat op het platform en duw vooral vanuit je hakken.","Houd aan het einde van elke duw een lichte buiging in je knieën.","Adem uit terwijl je duwt en in terwijl je het gewicht rustig terug laat komen.","Beweeg gecontroleerd: ongeveer 2 tellen duwen en 3 tellen terug laten zakken."]},"Seated Leg Extension":{"mistakes":["Je zwiept het gewicht omhoog met een zwaai in plaats van rustig te strekken.","Je laat het gewicht op de terugweg vallen in plaats van het af te remmen.","Het kussentje ligt te hoog op je scheen in plaats van net boven je wreef, waardoor de belasting verkeerd verdeeld wordt.","Je tilt je billen van de zitting of trekt aan de handgrepen om meer gewicht te bewegen.","Je overstrekt je knieën aan het einde van de beweging."],"tips":["Stel de stoel zo af dat het draaipunt van de machine precies naast je knie zit.","Doe vooral het laatste stukje van de strekking bewust en gecontroleerd, dat is goed voor je kniestabiliteit.","Houd je voeten neutraal en ontspannen, je hoeft je tenen niet naar je toe te trekken of te strekken.","Kies liever een lager gewicht met een nette uitvoering dan zwaar en slordig."]},"Shoulder Press":{"mistakes":["Je holt je onderrug en duwt met je hele lijf omhoog in plaats van alleen met je schouders.","Je trekt je schouders tijdens het duwen op richting je oren.","Je strekt je ellebogen bovenin hard door, waardoor het gewicht op je gewrichten hangt.","Je laat de grepen te ver zakken, ver onder oorhoogte, wat je schoudergewricht onnodig belast."],"tips":["Houd je rug en achterhoofd tegen de leuning en je voeten plat op de grond.","Gebruik de buitenste grepen en houd je ellebogen iets naar voren gericht.","Adem uit tijdens het omhoog duwen en in tijdens het rustig laten zakken.","Houd je schouders laag en ontspannen, weg van je oren."]},"Leg Curl":{"mistakes":["Je tilt je heupen of billen van de zitting om het gewicht mee te trekken.","Het kussentje ligt midden op je kuit in plaats van in het holletje tussen hiel en kuit.","Je laat het gewicht ongecontroleerd terugschieten in plaats van het rustig af te remmen.","Je kiest zoveel gewicht dat je de beweging maar half afmaakt."],"tips":["Schuif de stoel zo dat je knieschijf precies ter hoogte van het draaipunt van de machine staat.","Synchroniseer de beweging met je ademhaling: uitademen bij het buigen, inademen bij het terugkomen.","Houd je bovenlichaam stil en je rug de hele set tegen de leuning gedrukt.","Buig in ongeveer 2 tellen en laat het gewicht in 3 tellen terugkomen."]},"Dumbells":{"mistakes":["Je zwaait de dumbells omhoog met een zwiep vanuit je rug of benen in plaats van pure schouderkracht.","Je tilt je armen hoger dan schouderhoogte, wat je schouderpezen kan irriteren.","Je pakt te zware dumbells, waardoor je schouders optrekken en je vorm verdwijnt.","Je laat de gewichten op de terugweg gewoon vallen in plaats van ze af te remmen.","Je houdt je ellebogen volledig gestrekt op slot tijdens de beweging."],"tips":["Til tot maximaal 90 graden (schouderhoogte) en niet hoger, zowel naar voren als opzij.","Houd een lichte buiging in je ellebogen en beweeg rustig omhoog en net zo rustig omlaag.","Sta stabiel met je knieën licht gebogen en je buikspieren aangespannen.","Houd je polsen recht, alsof je twee glazen water draagt die niet mogen morsen."]},"Seated Chest Press":{"mistakes":["Je duwt met je benen of je hele lijf mee in plaats van alleen met borst en armen.","Je schouders komen aan het einde van de duw naar voren, los van de leuning.","Je strekt je ellebogen vooraan hard door.","De handvatten staan te hoog of te laag, in plaats van halverwege je borst.","Je laat het gewicht aan het einde van de herhaling terugkletteren op de stapel."],"tips":["Belangrijk: strek je armen vooraan niet helemaal door — geen 180 graden maar net iets minder, zodat de spanning op je borst blijft en niet op je ellebooggewricht komt te rusten.","Houd je rug en hoofd tegen het stoeltje en trek je schouderbladen licht naar achteren.","Adem in als het gewicht naar je toe komt en uit als je het van je af duwt.","Pak de handvatten in de neutrale stand en houd je schouders ontspannen laag.","Beweeg rustig en houd het gewicht ook op de terugweg onder controle."]},"Pulldown":{"mistakes":["Je trekt de stang achter je nek langs, wat je nek en schouders onnodig belast.","Je leunt ver naar achteren en trekt met je lichaamsgewicht in plaats van met je rug.","Je trekt vooral met je armen en biceps in plaats van met je rugspieren.","Je laat de stang te snel omhoog terugschieten.","Je schouders hangen bij de start opgetrokken tegen je oren."],"tips":["Begin elke herhaling met je schouderbladen naar beneden trekken, alsof je je schouders in je achterzak stopt.","Houd je ellebogen naar buiten en denk 'ellebogen naar beneden' in plaats van 'handen trekken'.","Trek de stang rustig richting je bovenborst en laat hem in 3 tellen gecontroleerd terug.","Adem uit tijdens het naar beneden trekken en in tijdens het teruggaan."]},"Horizontal Row (Pulley)":{"mistakes":["Je zwaait met je romp naar achteren om het gewicht los te trekken in plaats van stil te blijven zitten.","Je maakt je rug bol als je het gewicht terug laat komen.","Je trekt vooral vanuit je biceps in plaats van je schouderbladen naar achteren te knijpen.","Je trekt je schouders op richting je oren tijdens de beweging."],"tips":["Houd je romp recht en stil, met je handen ongeveer op schouderhoogte.","Begin de trekbeweging vanuit je schouderbladen: knijp ze van voor naar achter samen.","Laat het gewicht langzaam terug en houd daarbij je rug recht en borst vooruit.","Adem uit tijdens het trekken en in tijdens het terug laten komen."]},"Cooling-down":{"mistakes":["Je slaat de cooling-down over en stopt abrupt na je laatste krachtoefening.","Je gaat nog even vol gas in plaats van rustig uit te bollen.","Je stopt met bewegen en gaat meteen stilzitten, waardoor je duizelig kunt worden.","Je houdt het korter dan 5 minuten, waardoor je hartslag te snel moet zakken."],"tips":["Fiets of loop 5 tot 10 minuten rustig uit op een heel laag tempo.","Laat je hartslag geleidelijk zakken tot je weer normaal en rustig ademt.","Dit is een mooi moment om je kuiten voorzichtig te rekken, goed voor je linker achillespees, maar nooit met pijn.","Drink na afloop een glas water om je vochtbalans aan te vullen."]}};
 let GENERAL_MISTAKES = [{"title":"Algemeen","items":["Je traint door bij scherpe of stekende pijn in plaats van te stoppen en het met je fysio te bespreken.","Je verhoogt het gewicht sneller dan je pezen aankunnen, spieren worden sneller sterk dan pezen.","Je slaat rustdagen over, terwijl je juist tijdens het herstel sterker wordt.","Je vergelijkt jezelf met anderen in de sportschool en tilt daardoor te zwaar.","Je houdt je adem in op het zwaarste moment van een oefening.","Spierpijn een dag later is normaal, scherpe pijn tijdens de oefening niet: stop dan met die oefening.","Verhoog het gewicht pas als je alle herhalingen twee trainingen op rij netjes haalt.","Wees extra geduldig met je linker kuit en achillespees en bouw daar in kleinere stapjes op.","Neem 1 tot 2 minuten rust tussen je sets en drink tussendoor wat water."]},{"title":"Kracht (machines algemeen)","items":["Je neemt de afstelling van de vorige gebruiker over in plaats van stoel en kussentjes op jouw lichaam in te stellen.","Je laat het gewicht aan het einde van elke herhaling op de stapel kletteren.","Je kiest te veel gewicht en gaat wrikken en compenseren met je hele lichaam.","Je beweegt te snel en gebruikt zwaai in plaats van spierkracht.","Neem eerst rustig de tijd om de machine af te stellen: het draaipunt hoort op één lijn met je gewricht.","Gebruik als vuistregel 2 tellen duwen of trekken en 3 tellen terug.","Adem uit tijdens het zware deel van de beweging en in tijdens het teruggaan.","Houd het gewicht de hele beweging onder controle, juist ook op de terugweg."]},{"title":"Vrije gewichten (algemeen)","items":["Je pakt te zware dumbells, waardoor je gaat zwaaien en compenseren met je rug.","Je tilt dumbells van de grond of uit het rek met een bolle rug.","Je verliest je lichaamsspanning, waardoor je gaat wiebelen tijdens de oefening.","Je voert herhalingen te snel uit zonder de terugweg af te remmen.","Til dumbells altijd op vanuit je benen met een rechte rug, ook de lichte.","Span je buikspieren aan en sta stabiel met je voeten op heupbreedte.","Begin licht en verhoog pas als je de beweging strak en rustig kunt uitvoeren.","Zet dumbells na je set rustig terug in het rek in plaats van ze te laten vallen."]}];
 let COACH_LINES = [{"event":"sessionStart","intensity":"rustig","text":"Welkom terug. Rustig beginnen, we bouwen het samen op."},{"event":"sessionStart","intensity":"rustig","text":"Fijn dat je er bent. Luister goed naar je lichaam vandaag."},{"event":"sessionStart","intensity":"rustig","text":"Mooi, je bent er weer. Elke training telt, ook deze."},{"event":"sessionStart","intensity":"rustig","text":"We starten kalm. Jouw tempo, jouw training."},{"event":"sessionStart","intensity":"fanatiek","text":"Daar ben je! Vandaag maken we er iets moois van!"},{"event":"sessionStart","intensity":"fanatiek","text":"Lekker bezig dat je er bent. Kom op, we gaan knallen!"},{"event":"sessionStart","intensity":"fanatiek","text":"Nieuwe training, nieuwe kansen. Laten we gaan!"},{"event":"sessionStart","intensity":"fanatiek","text":"Je bent er, dat is stap één. Nu vol gas!"},{"event":"sessionStart","intensity":"beest","text":"Tijd om te leveren. De machines wachten op je."},{"event":"sessionStart","intensity":"beest","text":"Geen excuses vandaag. Alleen jij en het ijzer."},{"event":"sessionStart","intensity":"beest","text":"Zet je kop aan. Vandaag wordt er gewerkt."},{"event":"sessionStart","intensity":"beest","text":"Binnen is binnen. Nu laat je zien wat je waard bent."},{"event":"exerciseStart","intensity":"rustig","text":"Nieuwe oefening. Neem even de tijd voor een goede houding."},{"event":"exerciseStart","intensity":"rustig","text":"Daar gaan we. Rustige, gecontroleerde bewegingen, dat werkt het best."},{"event":"exerciseStart","intensity":"rustig","text":"Volgende apparaat. Stel alles goed in en begin ontspannen."},{"event":"exerciseStart","intensity":"fanatiek","text":"Nieuwe oefening, frisse energie. Pak hem aan!"},{"event":"exerciseStart","intensity":"fanatiek","text":"Hier gaan we weer. Laat deze oefening van jou zijn!"},{"event":"exerciseStart","intensity":"fanatiek","text":"Volgende uitdaging staat klaar. Jij kan dit!"},{"event":"exerciseStart","intensity":"beest","text":"Nieuw apparaat, zelfde missie. Slopen die sets."},{"event":"exerciseStart","intensity":"beest","text":"Ga zitten en maak er werk van. Nu."},{"event":"exerciseStart","intensity":"beest","text":"Deze machine gaat jou vandaag niet verslaan. Aanvallen."},{"event":"duringSet","intensity":"rustig","text":"Goed zo, blijf rustig ademen."},{"event":"duringSet","intensity":"rustig","text":"Mooie beweging, hou dit tempo vast."},{"event":"duringSet","intensity":"rustig","text":"Je doet het prima. Nog een paar nette herhalingen."},{"event":"duringSet","intensity":"rustig","text":"Rustig doorgaan, techniek gaat boven snelheid."},{"event":"duringSet","intensity":"rustig","text":"Voel de spier werken. Precies wat we willen."},{"event":"duringSet","intensity":"fanatiek","text":"Ja, dit is het! Blijf duwen!"},{"event":"duringSet","intensity":"fanatiek","text":"Kom op, nog een paar. Je hebt dit!"},{"event":"duringSet","intensity":"fanatiek","text":"Sterk bezig! Niet loslaten nu!"},{"event":"duringSet","intensity":"fanatiek","text":"Hier word je sterker van. Doorgaan!"},{"event":"duringSet","intensity":"fanatiek","text":"Elke herhaling telt. Pak ze allemaal!"},{"event":"duringSet","intensity":"beest","text":"Doorbijten! Opgeven bestaat niet!"},{"event":"duringSet","intensity":"beest","text":"Harder! Die laatste herhalingen maken het verschil!"},{"event":"duringSet","intensity":"beest","text":"Pijn is tijdelijk. Duwen!"},{"event":"duringSet","intensity":"beest","text":"Niemand doet dit voor je. Alles eruit, nu!"},{"event":"duringSet","intensity":"beest","text":"Kom op soldaat, de tank is nog niet leeg!"},{"event":"setDone","intensity":"rustig","text":"Set {n} van {total} klaar. Even lekker uitrusten."},{"event":"setDone","intensity":"rustig","text":"Goed gedaan. Neem rustig je pauze."},{"event":"setDone","intensity":"rustig","text":"Netjes afgerond. Adem even rustig door."},{"event":"setDone","intensity":"fanatiek","text":"Set {n} van {total} binnen! Lekker bezig!"},{"event":"setDone","intensity":"fanatiek","text":"Boem, weer één gedaan! Zo ken ik je!"},{"event":"setDone","intensity":"fanatiek","text":"Sterke set! Even opladen voor de volgende!"},{"event":"setDone","intensity":"beest","text":"Set {n} van {total} gesloopt. Volgende."},{"event":"setDone","intensity":"beest","text":"Afgevinkt. Rust kort, we zijn nog niet klaar."},{"event":"setDone","intensity":"beest","text":"Die zit erop. Blijf scherp."},{"event":"lastSet","intensity":"rustig","text":"Laatste set. Maak hem net zo netjes als de eerste."},{"event":"lastSet","intensity":"rustig","text":"Nog één set te gaan. Jij kan dit rustig aan."},{"event":"lastSet","intensity":"rustig","text":"De laatste alweer. Mooi gecontroleerd afmaken."},{"event":"lastSet","intensity":"fanatiek","text":"Laatste set! Alles wat je nog hebt, nu!"},{"event":"lastSet","intensity":"fanatiek","text":"Nog één keer knallen, dan is deze binnen!"},{"event":"lastSet","intensity":"fanatiek","text":"De finale! Maak hem onvergetelijk!"},{"event":"lastSet","intensity":"beest","text":"Laatste set. Leeg die tank, helemaal."},{"event":"lastSet","intensity":"beest","text":"Dit is het moment. Geen genade, alles geven."},{"event":"lastSet","intensity":"beest","text":"Eén set tussen jou en de winst. Pak hem."},{"event":"restEnd","intensity":"rustig","text":"De rust zit erop. Zullen we weer verdergaan?"},{"event":"restEnd","intensity":"rustig","text":"Tijd voor de volgende set. Rustig weer beginnen."},{"event":"restEnd","intensity":"rustig","text":"Even goed zitten en dan gaan we weer."},{"event":"restEnd","intensity":"fanatiek","text":"Pauze voorbij! Kom op, we gaan weer!"},{"event":"restEnd","intensity":"fanatiek","text":"Opgeladen? Mooi, tijd om te knallen!"},{"event":"restEnd","intensity":"fanatiek","text":"Genoeg gerust, de volgende set wacht op je!"},{"event":"restEnd","intensity":"beest","text":"Rust is voor straks. Aan de bak!"},{"event":"restEnd","intensity":"beest","text":"Klaar met chillen. Terug naar het werk."},{"event":"restEnd","intensity":"beest","text":"De klok tikt. Zitten en duwen!"},{"event":"exerciseDone","intensity":"rustig","text":"Deze oefening zit erop. Goed gewerkt."},{"event":"exerciseDone","intensity":"rustig","text":"Mooi afgerond. Loop rustig naar het volgende apparaat."},{"event":"exerciseDone","intensity":"rustig","text":"Helemaal klaar. Je lijf wordt hier sterker van."},{"event":"exerciseDone","intensity":"fanatiek","text":"Oefening voltooid! Weer een stap dichterbij!"},{"event":"exerciseDone","intensity":"fanatiek","text":"Die staat! Op naar de volgende uitdaging!"},{"event":"exerciseDone","intensity":"fanatiek","text":"Helemaal af! Je bent lekker op dreef vandaag!"},{"event":"exerciseDone","intensity":"beest","text":"Machine verslagen. Volgende slachtoffer."},{"event":"exerciseDone","intensity":"beest","text":"Klaar. Geen tijd verspillen, doorlopen."},{"event":"exerciseDone","intensity":"beest","text":"Afgewerkt en gesloopt. Zo doen we dat."},{"event":"pr","intensity":"rustig","text":"Een nieuw persoonlijk record. Wat knap van je."},{"event":"pr","intensity":"rustig","text":"Meer gewicht dan ooit. Je vooruitgang is prachtig om te zien."},{"event":"pr","intensity":"rustig","text":"Nieuw record! Al dat rustige opbouwen betaalt zich uit."},{"event":"pr","intensity":"fanatiek","text":"Nieuw record! Je wordt echt sterker, voel je dat?"},{"event":"pr","intensity":"fanatiek","text":"Persoonlijk record verbroken! Wat een topprestatie!"},{"event":"pr","intensity":"fanatiek","text":"Zwaarder dan ooit en jij tilt het gewoon! Geweldig!"},{"event":"pr","intensity":"beest","text":"Nieuw record. Het oude ik zou trots zijn en bang."},{"event":"pr","intensity":"beest","text":"Record gesloopt. Dit is waar je voor traint."},{"event":"pr","intensity":"beest","text":"Zwaarder, sterker, beter. Records zijn er om te breken."},{"event":"sessionEnd","intensity":"rustig","text":"De training zit erop. Wees trots op jezelf."},{"event":"sessionEnd","intensity":"rustig","text":"Goed gedaan vandaag. Rust lekker uit, dat verdien je."},{"event":"sessionEnd","intensity":"rustig","text":"Klaar voor vandaag. Je lichaam dankt je hiervoor."},{"event":"sessionEnd","intensity":"fanatiek","text":"Training voltooid! Wat een sessie was dit!"},{"event":"sessionEnd","intensity":"fanatiek","text":"Helemaal uitgetraind! Je mag supertrots zijn!"},{"event":"sessionEnd","intensity":"fanatiek","text":"Dat zit erop! Vandaag weer sterker geworden!"},{"event":"sessionEnd","intensity":"beest","text":"Missie volbracht. Ga naar huis als een winnaar."},{"event":"sessionEnd","intensity":"beest","text":"Klaar. Jij kwam, jij zag, jij sloopte alles."},{"event":"sessionEnd","intensity":"beest","text":"De sportschool heeft weer respect voor je. Tot de volgende."},{"event":"nextUp","intensity":"rustig","text":"Vorige keer wilde je iets zwaarder proberen. Voel je er klaar voor?"},{"event":"nextUp","intensity":"rustig","text":"Je had genoteerd dat je meer gewicht wilde. Rustig proberen mag."},{"event":"nextUp","intensity":"fanatiek","text":"Hé, je wilde toch meer gewicht? Vandaag is de dag!"},{"event":"nextUp","intensity":"fanatiek","text":"Vorige keer zei je: volgende keer zwaarder. Dat is nu!"},{"event":"nextUp","intensity":"beest","text":"Je beloofde jezelf meer gewicht. Beloftes maak je waar."},{"event":"nextUp","intensity":"beest","text":"Meer gewicht, zei je. Geen woorden maar daden."},{"event":"goal","intensity":"rustig","text":"Denk even aan waarom je dit doet: {goal}."},{"event":"goal","intensity":"rustig","text":"Elke set brengt je dichter bij je doel: {goal}."},{"event":"goal","intensity":"fanatiek","text":"Weet je nog waar je voor gaat? {goal}!"},{"event":"goal","intensity":"fanatiek","text":"Dit is jouw weg naar {goal}. Blijf gaan!"},{"event":"goal","intensity":"beest","text":"Vergeet nooit waarom je hier zweet: {goal}."},{"event":"goal","intensity":"beest","text":"{goal}. Dat haal je niet op de bank. Werken."},{"event":"hrHigh","intensity":"rustig","text":"Je hartslag is flink hoog. Neem even rust en adem diep."},{"event":"hrHigh","intensity":"rustig","text":"Even gas terug, je hart werkt hard genoeg. Rustig ademen."},{"event":"hrHigh","intensity":"fanatiek","text":"Hartslag piekt! Even rustiger, dan kun je straks weer knallen."},{"event":"hrHigh","intensity":"fanatiek","text":"Wauw, je motor draait op volle toeren. Even afkoelen, kampioen."},{"event":"hrHigh","intensity":"beest","text":"Zelfs beesten pauzeren. Hartslag omlaag, dan weer aanvallen."},{"event":"hrHigh","intensity":"beest","text":"Slim trainen is ook hard trainen. Even terugschakelen."},{"event":"halfway","intensity":"rustig","text":"Je bent halverwege. Het gaat lekker, rustig doorgaan zo."},{"event":"halfway","intensity":"rustig","text":"De helft zit erop. Mooi op schema vandaag."},{"event":"halfway","intensity":"fanatiek","text":"Halverwege al! De tweede helft wordt nog beter!"},{"event":"halfway","intensity":"fanatiek","text":"Helft gedaan! Hou dit vuur vast tot het einde!"},{"event":"halfway","intensity":"beest","text":"Halverwege. De echte winnaars maken nu het verschil."},{"event":"halfway","intensity":"beest","text":"Vijftig procent klaar. De rest sloop je ook."}];
 let KB_ENTRIES = [{"keywords":["afvallen","vet verbranden","gewicht verliezen","kilo's kwijt","dieet","slanker","vetpercentage"],"q":"Hoe val ik af met fitness?","a":"Afvallen draait om een calorietekort: iets minder eten dan je verbruikt. Krachttraining helpt daarbij enorm, want spieren verbruiken ook in rust energie en je behoudt spiermassa terwijl je vet verliest. Combineer je schema met wat extra cardio en let op je voeding, dan komt het resultaat vanzelf. Mik op een rustig tempo van ongeveer een halve kilo per week, dat is goed vol te houden."},{"keywords":["calorieën","kcal","calorietekort","energiebalans","hoeveel eten","verbranden"],"q":"Hoeveel calorieën moet ik eten om af te vallen?","a":"Een veilig startpunt is zo'n 300 tot 500 calorieën minder dan je dagelijks verbruikt. Extreem weinig eten werkt averechts: je verliest dan ook spiermassa en houdt het niet vol. Eet vooral voldoende eiwitten en groente, dan blijf je verzadigd. Weet je je verbruik niet? Een online calculator of een diëtist kan je op weg helpen."},{"keywords":["cardio","krachttraining","afvallen","vet verbranden","wat is beter","combineren"],"q":"Is cardio of krachttraining beter om af te vallen?","a":"De combinatie werkt het best. Cardio verbrandt direct calorieën, krachttraining zorgt dat je spiermassa behoudt en je stofwisseling op peil blijft. Jouw schema met warming-up, apparaten en cooling-down is daar al een mooie mix van. Het allerbelangrijkste blijft je voeding: afvallen doe je vooral in de keuken."},{"keywords":["buikvet","buik","plaatselijk","vet verbranden","sixpack","buikspieren"],"q":"Kan ik gericht buikvet verbranden?","a":"Helaas, plaatselijk vet verbranden bestaat niet. Je lichaam bepaalt zelf waar het vet verliest, en dat gaat overal geleidelijk. Buikspieroefeningen maken je buikspieren wel sterker, maar het vet erboven verdwijnt alleen door een algeheel calorietekort. Blijf dus gewoon trainen en let op je voeding, dan volgt de buik vanzelf."},{"keywords":["spieropbouw","spiermassa","spieren kweken","sterker worden","spiergroei","hypertrofie"],"q":"Hoe bouw ik spiermassa op?","a":"Spieren groeien door drie dingen: regelmatig trainen met voldoende weerstand, genoeg eiwitten eten en goed herstellen met rust en slaap. Train elke spiergroep zo'n twee keer per week en maak de training geleidelijk zwaarder. Je schema op de apparaten is daar prima voor: veilig en effectief. Geef het tijd, spieropbouw gaat langzaam maar zeker."},{"keywords":["resultaat","hoe snel","wanneer zie ik","spiergroei","vooruitgang","effect"],"q":"Hoe snel zie ik resultaat van trainen?","a":"De eerste weken word je vooral sterker doordat je zenuwstelsel efficiënter wordt; zichtbare spiergroei duurt meestal 6 tot 12 weken. Meer energie en beter slapen merk je vaak al eerder. Houd je gewichten en herhalingen bij in de app, dan zie je zwart op wit dat je vooruitgaat. Consistentie wint het altijd van perfectie."},{"keywords":["sets","reps","herhalingen","hoeveel","schema","series"],"q":"Hoeveel sets en herhalingen moet ik doen?","a":"Voor algemene kracht en spieropbouw zijn 2 tot 3 sets van 8 tot 12 herhalingen per oefening een prima richtlijn. De laatste twee herhalingen mogen zwaar aanvoelen, maar je techniek moet netjes blijven. Ben je aan het revalideren, begin dan lichter met 12 tot 15 herhalingen. Kwaliteit gaat altijd boven kwantiteit."},{"keywords":["gewicht kiezen","hoeveel kilo","beginnen","startgewicht","te zwaar","te licht"],"q":"Welk gewicht moet ik kiezen op een apparaat?","a":"Kies een gewicht waarmee je 8 tot 12 nette herhalingen kunt maken, waarbij de laatste twee echt moeite kosten. Kun je er makkelijk 15, dan is het te licht; haal je de 8 niet met goede techniek, dan is het te zwaar. Begin bij een nieuwe oefening liever te licht en bouw rustig op. Noteer je gewichten in de app, dan hoef je nooit te gokken."},{"keywords":["zwaarder","progressive overload","gewicht verhogen","opbouwen","wanneer meer","progressie"],"q":"Wanneer mag ik zwaarder trainen?","a":"Als je bij een oefening twee trainingen op rij makkelijk het bovenste aantal herhalingen haalt met goede techniek, is het tijd voor een stapje erbij. Verhoog met de kleinst mogelijke stap, vaak 2,5 of 5 kilo op een apparaat. Dit heet progressive overload: kleine stapjes die samen groot verschil maken. Bij oefeningen die je linkerbeen belasten mag je gerust wat voorzichtiger opbouwen."},{"keywords":["rust tussen sets","pauze","hoelang wachten","rusttijd","tussen series"],"q":"Hoeveel rust moet ik nemen tussen sets?","a":"Voor jouw type training is 60 tot 90 seconden rust tussen sets een goede richtlijn. Bij zwaardere oefeningen zoals de leg press mag je gerust 2 minuten nemen. Te korte rust gaat ten koste van je volgende set, te lange rust maakt de training onnodig lang. Luister naar je lijf: ben je nog flink buiten adem, wacht dan even."},{"keywords":["spierpijn","stijf","doms","pijn na training","normaal","spieren zeer"],"q":"Is spierpijn na het trainen normaal?","a":"Ja, zeker als je net begint of iets nieuws doet. Spierpijn die een dag of twee na de training opkomt, is een normaal teken dat je spieren zich aanpassen. Het hoort dof en verspreid aan te voelen, niet scherp of stekend. Bewegen, rustig fietsen en een warme douche helpen vaak om het te verzachten."},{"keywords":["blessure","pijn","scherpe pijn","stoppen","gewricht","verschil spierpijn","geblesseerd"],"q":"Hoe weet ik het verschil tussen spierpijn en een blessure?","a":"Spierpijn is dof, zit in de spierbuik en wordt in een paar dagen minder. Blessurepijn is vaak scherp of stekend, zit rond een gewricht of pees, komt tijdens de oefening op of wordt juist erger. Voel je scherpe pijn tijdens een oefening? Stop er dan meteen mee. Houdt de pijn langer dan een week aan of komt hij steeds terug, ga dan even langs je fysio of huisarts."},{"keywords":["trainen met spierpijn","spierpijn","doortrainen","mag ik trainen","stijve spieren"],"q":"Mag ik trainen als ik nog spierpijn heb?","a":"Lichte spierpijn is geen reden om over te slaan; rustig bewegen helpt zelfs bij het herstel. Is de spierpijn heftig, train dan een andere spiergroep of doe een lichte cardiosessie. Ga in elk geval niet vol gas op spieren die nog flink beurs zijn. Twijfel je of het spierpijn of iets anders is, doe het dan rustig aan."},{"keywords":["achillespees","gescheurd","revalidatie","hersteld","mag ik trainen","pees","operatie"],"q":"Mag ik gewoon trainen na mijn gescheurde achillespees?","a":"Als je fysio of arts groen licht heeft gegeven, is trainen juist goed: een herstelde achillespees wordt sterker door geleidelijke belasting. Bouw rustig op en vermijd voorlopig explosieve bewegingen zoals springen en sprinten, tenzij je fysio zegt dat het mag. Jouw schema op apparaten is een veilige manier om kracht op te bouwen. Houd de afspraken met je fysio aan als leidraad, die kent jouw situatie het best."},{"keywords":["kuiten","kuit","onderbeen","calf raises","kuitspier","sterker maken","hiel"],"q":"Hoe maak ik mijn kuiten en onderbeen sterker?","a":"De basisoefening is de calf raise: op je tenen omhoog komen en heel langzaam weer zakken, juist dat langzame zakken traint je achillespees en kuit. Je kunt dit staand op de grond doen, of op de leg press door alleen met je voorvoeten te duwen. Begin met twee benen tegelijk en bouw op naar herhalingen op alleen je linkerbeen. Doe 2 tot 3 sets van 12 tot 15 herhalingen, twee tot drie keer per week."},{"keywords":["achillespees","opbouwen","belasting","hoe snel","kuit","voorzichtig","hersteltijd"],"q":"Hoe snel mag ik de belasting op mijn achillespees opbouwen?","a":"Langzamer dan je waarschijnlijk wilt: pezen passen zich trager aan dan spieren. Een goede vuistregel is per week maar één ding verhogen, dus of het gewicht, of het aantal herhalingen. Lichte stijfheid na de training mag, maar pijn die de volgende ochtend nog aanwezig is, betekent een stapje terug. Bespreek je opbouwschema met je fysio, zeker in het eerste jaar na de scheur."},{"keywords":["linkerbeen","rechterbeen","verschil","asymmetrie","zwakker been","een been","unilateraal"],"q":"Mijn linkerbeen is zwakker dan mijn rechter, wat nu?","a":"Heel normaal na een achillespeesblessure, en goed te trainen. Doe oefeningen zoals de leg press, leg extension en leg curl af en toe met één been tegelijk, zodat je sterke been niet stiekem het werk overneemt. Laat je zwakkere linkerbeen het tempo bepalen: doe rechts evenveel als links aankan. Het verschil trekt in de loop van maanden bij, dus houd vol en meet je vooruitgang."},{"keywords":["achillespees","pijn","hiel","tijdens training","zeurende pijn","pees pijn"],"q":"Wat doe ik als mijn achillespees pijn doet tijdens het trainen?","a":"Voel je scherpe of toenemende pijn bij je hiel of achillespees, stop dan met die oefening. Een licht trekkerig of stijf gevoel dat tijdens de warming-up wegtrekt, is meestal onschuldig. Ga terug in gewicht of doe die dag alleen de oefeningen die je onderbeen niet belasten, zoals de chest press, pulldown en row. Blijft de pijn terugkomen, leg het dan voor aan je fysio voordat je verder opbouwt."},{"keywords":["balans","stabiliteit","enkel","wankel","evenwicht","op een been staan","onderbeen"],"q":"Hoe train ik de balans en stabiliteit van mijn enkel?","a":"Balans is een belangrijk stukje van je herstel. Oefen met op één been staan, eerst gewoon op de grond, later met je ogen dicht of op een kussen. Doe dit dagelijks een paar minuten, bijvoorbeeld tijdens het tandenpoetsen. Ook langzame calf raises op één been trainen je stabiliteit. Kleine moeite, groot effect voor je linker onderbeen."},{"keywords":["warming-up","opwarmen","waarom","cardio vooraf","roeien","fietsen","beginnen"],"q":"Waarom is een warming-up belangrijk en hoe doe ik die?","a":"Een warming-up verhoogt je hartslag en lichaamstemperatuur, waardoor je spieren en pezen soepeler worden en je blessurerisico daalt. Voor jou is dit extra belangrijk vanwege je achillespees: een koude pees belast je liever niet zwaar. Doe 5 tot 10 minuten rustig roeien, fietsen of crosstrainen tot je licht begint te zweten. Begin daarna bij elk apparaat eventueel met één lichte set om in te komen."},{"keywords":["cooling-down","afkoelen","uitfietsen","na de training","afsluiten","cooldown"],"q":"Is een cooling-down echt nodig?","a":"Een cooling-down van 5 tot 10 minuten rustig fietsen of wandelen helpt je hartslag geleidelijk zakken en voelt gewoon prettig na een pittige training. Het is ook een mooi moment om je kuiten en benen rustig te laten uitbewegen. Verplicht is het niet, maar het maakt de overgang naar de rest van je dag een stuk aangenamer. Sla het in elk geval niet over na intensieve cardio."},{"keywords":["ademhaling","ademen","persen","adem inhouden","uitademen","wanneer ademen"],"q":"Hoe moet ik ademen tijdens krachtoefeningen?","a":"De vuistregel: adem uit tijdens het zware deel (het duwen of trekken) en adem in tijdens het terugkomen. Bij de leg press adem je dus uit als je wegduwt en in als je terugbuigt. Houd je adem niet in, want dat jaagt je bloeddruk onnodig omhoog. In het begin voelt het onwennig, maar na een paar trainingen gaat het vanzelf."},{"keywords":["eiwit","proteine","eiwitten","hoeveel gram","spieren","voeding"],"q":"Hoeveel eiwit heb ik nodig voor spieropbouw?","a":"Voor iemand die krachttraining doet is 1,2 tot 2 gram eiwit per kilo lichaamsgewicht per dag een goede richtlijn. Weeg je 80 kilo, dan kom je dus op zo'n 100 tot 160 gram. Verdeel het over de dag: kwark, eieren, kip, vis, peulvruchten en zuivel zijn prima bronnen. Eiwit is ook belangrijk voor het herstel van je achillespees."},{"keywords":["eiwitshake","shake","proteine poeder","supplementen","nodig","creatine"],"q":"Heb ik een eiwitshake nodig?","a":"Nodig is het niet: haal je genoeg eiwit uit gewone voeding, dan voegt een shake weinig toe. Het is vooral gemak, handig als je na de training niet snel aan een maaltijd toekomt. Een bak kwark of een glas melk met een boterham doet hetzelfde werk. Kijk eerst naar je gewone eten en gebruik een shake alleen als aanvulling."},{"keywords":["eten voor training","vooraf eten","nuchter trainen","maaltijd","energie","wat eten"],"q":"Wat kan ik het beste eten voor het trainen?","a":"Eet 1 tot 2 uur voor je training iets lichts met koolhydraten, zoals een banaan, een boterham of wat yoghurt met muesli. Een grote maaltijd vlak vooraf zit in de weg; helemaal nuchter trainen kan, maar veel mensen voelen zich dan slap. Probeer uit wat voor jou prettig werkt. Neem in elk geval water mee naar de sportschool."},{"keywords":["eten na training","herstel","maaltijd na","eiwit na training","wat eten na"],"q":"Wat eet ik het beste na de training?","a":"Eet binnen een paar uur na je training een maaltijd of tussendoortje met eiwitten en koolhydraten, bijvoorbeeld kwark met fruit of een volwaardige warme maaltijd. Dat geeft je spieren de bouwstoffen om te herstellen en te groeien. Het beruchte 'halfuur-venster' is minder strikt dan vaak wordt gedacht; dezelfde dag goed eten is wat telt. Sla na de training in elk geval geen maaltijd over."},{"keywords":["hoe vaak trainen","trainingsfrequentie","per week","rustdag","dagen","schema"],"q":"Hoe vaak per week moet ik trainen?","a":"Twee tot drie keer per week jouw volledige schema is voor de meeste mensen ideaal. Plan minimaal één rustdag tussen twee krachttrainingen, want juist in die rust worden je spieren sterker. Op rustdagen mag je prima wandelen of rustig fietsen. Liever twee keer per week volhouden dan vier keer per week twee weken lang."},{"keywords":["slaap","slapen","herstel","nachtrust","moe","uitgerust"],"q":"Hoe belangrijk is slaap voor mijn training?","a":"Heel belangrijk: tijdens je slaap herstellen je spieren en pezen zich en maakt je lichaam groeihormoon aan. Mik op 7 tot 9 uur per nacht. Slecht slapen merk je direct in de sportschool: minder kracht, minder focus en meer kans op blessures. Zie slaap dus als een onderdeel van je training, niet als iets ernaast."},{"keywords":["overtraining","te veel trainen","geen vooruitgang","uitgeput","signalen","overbelasting"],"q":"Hoe merk ik dat ik te veel train?","a":"Signalen zijn: aanhoudende vermoeidheid, slechter slapen, prikkelbaarheid, een verhoogde rusthartslag en prestaties die achteruitgaan in plaats van vooruit. Ook steeds terugkerende pijntjes, bijvoorbeeld rond je achillespees, kunnen op overbelasting wijzen. De oplossing is simpel: een paar dagen extra rust of een week lichter trainen. Meer is niet altijd beter; beter is beter."},{"keywords":["hartslag","hartslagzones","zones","bpm","polsslag","intensiteit"],"q":"Wat zijn hartslagzones en wat heb ik eraan?","a":"Je hartslagzones zijn percentages van je maximale hartslag, die je grofweg schat met 220 min je leeftijd. Voor vetverbranding en conditie zit je goed in zone 2 tot 3, zo'n 60 tot 75 procent van je maximum: je bent bezig maar kunt nog net praten. Voor je warming-up is een rustige zone prima. Een hartslagmeter is handig, maar de praattest werkt ook uitstekend."},{"keywords":["maximale hartslag","hoe hoog","hartslag te hoog","hartkloppingen","gevaarlijk","bpm"],"q":"Hoe hoog mag mijn hartslag worden tijdens het sporten?","a":"Tijdens intensieve inspanning mag je hartslag flink omhoog, richting je geschatte maximum van 220 min je leeftijd. Voor gewone trainingen hoef je daar zelden in de buurt te komen; 60 tot 80 procent is voor de meeste doelen genoeg. Voel je je duizelig, misselijk of krijg je pijn op de borst, stop dan direct. Bij twijfel over je hart is de huisarts de aangewezen persoon, niet de sportschool."},{"keywords":["cardio","conditie","hoe lang","fietsen","roeien","duurtraining","uithoudingsvermogen"],"q":"Hoeveel cardio moet ik doen naast mijn krachtschema?","a":"De algemene richtlijn is minstens 150 minuten matig intensief bewegen per week. Je warming-up en cooling-down tellen al mee, en je kunt op rustdagen wandelen of fietsen toevoegen. Roeien, fietsen en de crosstrainer zijn vriendelijk voor je achillespees; met hardlopen bouw je voorzichtiger op. Kies vooral iets dat je leuk vindt, dan houd je het vol."},{"keywords":["motivatie","geen zin","opgeven","moeite","volhouden","dip"],"q":"Wat doe ik als ik geen zin heb om te trainen?","a":"Iedereen heeft dat soms, ook fanatieke sporters. Een gouden truc: spreek met jezelf af dat je alleen de warming-up doet. Eenmaal bezig komt de zin meestal vanzelf, en zo niet, dan mag je na tien minuten stoppen zonder schuldgevoel. Onthoud ook waarom je begonnen bent: een sterker onderbeen en een fitter lijf bouw je op met juist die trainingen waar je geen zin in had."},{"keywords":["consistentie","gewoonte","routine","volhouden","discipline","regelmaat"],"q":"Hoe maak ik van trainen een gewoonte?","a":"Plan je trainingen als vaste afspraken in je agenda, op dezelfde dagen en tijden. Maak de drempel laag: tas de avond ervoor klaarzetten scheelt al de helft. Houd je trainingen bij in de app, want een reeks niet willen doorbreken is verrassend motiverend. Na een week of zes voelt overslaan gekker dan gaan."},{"keywords":["plateau","geen vooruitgang","stilstand","resultaat blijft uit","vast","stagneren"],"q":"Ik ga niet meer vooruit, wat nu?","a":"Een plateau hoort erbij en is meestal goed te doorbreken. Check eerst de basis: slaap je genoeg, eet je voldoende eiwit en verhoog je je gewichten nog weleens? Varieer daarna eens met je herhalingen, bijvoorbeeld een periode van 12 naar 8 zwaardere herhalingen. Soms is een weekje rustiger aan doen juist de sleutel: daarna ga je vaak weer als een speer."},{"keywords":["leg press","beenpers","techniek","benen duwen","knieën","uitvoering"],"q":"Hoe doe ik de leg press goed?","a":"Zet je voeten op heuphoogte op het platform, ongeveer schouderbreed. Duw rustig weg tot je benen bijna gestrekt zijn, maar klik je knieën niet op slot. Laat het gewicht gecontroleerd terugkomen tot je knieën ongeveer 90 graden gebogen zijn en houd je onderrug tegen de leuning. Voor je achillespees: duw vanuit je hele voet en laat je hielen niet loskomen."},{"keywords":["leg extension","beenstrekker","bovenbeen","quadriceps","techniek","knie strekken"],"q":"Hoe gebruik ik de leg extension goed?","a":"Stel de machine zo af dat je knieën precies bij het draaipunt zitten en het kussen op je onderbenen rust, net boven je enkels. Strek je benen rustig omhoog, houd een tel vast en laat langzaam weer zakken zonder het gewicht te laten vallen. Deze oefening traint je bovenbenen (quadriceps) heel gericht. Voel je pijn ín de knie zelf, verlaag dan het gewicht of vraag advies."},{"keywords":["leg curl","hamstring","beenbuiger","techniek","achterkant been","zittend"],"q":"Hoe doe ik de zittende leg curl goed?","a":"Ga zitten met je knieën bij het draaipunt van de machine en het kussen tegen je onderbenen, vlak boven je hielen. Buig je benen krachtig naar beneden en laat ze daarna langzaam en gecontroleerd terugkomen. Je traint hiermee je hamstrings, de achterkant van je bovenbenen, die ook belangrijk zijn voor de balans in je benen. Houd je heupen goed in de stoel en trek niet met je rug."},{"keywords":["shoulder press","schouderdrukken","schouders","techniek","boven het hoofd","machine"],"q":"Waar let ik op bij de shoulder press?","a":"Stel de stoel zo af dat de handvatten ongeveer op schouderhoogte beginnen. Duw rustig omhoog tot je armen bijna gestrekt zijn en laat gecontroleerd zakken tot schouderhoogte. Houd je rug tegen de leuning en maak geen holle rug om extra kracht te zetten; dan is het gewicht te zwaar. Adem uit tijdens het omhoog duwen."},{"keywords":["dumbells","front raise","side raise","zijwaarts heffen","schouders","90 graden","gewichtjes"],"q":"Hoe doe ik front raises en side raises met dumbells goed?","a":"Sta rechtop met een lichte dumbell in elke hand. Bij de front raise hef je je gestrekte armen voorwaarts tot schouderhoogte (90 graden), bij de side raise zijwaarts tot dezelfde hoogte. Beweeg langzaam, zonder zwaaien of momentum uit je rug; hoger dan schouderhoogte hoeft niet. Dit zijn oefeningen waarbij licht gewicht en nette uitvoering veel meer opleveren dan zwaar en slordig."},{"keywords":["chest press","borstdrukken","borst","techniek","duwen","machine"],"q":"Hoe voer ik de chest press goed uit?","a":"Stel de stoel zo af dat de handvatten op borsthoogte zitten. Duw ze rustig naar voren tot je armen bijna gestrekt zijn en laat ze gecontroleerd terugkomen tot naast je borst. Houd je schouders laag en ontspannen, weg van je oren, en je rug tegen de leuning. Adem uit tijdens het duwen en in tijdens het terugkomen."},{"keywords":["pulldown","lat pulldown","rug","techniek","naar beneden trekken","latissimus"],"q":"Hoe doe ik de lat pulldown goed?","a":"Pak de stang iets breder dan schouderbreedte en ga zitten met je bovenbenen onder de kussens. Trek de stang rustig naar je bovenste borst terwijl je je ellebogen naar beneden en iets naar achteren beweegt, en laat hem gecontroleerd terug omhoog. Trek niet achter je nek langs en hang niet naar achteren om het gewicht mee te trekken. Denk 'ellebogen in je broekzakken', dan voel je hem mooi in je rug."},{"keywords":["row","horizontal row","roeien","seated row","pulley","rug","techniek"],"q":"Waar let ik op bij de horizontal row?","a":"Ga rechtop zitten met een lichte buiging in je knieën en pak de handvatten vast. Trek ze naar je buik toe terwijl je je schouderbladen naar elkaar knijpt, en laat rustig weer vieren zonder dat je schouders naar voren rollen. Houd je rug recht: de beweging komt uit je armen en rug, niet uit heen en weer zwaaien met je romp. Een sterke rug helpt ook je houding in het dagelijks leven."},{"keywords":["stretchen","rekken","rekoefeningen","voor of na","lenigheid","kuit rekken"],"q":"Moet ik stretchen voor of na het trainen?","a":"Voor de training is een actieve warming-up belangrijker dan stretchen; lang statisch rekken op koude spieren heeft weinig zin. Na de training of op rustdagen is rustig stretchen prima, zeker voor je kuiten. Rek je kuit door met gestrekt achterbeen tegen een muur te leunen, 20 tot 30 seconden per keer, zonder te veren. Voel je rek, geen pijn; en bij je herstellende achillespees altijd rustig aan."},{"keywords":["water","drinken","hydratatie","vocht","hoeveel drinken","dorst"],"q":"Hoeveel water moet ik drinken rond het trainen?","a":"Zorg dat je gehydrateerd aan je training begint en neem een bidon mee: een paar slokken tussen de oefeningen door is genoeg. Over de hele dag is 1,5 tot 2 liter een goede richtlijn, op trainingsdagen iets meer. Donkere urine is een simpel signaal dat je meer moet drinken. Sportdrank is bij een uurtje fitness niet nodig; water volstaat prima."},{"keywords":["ziek","verkouden","griep","koorts","trainen als ziek","doortrainen"],"q":"Kan ik trainen als ik ziek of verkouden ben?","a":"Een handige vuistregel is de nekcheck: zitten je klachten boven de nek (snotneus, licht keelpijn), dan mag je rustig en licht trainen als je je verder goed voelt. Zitten ze eronder (hoesten op de borst, spierpijn door ziekte) of heb je koorts, dan sla je over: rust is dan echt het beste. Kom na ziekte rustig terug, met minder gewicht dan je gewend was. Twijfel je, kies dan altijd voor rust."},{"keywords":["moe","vermoeid","slecht geslapen","energie","toch trainen","futloos"],"q":"Moet ik trainen als ik moe ben?","a":"Gewone dagelijkse moeheid is meestal geen reden om over te slaan; vaak knap je juist op van bewegen. Doe dan een lichtere versie van je schema: minder gewicht of een set minder per oefening. Ben je echt uitgeput of heb je nachten slecht geslapen, dan is rust waardevoller dan een matige training. Luister naar je lijf; het verschil tussen 'geen zin' en 'echt op' voel je zelf het best."},{"keywords":["volgorde","oefeningen","schema volgorde","wat eerst","grote spiergroepen","indeling"],"q":"Maakt de volgorde van mijn oefeningen uit?","a":"Ja, en jouw schema zit al logisch in elkaar: eerst de warming-up, dan grote spiergroepen zoals benen en borst, en afsluiten met een cooling-down. Grote, zware oefeningen doe je als je nog fris bent; kleinere oefeningen zoals de dumbell raises komen daarna. Wissel je een keer een apparaat om drukte in de sportschool, geen probleem. Houd alleen de warming-up altijd als eerste, zeker voor je achillespees."},{"keywords":["afvallen","spieropbouw","tegelijk","kan dat","vet verliezen spier winnen","recomp"],"q":"Kan ik tegelijk afvallen en spieren opbouwen?","a":"Ja, zeker als je relatief nieuw bent met krachttraining of terugkomt na een blessure: dan kan je lichaam vet verliezen en spier opbouwen tegelijk. De sleutel is een klein calorietekort combineren met veel eiwit en consequent trainen. Verwacht wel dat het langzamer gaat dan wanneer je op één doel focust. Laat de weegschaal je niet gek maken; foto's en je kleding zeggen vaak meer."},{"keywords":["hoelang trainen","duur training","hoeveel minuten","sessie","te lang","tijd"],"q":"Hoe lang moet een training duren?","a":"Jouw volledige schema kost inclusief warming-up en cooling-down zo'n 45 tot 60 minuten, en dat is ruim voldoende. Langer trainen is niet automatisch beter; de kwaliteit van je sets telt, niet de tijd op de klok. Heb je een keer weinig tijd, doe dan een verkorte versie met de grootste oefeningen zoals de leg press, chest press en row. Een korte training is altijd beter dan geen training."}];
@@ -1448,7 +1485,9 @@ let HR_GUIDANCE = [{"phase":"warmingup","pctLow":50,"pctHigh":70,"durationText":
    GEWICHTSSTAPELS PER APPARAAT (uit foto's van de gebruiker, kg)
    ============================================================ */
 const MACHINE_STACKS = {
-  "Seated Chest Press":   [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  // Chest press: afgelezen van de foto van 28-07. Het lbs-lijstje loopt 30·40·50·65·80·95 en
+  // daarna in stappen van 15 door tot 230 lbs; de kg-kolom ernaast is 14 t/m 104.
+  "Seated Chest Press":   [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Seated Leg Press":     [18, 29, 41, 52, 63, 75, 86, 97, 109, 120, 131, 143, 154, 165, 177, 188],
   "Seated Leg Extension": [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Dumbells":             [1, 2, 3, 4, 5],
@@ -1457,15 +1496,17 @@ const MACHINE_STACKS = {
   "Horizontal Row (Pulley)": [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Kettlebell":           [16, 20],
 };
-/* Openstaande vragen per apparaat — zichtbaar in de app zodat de gebruiker weet welke info nog nodig is */
+/* Openstaande vragen per apparaat — zichtbaar in de app zodat de gebruiker weet welke info nog nodig is.
+   `mootAbove` is de kilo waarboven de vraag er niet meer toe doet: gaat het over de lichtste plaatjes
+   bovenin de stapel en train je daar allang overheen, dan hoef je er geen foto meer voor te maken.
+   `mootAbove: null` = de hele stapel is onbekend, dus de vraag blijft altijd staan. */
 const MACHINE_OPEN_QUESTIONS = {
-  "Seated Chest Press": "Zit er boven het plaatje van 9 kg nog een lichter plaatje? En kloppen de (op de foto onscherpe) waarden 43 t/m 104 kg?",
-  "Seated Leg Press": "De platen 52 en 75 kg waren op de foto's verdekt — kloppen die tussenwaarden?",
-  "Seated Leg Extension": "Zit er boven 14 kg nog een lichter plaatje (bijv. 9 kg)?",
-  "Shoulder Press": "Zit er boven 9 kg nog een lichter plaatje (bijv. 5 kg)?",
-  "Pulldown": "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?",
-  "Horizontal Row (Pulley)": "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?",
-  "Leg Curl": "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.",
+  "Seated Leg Press": { q: "De platen 52 en 75 kg waren op de foto's verdekt — kloppen die tussenwaarden?", mootAbove: 86 },
+  "Seated Leg Extension": { q: "Zit er boven 14 kg nog een lichter plaatje (bijv. 9 kg)?", mootAbove: 29 },
+  "Shoulder Press": { q: "Zit er boven 9 kg nog een lichter plaatje (bijv. 5 kg)?", mootAbove: 23 },
+  "Pulldown": { q: "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?", mootAbove: 36 },
+  "Horizontal Row (Pulley)": { q: "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?", mootAbove: 36 },
+  "Leg Curl": { q: "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.", mootAbove: null },
 };
 const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
 /* Kettlebell-oefeningen met do's & don'ts — getoond op de Kettlebell-kaart in de sessie (squat eerst) */
@@ -1912,8 +1953,8 @@ function hwStepsHtml(s, open) {
   const steps = EXERCISE_STEPS[s.name] || (s.description ? [s.description] : []);
   return `<details class="tip inline-tip" style="margin-top:8px;"${open ? " open" : ""}><summary>Uitvoering, do's &amp; don'ts</summary><div class="tip-body">
     ${steps.length ? `<div class="sub">Zo voer je hem uit</div><ul>${steps.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    ${s.tips && s.tips.length ? `<div class="sub">${icon("check",15)}Zo doe je hem goed</div><ul>${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-    ${s.mistakes && s.mistakes.length ? `<div class="sub">${icon("ban",15)}Dit moet je niet doen</div><ul>${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${s.tips && s.tips.length ? `<div class="sub">${icon("check",15)}Zo doe je hem goed</div><ul class="dos-list">${s.tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    ${s.mistakes && s.mistakes.length ? `<div class="sub">${icon("ban",15)}Dit moet je niet doen</div><ul class="donts-list">${s.mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     <div class="speak-row">
       ${steps.length ? `<button class="btn small ghost hw-speak-steps">${icon("sound",15)}Uitvoering</button>` : ""}
       ${s.tips && s.tips.length ? `<button class="btn small ghost hw-speak-dos">${icon("sound",15)}Do's</button>` : ""}
@@ -1930,7 +1971,8 @@ function bindHwSpeak(root, s) {
   wire(".hw-speak-donts", "De don'ts, dit gaat vaak mis. " + (s.mistakes || []).join(". ") + ".");
 }
 /* Gevoelsschaal thuis (zelfde 5 kleuren als de gym) + gevolg voor het doel:
-   groen/donkergroen → zwaarder-vraag, rood/oranje → doel automatisch omlaag */
+   groen/donkergroen → zwaarder-vraag. Omlaag gaat het doel nooit meteen bij het aantikken:
+   dat gebeurt pas bij het afvinken, en alleen als het donkerrood was (zie hwLowerIfDarkRed). */
 function hwFeelHtml(feel) {
   return `<div class="feel-row" style="margin-top:10px;margin-bottom:4px;">
     <span class="feel-lbl">Hoe voelde dit?</span>
@@ -1952,10 +1994,10 @@ function bindHwFeel(root, s, metric) {
   });
 }
 function hwFeelFollowUp(s, feel, metric) {
-  if (!feel || feel === 3) return;
+  if (!feel || feel <= 3) return; // rood en oranje doen bij het aantikken niets meer
   const sug = hwSuggest(s);
   const unit = metric === "sec" ? "seconden" : "herhalingen";
-  if (feel >= 4) {
+  {
     if (hwWeighted(s)) {
       const nextKg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, sug.kg) : Math.round((sug.kg + (feel === 5 ? 1 : 0.5)) * 2) / 2;
       if (nextKg !== sug.kg) showModal("Zwaarder de volgende keer?", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${nextKg} kg proberen (nu ${sug.kg} kg)?`, () => {
@@ -1967,14 +2009,20 @@ function hwFeelFollowUp(s, feel, metric) {
         setHwTarget(s.name, { reps: nextReps }); toast(`Genoteerd! Volgende keer: ${nextReps} ${unit}`);
       });
     }
+  }
+}
+/* Het doel gaat alleen omlaag als je de oefening hebt afgevinkt én hem donkerrood
+   ("veel te zwaar") noemde. Lichtrood laat je doel dus staan. */
+function hwLowerIfDarkRed(s, feel, metric) {
+  if (feel !== 1) return;
+  const sug = hwSuggest(s);
+  if (hwWeighted(s)) {
+    const downKg = s.equipment === "kettlebell" ? stackPrev(KETTLEBELL_WEIGHTS, sug.kg) : Math.max(0.5, Math.round((sug.kg - 1) * 2) / 2);
+    if (downKg !== sug.kg) { setHwTarget(s.name, { kg: downKg }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downKg} kg`); }
   } else {
-    if (hwWeighted(s)) {
-      const downKg = s.equipment === "kettlebell" ? stackPrev(KETTLEBELL_WEIGHTS, sug.kg) : Math.max(0.5, Math.round((sug.kg - (feel === 1 ? 1 : 0.5)) * 2) / 2);
-      if (downKg !== sug.kg) { setHwTarget(s.name, { kg: downKg }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downKg} kg`); }
-    } else {
-      const downReps = Math.max(1, sug.reps - (metric === "sec" ? 5 : 2));
-      if (downReps !== sug.reps) { setHwTarget(s.name, { reps: downReps }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downReps} ${unit}`); }
-    }
+    const unit = metric === "sec" ? "seconden" : "herhalingen";
+    const downReps = Math.max(1, sug.reps - (metric === "sec" ? 5 : 2));
+    if (downReps !== sug.reps) { setHwTarget(s.name, { reps: downReps }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downReps} ${unit}`); }
   }
 }
 function exVideoSearch(s) {
@@ -2121,6 +2169,15 @@ const store = {
   setPushups: (c) => { localStorage.setItem("gymwave_pushups", JSON.stringify(c)); touch(); },
   situps: () => { const v = jget("gymwave_situps", "[]"); return Array.isArray(v) ? v : []; },
   setSitups: (c) => { localStorage.setItem("gymwave_situps", JSON.stringify(c)); touch(); },
+  // antwoorden op de openstaande apparaat-vragen (foto-id, tekst, en of hij afgehandeld is)
+  answers: () => { const v = jget("gymwave_machine_answers", "{}"); return v && typeof v === "object" ? v : {}; },
+  setAnswers: (a) => { localStorage.setItem("gymwave_machine_answers", JSON.stringify(a)); touch(); },
+  // weergavevoorkeuren, o.a. welke hero-rijen op Home zichtbaar zijn
+  prefs: () => {
+    const raw = jget("gymwave_prefs", "{}") || {};
+    return Object.assign({}, raw, { heroes: Object.assign({ gym: true, home: true, calf: true, push: true, situp: true }, raw.heroes || {}) });
+  },
+  setPrefs: (p) => { localStorage.setItem("gymwave_prefs", JSON.stringify(p)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
   setChat: (c) => localStorage.setItem("gymwave_chat", JSON.stringify(c)), // lokaal, niet syncen
   apiKey: () => localStorage.getItem("gymwave_api_key") || "",
@@ -2204,6 +2261,18 @@ function migrateMachines() {
       prof.chestPress23 = true;
       localStorage.setItem("gymwave_profile", JSON.stringify(prof));
     }
+  }
+  // Chest press-stapel gelijktrekken met de foto van 28-07: het lichtste plaatje is 14 kg
+  // (30 lbs), er zit er geen van 9 kg boven. Eenmalig, en alleen als de oude lijst er nog staat.
+  if (machines.length && !prof.chestStackPhoto2607) {
+    const cp = machines.find(mm => mm.name === "Seated Chest Press");
+    if (cp && Array.isArray(cp.stack) && cp.stack[0] === 9) {
+      cp.stack = MACHINE_STACKS["Seated Chest Press"].slice();
+      if (cp.lastWeight === 9) cp.lastWeight = 14;
+      changed = true;
+    }
+    prof.chestStackPhoto2607 = true;
+    localStorage.setItem("gymwave_profile", JSON.stringify(prof));
   }
   if (changed) localStorage.setItem("gymwave_machines", JSON.stringify(machines));
 }
@@ -2840,10 +2909,10 @@ function waitChipHtml(days, stepDays) {
     </div>`;
 }
 /* Twee tellers naast elkaar: aantal links, PR rechts. Geen bekertje. */
-function heroCountsHtml(nLabel, nVal, prLabel, prVal) {
+function heroCountsHtml(nLabel, nVal, prLabel, prVal, prTitle) {
   return `<div class="hero-counts">
       <button class="hero-count" data-jump="count"><span class="hc-num">${nVal}</span><span class="hc-lbl">${nLabel}</span></button>
-      <button class="hero-count" data-jump="pr"><span class="hc-num">${prVal}</span><span class="hc-lbl">${prLabel}</span></button>
+      <button class="hero-count" data-jump="pr"${prTitle ? ` title="${esc(prTitle)}"` : ""}><span class="hc-num">${prVal}</span><span class="hc-lbl">${prLabel}</span></button>
     </div>`;
 }
 
@@ -2958,15 +3027,33 @@ function buildHeroRows() {
   });
   wrap.dataset.rows = "1";
 }
+/* Een uitgezette hero-rij verdwijnt van Home en komt terug als de gewone, rustige
+   ghost-knop onderaan — zo wordt het scherm kalmer zonder dat je iets kwijtraakt.
+   De hero-knoppen zelf blijven in de DOM zodat alle bestaande verwijzingen
+   (#enter-gym, #enter-home, …) blijven werken. */
+const HERO_FALLBACK = { gym: "open-gym", home: "open-homeworkout", calf: "open-calf", push: "open-pushup", situp: "open-situp" };
+function applyHeroVisibility() {
+  const heroes = store.prefs().heroes;
+  Object.keys(HERO_FALLBACK).forEach(k => {
+    const row = document.querySelector(".hero-wrap .hero-row.row-" + k);
+    if (row) row.style.display = heroes[k] ? "" : "none";
+    const ghost = document.getElementById(HERO_FALLBACK[k]);
+    if (ghost) ghost.classList.toggle("as-fallback", !heroes[k]);
+  });
+}
 function heroBtnHtml(ico, title, sub) {
   return `<span class="hero-ic">${icon(ico, 20)}</span>
     <span class="hero-txt"><span class="hero-title">${esc(title)}</span><span class="hero-sub">${esc(sub)}</span></span>`;
 }
 function renderHeroRows(sessions, homeSess) {
   buildHeroRows();
+  applyHeroVisibility();
   const machines = store.machines();
-  const gymPr = Math.round(sessions.reduce((mx, s) => Math.max(mx, ...(s.entries || []).map(e => parseFloat(e.weight) || 0)), 0));
-  const homePr = Math.round(homeSess.reduce((mx, s) => Math.max(mx, ...(s.entries || []).map(e => parseFloat(e.weight) || 0)), 0));
+  // PR bij gym en thuis = de zwaarste sessie als geheel: alle gewichten van één sessie
+  // bij elkaar opgeteld, en daarvan de hoogste. Niet het zwaarste losse apparaat.
+  const sessionTotal = s => (s.entries || []).reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0);
+  const gymPr = Math.round(sessions.reduce((mx, s) => Math.max(mx, sessionTotal(s)), 0));
+  const homePr = Math.round(homeSess.reduce((mx, s) => Math.max(mx, sessionTotal(s)), 0));
   const calf = store.calf();
   const calfPr = calf.reduce((mx, a) => Math.max(mx, a.reps || 0), 0);
 
@@ -2978,7 +3065,7 @@ function renderHeroRows(sessions, homeSess) {
     currentSession ? `${doneN} van ${machines.length} gedaan` : `${machines.length} onderdelen`);
   const lastGym = sessions.length ? sessions[sessions.length - 1].date : null;
   gym.parentElement.querySelector(".hero-side").innerHTML =
-    waitChipHtml(daysSinceISO(lastGym), 3) + heroCountsHtml("sessies", sessions.length, "kg pr", gymPr);
+    waitChipHtml(daysSinceISO(lastGym), 3) + heroCountsHtml("sessies", sessions.length, "kg pr", gymPr, "Zwaarste sessie: alle gewichten van één sessie bij elkaar opgeteld");
 
   // --- rij 2: thuis ---
   const hwToday = store.homeWorkout();
@@ -2990,7 +3077,7 @@ function renderHeroRows(sessions, homeSess) {
     planN ? `${planN} oefeningen · ${hwPlanMinutes(hwToday)} min` : "stel je eigen workout samen");
   const lastHome = homeSess.length ? homeSess[homeSess.length - 1].date : null;
   home.parentElement.querySelector(".hero-side").innerHTML =
-    waitChipHtml(daysSinceISO(lastHome), 3) + heroCountsHtml("sessies", homeSess.length, "kg pr", homePr);
+    waitChipHtml(daysSinceISO(lastHome), 3) + heroCountsHtml("sessies", homeSess.length, "kg pr", homePr, "Zwaarste thuis-workout: alle gewichten van één workout bij elkaar opgeteld");
 
   // --- rij 3: calf raises ---
   const calfBtn = document.getElementById("enter-calf");
@@ -3151,12 +3238,49 @@ document.getElementById("enter-gym").addEventListener("click", () => {
   startNewSession();
 });
 document.getElementById("enter-home").addEventListener("click", () => route("homeworkout"));
+// De rustige ghost-knoppen die verschijnen als je hun hero uitzet — zelfde route, geen nieuwe logica
+document.getElementById("open-gym").addEventListener("click", () => document.getElementById("enter-gym").click());
+document.getElementById("open-homeworkout").addEventListener("click", () => document.getElementById("enter-home").click());
 
 /* ============================================================
    SESSIE
    ============================================================ */
 const FEEL_COLORS = ["", "#7f1d1d", "#ef4444", "#eab308", "#4ade80", "#166534"];
 const FEEL_LABELS = ["", "Veel te zwaar", "Te zwaar", "Precies goed", "Te licht", "Veel te licht"];
+/* Een gemiddelde van 3,4 zit tussen geel en lichtgroen in; die tussenkleur mengen we
+   zodat een balk precies laat zien hoe de sessie voelde in plaats van af te ronden. */
+function feelColor(avg) {
+  if (!avg || !(avg > 0)) return null;
+  const v = Math.max(1, Math.min(5, avg));
+  const lo = Math.floor(v), hi = Math.min(5, lo + 1), t = v - lo;
+  const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const a = rgb(FEEL_COLORS[lo]), b = rgb(FEEL_COLORS[hi]);
+  return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(",")})`;
+}
+/* Gemiddeld gevoel over alle oefeningen van één sessie (gym of thuis); null als je niks invulde. */
+function sessionFeelAvg(s) {
+  const f = (s.entries || []).map(e => e.feeling).filter(v => v > 0);
+  return f.length ? f.reduce((a, b) => a + b, 0) / f.length : null;
+}
+/* Balkkleur + gloed uit het gemiddelde gevoel; zonder ingevuld gevoel blijft de standaardkleur staan. */
+function feelBarStyle(avg, glow) {
+  const col = feelColor(avg);
+  if (!col) return "";
+  return `background:linear-gradient(180deg, ${col}, color-mix(in srgb, ${col} 28%, transparent));`
+    + (glow ? `box-shadow:0 0 24px color-mix(in srgb, ${col} 60%, transparent);` : "box-shadow:none;");
+}
+function feelBarTip(avg) {
+  return avg ? ` · gevoel ${avg.toFixed(1)}/5 (${FEEL_LABELS[Math.round(avg)]})` : "";
+}
+/* Legenda onder de grafieken: de vijfpuntsschaal als kleurbalk. */
+function feelLegendHtml(what) {
+  return `<div class="feel-legend">
+      <span class="fl-lbl">${esc(what)}</span>
+      <div class="fl-row">
+        <span class="fl-end">veel te zwaar</span><span class="fl-ramp"></span><span class="fl-end">veel te licht</span>
+      </div>
+    </div>`;
+}
 function suggestNext(w, step) {
   const st = Math.max(0.5, step || 1);
   const inc = w < 10 ? st : w < 40 ? Math.max(st, 2) : Math.max(st, 5);
@@ -3169,14 +3293,325 @@ function suggestPrev(w, step) {
 }
 function suggestNextFor(m, w) { const st = machineStack(m); return st ? stackNext(st, w) : suggestNext(w, m.step); }
 function suggestPrevFor(m, w) { const st = machineStack(m); return st ? stackPrev(st, w) : suggestPrev(w, m.step); }
+/* Do's en don'ts: staan standaard in EXERCISE_MISTAKES, maar zodra je er zelf regels uit
+   weggooit slaan we de overgebleven lijst op het apparaat op. De bewerkt-vlag zorgt dat een
+   lijst die je helemaal leeggemaakt hebt ook leeg blijft (en niet terugvalt op de standaard). */
 function machineMistakes(m) {
-  if (Array.isArray(m.mistakes) && m.mistakes.length) return m.mistakes;
+  if (Array.isArray(m.mistakes) && (m.mistakes.length || m.dontsEdited)) return m.mistakes;
   const hit = EXERCISE_MISTAKES[m.name];
   return hit ? (hit.mistakes || []) : [];
 }
 function machineExtraTips(m) {
+  if (Array.isArray(m.tips) && (m.tips.length || m.dosEdited)) return m.tips;
   const hit = EXERCISE_MISTAKES[m.name];
   return hit ? (hit.tips || []) : [];
+}
+/* Verwijdert de aangevinkte regels uit de do's of don'ts van één apparaat. */
+function removeMachineTipLines(machineId, kind, idxs) {
+  const machines = store.machines();
+  const target = machines.find(x => x.id === machineId);
+  if (!target || !idxs.length) return 0;
+  const cur = kind === "dos" ? machineExtraTips(target) : machineMistakes(target);
+  const kept = cur.filter((_, i) => !idxs.includes(i));
+  if (kind === "dos") { target.tips = kept; target.dosEdited = true; }
+  else { target.mistakes = kept; target.dontsEdited = true; }
+  store.setMachines(machines);
+  return cur.length - kept.length;
+}
+/* Do's & don'ts als blok, met een selectiemodus om regels weg te gooien die je niet
+   meer wilt zien. Eén lijst tegelijk staat in selectiemodus; dat is genoeg en houdt de
+   knoppenrij rustig. Wordt gebruikt in de sessiekaart én op de Tips-pagina. */
+let tipEditFor = null;
+function tipListHtml(kind, items, editing) {
+  const cls = kind === "dos" ? "dos-list" : "donts-list";
+  return `<ul class="${cls}${editing ? " picking" : ""}">${items.map((x, i) => editing
+    ? `<li><label class="tip-pick"><input type="checkbox" data-kind="${kind}" data-i="${i}" /><span>${esc(x)}</span></label></li>`
+    : `<li>${esc(x)}</li>`).join("")}</ul>`;
+}
+function dosDontsHtml(m, opts) {
+  const o = opts || {};
+  const tips = machineExtraTips(m), mistakes = machineMistakes(m);
+  const edited = !!(m.dosEdited || m.dontsEdited);
+  if (!tips.length && !mistakes.length && !edited) return "";
+  const editing = tipEditFor === m.id;
+  const inner = `<div class="tip-body" data-tips="${m.id}">
+    ${tips.length ? `<div class="sub">${icon("check",15)}Do's — zo doe je het goed</div>${tipListHtml("dos", tips, editing)}` : ""}
+    ${mistakes.length ? `<div class="sub" style="margin-top:6px;">${icon("ban",15)}Don'ts — gaat vaak mis</div>${tipListHtml("donts", mistakes, editing)}` : ""}
+    ${!tips.length && !mistakes.length ? `<p style="font-weight:600; opacity:0.75;">Je hebt hier alle regels weggehaald.</p>` : ""}
+    ${editing ? `<p class="ask-lbl" style="margin-top:10px;">Vink aan wat weg mag en druk op verwijderen.</p>` : ""}
+    <div class="speak-row">
+      ${tips.length ? `<button class="btn small ghost speak-dos">${icon("sound",15)}Do's</button>` : ""}
+      ${mistakes.length ? `<button class="btn small ghost speak-donts">${icon("sound",15)}Don'ts</button>` : ""}
+      ${tips.length || mistakes.length ? `<button class="btn small ghost speak-tips">${icon("sound",15)}Alles</button>` : ""}
+    </div>
+    <div class="speak-row">
+      ${tips.length || mistakes.length ? `<button class="btn small ghost tip-pick-toggle">${editing ? icon("undo",15) + "Klaar met selecteren" : icon("close",15) + "Regels weghalen"}</button>` : ""}
+      ${editing ? `<button class="btn small warn tip-pick-del">${icon("close",15)}Verwijder selectie</button>` : ""}
+      ${edited && !editing ? `<button class="btn small ghost tip-restore">${icon("refresh",15)}Standaardtekst terug</button>` : ""}
+    </div>
+  </div>`;
+  if (o.bare) return inner;
+  return `<details class="tip inline-tip"${editing ? " open" : ""}><summary>Do's &amp; don'ts</summary>${inner}</details>`;
+}
+function bindDosDonts(root, m, onChange) {
+  const body = (root || document).querySelector(`.tip-body[data-tips="${m.id}"]`);
+  if (!body) return;
+  const tog = body.querySelector(".tip-pick-toggle");
+  if (tog) tog.onclick = () => { tipEditFor = tipEditFor === m.id ? null : m.id; onChange(); };
+  const restore = body.querySelector(".tip-restore");
+  if (restore) restore.onclick = () => showModal("Standaardtekst terugzetten?",
+    `Alle do's en don'ts van ${m.name} weer op de standaardlijst zetten?`, () => {
+      const machines = store.machines();
+      const target = machines.find(x => x.id === m.id);
+      if (target) { delete target.tips; delete target.mistakes; delete target.dosEdited; delete target.dontsEdited; store.setMachines(machines); }
+      toast("Standaardtekst teruggezet");
+      onChange();
+    });
+  const del = body.querySelector(".tip-pick-del");
+  if (del) del.onclick = () => {
+    const picks = { dos: [], donts: [] };
+    body.querySelectorAll("input[type=checkbox][data-kind]:checked").forEach(cb => picks[cb.dataset.kind].push(parseInt(cb.dataset.i)));
+    const n = picks.dos.length + picks.donts.length;
+    if (!n) { toast("Vink eerst aan welke regels weg mogen"); return; }
+    showModal("Regels verwijderen?", `${n} regel${n === 1 ? "" : "s"} weghalen bij ${m.name}? Met "Standaardtekst terug" krijg je ze later weer.`, () => {
+      removeMachineTipLines(m.id, "dos", picks.dos);
+      removeMachineTipLines(m.id, "donts", picks.donts);
+      toast(`${n} regel${n === 1 ? "" : "s"} weggehaald`);
+      onChange();
+    });
+  };
+  const live = () => store.machines().find(x => x.id === m.id) || m;
+  const sd = body.querySelector(".speak-dos");
+  if (sd) sd.onclick = () => voiceCoach.speak("De do's. " + machineExtraTips(live()).join(" "), { force: true, interrupt: true });
+  const sn = body.querySelector(".speak-donts");
+  if (sn) sn.onclick = () => voiceCoach.speak("De don'ts, dit gaat vaak mis. " + machineMistakes(live()).join(" "), { force: true, interrupt: true });
+  const st = body.querySelector(".speak-tips");
+  if (st) st.onclick = () => {
+    const t = live(), parts = [];
+    if (t.note) parts.push(t.note);
+    machineExtraTips(t).forEach(x => parts.push("Tip: " + x));
+    machineMistakes(t).forEach(x => parts.push("Let op: " + x));
+    voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
+  };
+}
+/* ---- Openstaande apparaat-vragen ---------------------------------------
+   Een vraag verdwijnt zodra je hem beantwoord hebt (foto, tekst of gewichten), én
+   zodra je gemiddelde gewicht al boven de onduidelijke plaatjes zit: dan maakt het
+   voor jouw training niet meer uit hoe die lichtste platen precies heten. */
+function machineAvgWeight(m) {
+  const ws = [];
+  store.sessions().forEach(s => (s.entries || []).forEach(e => {
+    if (e.machineId === m.id) { const v = parseFloat(e.weight) || 0; if (v > 0) ws.push(v); }
+  }));
+  if (!ws.length) return parseFloat(m.lastWeight) || 0;
+  return ws.reduce((a, b) => a + b, 0) / ws.length;
+}
+function machineAnswer(m) { return store.answers()[m.name] || null; }
+/* Geeft { q, mootAbove } terug zolang de vraag nog leeft, anders null. */
+function openQuestionFor(m) {
+  const def = MACHINE_OPEN_QUESTIONS[m.name];
+  if (!def) return null;
+  const ans = machineAnswer(m);
+  if (ans && ans.resolved) return null;
+  if (def.mootAbove != null && machineAvgWeight(m) >= def.mootAbove) return null;
+  return def;
+}
+/* Alle apparaten waar nog iets voor nodig is (in de volgorde van je schema). */
+function machinesWithOpenQuestion() { return store.machines().filter(m => openQuestionFor(m)); }
+/* Vrije tekst omzetten naar een lijst kilo's: "9, 14, 18" en "9,5 en 14" werken allebei. */
+function parseWeightList(txt) {
+  const out = [];
+  const re = /\d+(?:[.,]\d)?(?!\d)/g;
+  let hit;
+  while ((hit = re.exec(String(txt || "")))) out.push(parseFloat(hit[0].replace(",", ".")));
+  return [...new Set(out.filter(n => n > 0 && n <= 500))].sort((a, b) => a - b);
+}
+/* Kopiëren dat ook werkt als de app van file:// draait — daar is de clipboard-API geblokkeerd. */
+async function copyText(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; } catch {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch { return false; }
+}
+/* Eén blok tekst met alles wat nodig is om de app op dit punt te verbeteren — plak dit in een
+   Claude-routine of -gesprek en de gewichtsstapel/notitie wordt daarop aangepast. */
+function askReportText(list) {
+  const lines = ["GymWave — input voor de app (kopieer dit naar Claude)", ""];
+  list.forEach(m => {
+    const def = MACHINE_OPEN_QUESTIONS[m.name];
+    const ans = machineAnswer(m) || {};
+    lines.push(`## ${m.name}`);
+    if (def) lines.push(`Vraag: ${def.q}`);
+    lines.push(`Stapel nu: ${Array.isArray(m.stack) && m.stack.length ? m.stack.join(", ") + " kg" : "losse stappen van " + (m.step || 1) + " kg"}`);
+    lines.push(`Mijn gemiddelde hier: ${Math.round(machineAvgWeight(m))} kg (nu ingesteld: ${Math.round(m.lastWeight || 0)} kg)`);
+    if (ans.text) lines.push(`Mijn antwoord: ${ans.text}`);
+    if (ans.stack && ans.stack.length) lines.push(`Doorgegeven gewichten: ${ans.stack.join(", ")} kg`);
+    if (ans.moot) lines.push("Antwoord: niet meer nodig — ik train hier al ruim boven.");
+    if (ans.photos && ans.photos.length) lines.push(`Foto's: ${ans.photos.length} (staan lokaal in de app — stuur ze los mee)`);
+    if (!ans.text && !ans.stack && !ans.moot && !(ans.photos || []).length) lines.push("Mijn antwoord: (nog niets ingevuld)");
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+/* Het blok bij een oefening: wat is nog onduidelijk, en hoe geef je het door.
+   Wordt zowel in de sessiekaart als in Instellingen gebruikt. */
+function askBoxHtml(m, opts) {
+  const o = opts || {};
+  const def = MACHINE_OPEN_QUESTIONS[m.name];
+  if (!def) return "";
+  const live = openQuestionFor(m);
+  const ans = machineAnswer(m) || {};
+  const nPhotos = (ans.photos || []).length;
+  if (!live) {
+    if (!o.showResolved) return "";
+    const why = ans.resolved
+      ? (ans.moot ? "je gaf aan dat je hier al ruim boven traint" : "je hebt het doorgegeven" + (ans.ts ? ` op ${fmtNice(ans.ts.slice(0, 10))}` : ""))
+      : `je gemiddelde (${Math.round(machineAvgWeight(m))} kg) zit al boven de onduidelijke plaatjes`;
+    return `<div class="ask-box done" data-ask="${m.id}">
+      <div class="ask-head">${icon("check",15)}<span><b>${esc(m.name)}</b> — afgehandeld</span></div>
+      <div class="ask-q">Niets meer nodig: ${esc(why)}.</div>
+      ${ans.text ? `<div class="ask-q"><b>Jouw antwoord:</b> ${esc(ans.text)}</div>` : ""}
+      ${nPhotos ? `<div class="ask-thumbs photo-grid" data-thumbs="${esc(m.name)}"></div>` : ""}
+      <div class="ask-actions"><button class="btn small ghost ask-reopen">${icon("undo",15)}Toch weer openzetten</button></div>
+    </div>`;
+  }
+  return `<div class="ask-box" data-ask="${m.id}">
+    <div class="ask-head">${icon("camera",15)}<span><b>Nog te checken</b>${o.showName ? " — " + esc(m.name) : ""}</span></div>
+    <div class="ask-q">${esc(live.q)}</div>
+    <div class="ask-actions">
+      <button class="btn small ghost ask-photo">${icon("camera",15)}Foto maken</button>
+      <button class="btn small ghost ask-moot">${icon("check",15)}Hoeft niet — ik zit hier al boven</button>
+    </div>
+    <input type="file" class="ask-file" accept="image/*" capture="environment" style="display:none;" />
+    <label class="ask-lbl">Antwoord of gewichten (kg, kommagescheiden)</label>
+    <textarea class="ask-text" rows="2" placeholder="bijv. 14, 18, 23, 29, 36 …  of: nee, 14 kg is de lichtste">${esc(ans.text || "")}</textarea>
+    <div class="ask-actions">
+      <button class="btn small ask-send">${icon("check",15)}Doorgeven</button>
+      <button class="btn small ghost ask-copy">${icon("upload",15)}Kopieer voor Claude</button>
+    </div>
+    ${nPhotos ? `<div class="ask-thumbs photo-grid" data-thumbs="${esc(m.name)}"></div>` : ""}
+  </div>`;
+}
+/* Thumbnails komen uit IndexedDB en dus pas ná het renderen binnen. */
+async function fillAskThumbs(root, onChange) {
+  const slots = [...(root || document).querySelectorAll(".ask-thumbs[data-thumbs]")];
+  if (!slots.length) return;
+  let all = [];
+  try { all = await photoDB.all(); } catch { return; }
+  slots.forEach(slot => {
+    const mine = all.filter(p => p.kind === "stack" && p.machine === slot.dataset.thumbs);
+    slot.innerHTML = "";
+    mine.forEach(p => {
+      const d = document.createElement("div");
+      d.className = "photo-thumb";
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(p.blob);
+      d.appendChild(img);
+      const dt = new Date(p.ts);
+      d.insertAdjacentHTML("beforeend", `<div class="ph-date">${dt.toLocaleDateString("nl-NL", { day: "2-digit", month: "short" })}</div>`);
+      d.onclick = () => showModal("Foto verwijderen?", `Foto van de gewichtsstapel (${slot.dataset.thumbs}) verwijderen?`, async () => {
+        await photoDB.remove(p.id);
+        const a = store.answers();
+        if (a[slot.dataset.thumbs]) {
+          a[slot.dataset.thumbs].photos = (a[slot.dataset.thumbs].photos || []).filter(x => x !== p.id);
+          store.setAnswers(a);
+        }
+        if (onChange) onChange();
+      });
+      slot.appendChild(d);
+    });
+  });
+}
+/* Alle knoppen van een ask-blok aansluiten. `onChange` hertekent het scherm eromheen. */
+function bindAskBox(root, m, onChange) {
+  const box = (root || document).querySelector(`.ask-box[data-ask="${m.id}"]`);
+  if (!box) return;
+  const patch = (fields) => {
+    const a = store.answers();
+    a[m.name] = Object.assign({ photos: [] }, a[m.name] || {}, fields, { ts: new Date().toISOString() });
+    store.setAnswers(a);
+  };
+  const reopen = box.querySelector(".ask-reopen");
+  if (reopen) reopen.onclick = () => {
+    const a = store.answers();
+    if (a[m.name]) { a[m.name].resolved = false; a[m.name].moot = false; store.setAnswers(a); }
+    if (onChange) onChange();
+  };
+  const fileIn = box.querySelector(".ask-file");
+  const photoBtn = box.querySelector(".ask-photo");
+  if (photoBtn && fileIn) {
+    photoBtn.onclick = () => fileIn.click();
+    fileIn.onchange = async (e) => {
+      const f = e.target.files[0];
+      e.target.value = "";
+      if (!f) return;
+      try {
+        const id = await storeStackPhoto(f, m.name);
+        const a = store.answers();
+        const rec = Object.assign({ photos: [] }, a[m.name] || {});
+        rec.photos = (rec.photos || []).concat(id);
+        rec.resolved = true; rec.ts = new Date().toISOString();
+        a[m.name] = rec; store.setAnswers(a);
+        toast("Foto opgeslagen — de vraag staat nu op afgehandeld");
+        if (onChange) onChange();
+      } catch (err) { toast("Foto opslaan mislukt: " + (err.message || err)); }
+    };
+  }
+  const moot = box.querySelector(".ask-moot");
+  if (moot) moot.onclick = () => {
+    patch({ moot: true, resolved: true });
+    toast("Genoteerd — deze vraag wordt niet meer gesteld");
+    if (onChange) onChange();
+  };
+  const ta = box.querySelector(".ask-text");
+  const send = box.querySelector(".ask-send");
+  if (send && ta) send.onclick = () => {
+    const txt = ta.value.trim();
+    if (!txt) { toast("Typ eerst een antwoord of de gewichten"); return; }
+    const vals = m.cardio ? [] : parseWeightList(txt);
+    const applyAnswer = (withStack) => {
+      patch({ text: txt, stack: withStack ? vals : null, resolved: true });
+      if (withStack) {
+        const machines = store.machines();
+        const target = machines.find(x => x.id === m.id);
+        if (target) { target.stack = vals.slice(); store.setMachines(machines); }
+        toast(`Gewichtsstapel bijgewerkt: ${vals.length} platen`);
+      } else toast("Doorgegeven — dank je!");
+      if (onChange) onChange();
+    };
+    // vier of meer kilo's achter elkaar lezen we als de complete gewichtsstapel
+    if (vals.length >= 4) {
+      showModal("Is dit de gewichtsstapel?",
+        `Ik lees ${vals.length} platen: ${vals.join(", ")} kg. Meteen zo instellen voor ${m.name}? (Annuleer = alleen als antwoord bewaren.)`,
+        () => applyAnswer(true));
+      // annuleren betekent: wel bewaren, niet toepassen
+      modalCancelCb = () => applyAnswer(false);
+    } else applyAnswer(false);
+  };
+  const copy = box.querySelector(".ask-copy");
+  if (copy) copy.onclick = async () => {
+    if (ta && ta.value.trim()) patch({ text: ta.value.trim() });
+    const ok = await copyText(askReportText([store.machines().find(x => x.id === m.id) || m]));
+    toast(ok ? "Gekopieerd — plak het in Claude" : "Kopiëren lukte niet; selecteer de tekst handmatig");
+  };
+  fillAskThumbs(box, onChange);
+}
+/* Foto verkleinen en opslaan bij het apparaat (lokaal, zelfde IndexedDB als de benchmarkfoto's). */
+async function storeStackPhoto(file, machineName) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bmp.width * scale); canvas.height = Math.round(bmp.height * scale);
+  canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.85));
+  const id = uuid();
+  await photoDB.add({ id, ts: Date.now(), blob, kind: "stack", machine: machineName });
+  return id;
 }
 function machineUnilateral(m) {
   return UNILATERAL.filter(u => u.machineName === m.name);
@@ -3216,7 +3651,7 @@ function speakMachineSettings(m) {
   }
   const txt = parts.join(" ");
   voiceCoach.speak(txt, { force: true, interrupt: true });
-  if (store.coach().speakSettingsTimes === 2) voiceCoach.speak("Nog een keer. " + txt, { force: true });
+  if (store.coach().speakSettingsTimes === 2) voiceCoach.speak("I repeat. " + txt, { force: true });
 }
 function renderSession() {
   const list = document.getElementById("machine-list");
@@ -3235,7 +3670,7 @@ function renderSession() {
   const entryOf = id => currentSession.entries.find(e => e.machineId === id);
   const isSkipped = id => !entryOf(id) && !!(currentSession.skipped && currentSession.skipped[id]);
   // welke toestellen missen nog een foto van de gewichtsstapel?
-  const photoNeeded = machines.filter(m => MACHINE_OPEN_QUESTIONS[m.name] && !entryOf(m.id));
+  const photoNeeded = machines.filter(m => openQuestionFor(m) && !entryOf(m.id));
   if (photoNeeded.length) {
     const banner = document.createElement("div");
     banner.className = "photo-banner";
@@ -3264,7 +3699,7 @@ function renderSession() {
       ? (expanded ? `<span class="chev">${icon("chev",16)}</span>` : `<span class="chk">${icon("check",18)}</span>`)
       : skipped
         ? `<span class="skip-tag">${icon("skip",15)}overgeslagen</span><span class="chev">${icon("chev",16)}</span>`
-        : `${MACHINE_OPEN_QUESTIONS[m.name] ? `<span title="Foto van de gewichtsstapel nodig">${icon("camera",15)}</span>` : ""}${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? icon("arrow",14,'style="transform:rotate(90deg)"') + " " : icon("arrow",14,'style="transform:rotate(-90deg)"') + " ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">${icon("chev",16)}</span>`;
+        : `${openQuestionFor(m) ? `<span title="Foto van de gewichtsstapel nodig">${icon("camera",15)}</span>` : ""}${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? icon("arrow",14,'style="transform:rotate(90deg)"') + " " : icon("arrow",14,'style="transform:rotate(-90deg)"') + " ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">${icon("chev",16)}</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
     header.innerHTML = `<div class="m-name">${esc(m.name)}</div><div class="m-hint">${hint}</div>`;
@@ -3342,24 +3777,13 @@ function renderSession() {
           <div class="feel-scale">${[1,2,3,4,5].map(i => `<button class="feel-btn ${feeling === i ? "sel" : ""}" data-feel="${i}" style="background:${FEEL_COLORS[i]};" title="${FEEL_LABELS[i]}">${feeling === i ? icon("check",17) : ""}</button>`).join("")}</div>
           <div class="feel-caption">${feeling ? FEEL_LABELS[feeling] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)"}</div>
         </div>`;
-      const mistakes = machineMistakes(m);
-      const extraTips = machineExtraTips(m);
-      const mistakesHtml = (mistakes.length || extraTips.length) ? `
-        <details class="tip inline-tip"><summary>Do's &amp; don'ts</summary><div class="tip-body">
-          ${extraTips.length ? `<div class="sub">${icon("check",15)}Do's — zo doe je het goed</div><ul>${extraTips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-          ${mistakes.length ? `<div class="sub" style="margin-top:6px;">${icon("ban",15)}Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-          <div class="speak-row">
-            ${extraTips.length ? `<button class="btn small ghost speak-dos">${icon("sound",15)}Do's</button>` : ""}
-            ${mistakes.length ? `<button class="btn small ghost speak-donts">${icon("sound",15)}Don'ts</button>` : ""}
-            <button class="btn small ghost speak-tips">${icon("sound",15)}Alles</button>
-          </div>
-        </div></details>` : "";
+      const mistakesHtml = dosDontsHtml(m);
       const kbHtml = /kettlebell/i.test(m.name) ? `
         <details class="tip inline-tip"><summary>Kettlebell-oefeningen: do's &amp; don'ts</summary><div class="tip-body">
           ${KETTLEBELL_EXERCISES.map(k => `
             <div class="sub">${esc(k.name)} · ${esc(k.dose)}</div>
-            <div class="kb-lbl">${icon("check",14)}Do's</div><ul>${k.dos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
-            <div class="kb-lbl">${icon("ban",14)}Don'ts</div><ul>${k.donts.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
+            <div class="kb-lbl">${icon("check",14)}Do's</div><ul class="dos-list">${k.dos.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+            <div class="kb-lbl">${icon("ban",14)}Don'ts</div><ul class="donts-list">${k.donts.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`).join("")}
         </div></details>` : "";
       const uni = machineUnilateral(m);
       const uniHtml = uni.length ? `
@@ -3383,7 +3807,7 @@ function renderSession() {
         : `<div class="nextup-badge">${icon("arrow",15,'style="transform:rotate(-90deg)"')} Vorige keer aangegeven: meer gewicht! Probeer <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`) : "";
       body.innerHTML = `
         ${nextupBadge}
-        ${MACHINE_OPEN_QUESTIONS[m.name] ? `<div class="photo-ask">${icon("camera",15)} <b>Foto nodig:</b> ${esc(MACHINE_OPEN_QUESTIONS[m.name])}</div>` : ""}
+        ${askBoxHtml(m)}
         ${m.note ? `<div class="m-note">${esc(m.note)}</div>` : ""}
         ${mistakesHtml}
         ${kbHtml}
@@ -3396,11 +3820,12 @@ function renderSession() {
         ${feelHtml}
         ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
         <div class="exercise-actions">
-          ${m.cardio ? "" : `<button class="btn ghost full small save-btn">${icon("save",15)}Opslaan</button>
-          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? icon("check",15) + "Genoteerd" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Next time more"}</button>`}
-          <button class="btn full done-btn">${icon("check",20)}${done ? "OPSLAAN" : "KLAAR"}</button>
+          ${m.cardio ? "" : `<button class="btn ghost full small save-btn">${icon("save",15)}Bewaren zonder afvinken</button>
+          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? icon("check",15) + "Genoteerd: volgende keer zwaarder" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer zwaarder"}</button>`}
+          <button class="btn full done-btn">${icon("check",20)}${done ? "WIJZIGING OPSLAAN" : "KLAAR — AFVINKEN"}</button>
           ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">${icon("undo",15)}Heropenen (vink uit)</button>`
                  : `<button class="btn ghost full small skip-btn" style="margin-top:0;">${skipped ? icon("undo",15) + "Toch doen — zet terug in de lijst" : icon("skip",15) + "Deze keer overslaan"}</button>`}
+          ${m.cardio ? "" : `<div class="action-hint">Bewaren = je gewicht onthouden, oefening blijft open. Klaar = afvinken, telt mee in je sessie.</div>`}
         </div>`;
       card.appendChild(body);
       if (!m.cardio) {
@@ -3516,7 +3941,7 @@ function renderSession() {
                 m.nextUp = target.nextUp;
                 toast(`Genoteerd! Volgende keer: ${sug} ${target.unit || "kg"}`);
                 const nuBtn2 = body.querySelector(".nextup-btn");
-                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("check",15) + "Genoteerd"; }
+                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("check",15) + "Genoteerd: volgende keer zwaarder"; }
               });
             }
           }
@@ -3544,22 +3969,12 @@ function renderSession() {
           m.nextUp = target.nextUp;
           const active = !!(target.nextUp && target.nextUp.dir !== "down");
           nuBtn.classList.toggle("active", active);
-          nuBtn.innerHTML = active ? icon("check",15) + "Genoteerd" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Next time more";
+          nuBtn.innerHTML = active ? icon("check",15) + "Genoteerd: volgende keer zwaarder" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer zwaarder";
         };
       }
-      const st = body.querySelector(".speak-tips");
-      if (st) st.onclick = () => {
-        const parts = [];
-        if (m.note) parts.push(m.note);
-        machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
-        machineMistakes(m).forEach(x => parts.push("Let op: " + x));
-        voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
-      };
-      // do's en don'ts los te herhalen — elke druk leest opnieuw voor
-      const sd = body.querySelector(".speak-dos");
-      if (sd) sd.onclick = () => voiceCoach.speak("De do's. " + machineExtraTips(m).join(" "), { force: true, interrupt: true });
-      const sn = body.querySelector(".speak-donts");
-      if (sn) sn.onclick = () => voiceCoach.speak("De don'ts, dit gaat vaak mis. " + machineMistakes(m).join(" "), { force: true, interrupt: true });
+      // voorleesknoppen én de selectiemodus om regels weg te halen zitten in dit blok
+      bindDosDonts(body, m, () => { renderSession(); renderTips(); });
+      bindAskBox(body, m, () => { renderSession(); renderMachineQuestions(); });
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
       const undo = body.querySelector(".undo-btn");
       if (undo) undo.onclick = () => undoMachine(m);
@@ -3608,7 +4023,9 @@ function completeMachine(m, body) {
       if (reps) target.reps = reps;
       // verlaging afhandelen op basis van vlag en gevoel (verhoging wordt al gevraagd bij het aantikken van groen)
       if (target.nextUp && ((target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) || (target.nextUp.dir === "down" && weight <= target.nextUp.suggested))) delete target.nextUp;
-      if (entry.feeling <= 2 && entry.feeling > 0 && !target.nextUp) {
+      // Alleen donkerrood ("veel te zwaar") verlaagt het gewicht, en pas nu je de oefening
+      // afrondt. Lichtrood is een signaal, geen reden om automatisch terug te gaan.
+      if (entry.feeling === 1 && !target.nextUp) {
         if (weight < prevWeight) {
           // al verlaagd tijdens deze sessie: niet nóg een keer verlagen — het nieuwe gewicht blijft staan
           toast(`Gewicht al verlaagd naar ${weight} ${target.unit || "kg"} — dat blijft zo (niet dubbel verlaagd)`);
@@ -4600,7 +5017,8 @@ async function renderPhotosBox() {
   const box = document.getElementById("photos-box");
   const h = store.home();
   let photos = [];
-  try { photos = await photoDB.all(); } catch {}
+  // alleen de benchmarkfoto's; foto's van gewichtsstapels horen bij hun apparaat
+  try { photos = (await photoDB.all()).filter(p => p.kind !== "stack"); } catch {}
   box.innerHTML = `
     <div class="card">
       <p style="font-weight:600; opacity:0.85; line-height:1.45; font-size:0.95rem;">Volg je lichaamsbouw met benchmarkfoto's. Ze blijven <b>alleen op dit apparaat</b> (geen cloud, geen back-up-export). Tip om anoniem te blijven: houd je gezicht buiten beeld. Voor een eerlijke vergelijking: maak ze steeds op hetzelfde moment van de dag.</p>
@@ -4635,7 +5053,7 @@ async function renderPhotosBox() {
       canvas.width = Math.round(bmp.width * scale); canvas.height = Math.round(bmp.height * scale);
       canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
       const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.82));
-      await photoDB.add({ id: uuid(), ts: Date.now(), blob });
+      await photoDB.add({ id: uuid(), ts: Date.now(), blob, kind: "benchmark" });
       toast("Foto opgeslagen (lokaal)");
       renderPhotosBox();
     } catch (err) { toast("Foto opslaan mislukt: " + (err.message || err)); }
@@ -4905,6 +5323,7 @@ function renderHwPlayer(hw) {
   };
   card.querySelector("#hwp-done").onclick = () => {
     clearInterval(hwTimerInt);
+    let feltAs = null;
     save(w => {
       const rr = Object.assign({ metric }, w.results[s.name] || {});
       rr.done = true;
@@ -4912,7 +5331,9 @@ function renderHwPlayer(hw) {
       if (weighted) rr.weight = wtIn && wtIn.value !== "" ? parseFloat(wtIn.value) : sug.kg;
       w.results[s.name] = rr;
       w.playIdx = idx + 1;
+      feltAs = rr.feel;
     });
+    hwLowerIfDarkRed(s, feltAs, metric); // verlagen pas nu je afvinkt, en alleen bij donkerrood
     voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -5019,6 +5440,7 @@ function hwCard(s, hw) {
     w.results[s.name] = rr; store.setHomeWorkout(w);
     renderHomeWorkout();
     if (rr.done) { // net als in de gym: door naar de volgende openstaande oefening
+      hwLowerIfDarkRed(s, rr.feel, metric); // verlagen pas nu, en alleen bij donkerrood
       voiceCoach.say("exerciseDone", {}, { minGap: 2000 });
       setTimeout(() => { const nxt = document.querySelector("#hw-plan .snack-card:not(.hw-done)"); if (nxt) nxt.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     }
@@ -5158,17 +5580,19 @@ function renderStats() {
 function renderHomeTotalChart(list) {
   const card = document.getElementById("total-chart-card");
   if (!list.length) { card.innerHTML = `<div class="empty-state">Geen thuis-workouts in dit bereik.</div>`; return; }
-  const totals = list.map(s => ({ date: s.date, n: (s.entries || []).length, kg: (s.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0) }));
+  const totals = list.map(s => ({ date: s.date, n: (s.entries || []).length, kg: (s.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s) }));
   const max = Math.max(...totals.map(t => t.n), 1);
   const lastIdx = totals.length - 1;
+  const anyFeel = totals.some(t => t.feel);
   const bars = totals.map((t, i) => {
     const h = Math.max(6, (t.n / max) * 100);
     const md = t.date.slice(5).replace("-", "/");
-    const tip = `${t.date}: ${t.n} oefening${t.n === 1 ? "" : "en"}${t.kg ? ` · ${Math.round(t.kg)} kg` : ""}`;
+    const tip = `${t.date}: ${t.n} oefening${t.n === 1 ? "" : "en"}${t.kg ? ` · ${Math.round(t.kg)} kg` : ""}${feelBarTip(t.feel)}`;
     const newest = i === lastIdx;
-    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%" data-h="${h}" title="${tip}">${newest ? `<span class="bar-val">${t.n}</span>` : ""}<span class="bar-date">${md}</span></div>`;
+    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%;${feelBarStyle(t.feel, newest)}" data-h="${h}" title="${tip}">${newest ? `<span class="bar-val">${t.n}</span>` : ""}<span class="bar-date">${md}</span></div>`;
   }).join("");
-  card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.n), max, "")}<div class="wave-chart">${bars}</div></div><div class="legend" style="margin-top:8px;">Aantal afgeronde oefeningen per thuis-workout</div>`;
+  card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.n), max, "")}<div class="wave-chart">${bars}</div></div><div class="legend" style="margin-top:8px;">Aantal afgeronde oefeningen per thuis-workout</div>`
+    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die workout") : "");
   requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
 }
 function renderHomeWaffles(list) {
@@ -5183,7 +5607,7 @@ function homeWafflesInto(wrap, home) {
   names.sort((a, b) => a.localeCompare(b, "nl"));
   names.forEach(name => {
     const pts = [];
-    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight }); });
+    home.forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight, feel: e.feeling || null }); });
     if (!pts.length) return;
     const block = document.createElement("div"); block.className = "card";
     const pb = Math.max(...pts.map(p => p.value));
@@ -5191,12 +5615,17 @@ function homeWafflesInto(wrap, home) {
     const unit = pts[0].metric === "sec" ? "sec" : "reps";
     const weights = pts.map(p => p.weight).filter(w => w != null);
     const wPr = weights.length ? Math.max(...weights) : null;
+    const feels = pts.map(p => p.feel).filter(v => v > 0);
+    const avgFeel = feels.length ? feels.reduce((a, b) => a + b, 0) / feels.length : null;
     const cells = pts.map(p => {
       const ratio = pb > minV ? (p.value - minV) / (pb - minV) : 1;
       const lv = Math.max(1, Math.min(5, Math.ceil(ratio * 5)));
       const isPr = p.value >= pb && pb > minV;
       const star = isPr ? `<span class="star">${iconFill("star-solid",15)}</span>` : "";
-      return `<div class="waffle-cell ${isPr ? "pr" : "lv" + lv}" title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}">${star}</div>`;
+      // PR-cel kleurt naar de vijfpuntsschaal, net als in de gym
+      const prCol = isPr ? feelColor(p.feel || avgFeel) : null;
+      const st = prCol ? ` style="background:${prCol};box-shadow:0 0 14px color-mix(in srgb, ${prCol} 65%, transparent);"` : "";
+      return `<div class="waffle-cell ${isPr ? "pr" : "lv" + lv}"${st} title="${p.date}: ${p.value} ${unit}${p.weight != null ? ` @ ${p.weight}kg` : ""}${p.feel ? ` · ${FEEL_LABELS[p.feel].toLowerCase()}` : ""}">${star}</div>`;
     }).join("");
     block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${esc(name)}</div><div class="waffle">${cells}</div>
       ${waffleLegendHtml()}
@@ -5208,20 +5637,23 @@ function homeWafflesInto(wrap, home) {
 function renderTotalChart(sessions) {
   const card = document.getElementById("total-chart-card");
   if (sessions.length === 0) { card.innerHTML = `<div class="empty-state">Geen sessies in dit bereik.</div>`; return; }
-  const totals = sessions.map(s => ({ date: s.date, name: s.name || "", total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0) }));
+  const totals = sessions.map(s => ({ date: s.date, name: s.name || "", total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s) }));
   const max = Math.max(...totals.map(t => t.total), 1);
   const lastIdx = totals.length - 1;
+  const anyFeel = totals.some(t => t.feel);
   const bars = totals.map((t, i) => {
     const h = Math.max(6, (t.total / max) * 100);
     const md = t.date.slice(5).replace("-", "/");
-    const tip = (t.name ? t.name + " · " : "") + t.date + ": " + Math.round(t.total) + " kg";
+    const tip = (t.name ? t.name + " · " : "") + t.date + ": " + Math.round(t.total) + " kg" + feelBarTip(t.feel);
     const newest = i === lastIdx;
+    // de balk kleurt mee met het gemiddelde van de vijfpuntsschaal van die sessie;
     // alleen de nieuwste balk krijgt de waarde erboven en de gloed (§2 glow-regel)
-    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%" data-h="${h}" title="${tip}">${
+    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%;${feelBarStyle(t.feel, newest)}" data-h="${h}" title="${tip}">${
       newest ? `<span class="bar-val">${Math.round(t.total)}${iconFill("star-solid", 12)}</span>` : ""
     }<span class="bar-date">${md}</span></div>`;
   }).join("");
-  card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.total), max, "kg")}<div class="wave-chart">${bars}</div></div>`;
+  card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.total), max, "kg")}<div class="wave-chart">${bars}</div></div>`
+    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die sessie") : "");
   requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
 }
 /* Referentielijnen: 2 px, volle kleur met eigen gloed, en elk met een
@@ -5257,7 +5689,7 @@ function renderWaffles(sessions) {
   if (machines.length === 0) { wrap.innerHTML = `<div class="empty-state">Nog geen apparaten.</div>`; return; }
   machines.forEach(m => {
     const points = [];
-    sessions.forEach(s => { const e = s.entries.find(en => en.machineId === m.id); if (e) points.push({ date: s.date, weight: parseFloat(e.weight) || 0 }); });
+    sessions.forEach(s => { const e = s.entries.find(en => en.machineId === m.id); if (e) points.push({ date: s.date, weight: parseFloat(e.weight) || 0, feel: e.feeling || null }); });
     const block = document.createElement("div");
     block.className = "card";
     if (points.length === 0) {
@@ -5270,18 +5702,25 @@ function renderWaffles(sessions) {
     const milestoneStep = Math.max(5, startW * 0.1);
     let prevMilestone = startW;
     // 5-staps intensiteitsladder in paars; de PR-cel is vol met ster (§3.4)
+    // gemiddeld gevoel op dit apparaat — de terugval als de PR-sessie zelf geen gevoel heeft
+    const feels = points.map(p => p.feel).filter(v => v > 0);
+    const avgFeel = feels.length ? feels.reduce((a, b) => a + b, 0) / feels.length : null;
     const cells = points.map(p => {
       const ratio = pb > minW ? (p.weight - minW) / (pb - minW) : 1;
       const lv = Math.max(1, Math.min(5, Math.ceil(ratio * 5)));
       let star = "";
       if (p.weight >= prevMilestone + milestoneStep) { star = `<span class="star">${iconFill("star-solid",15)}</span>`; prevMilestone = p.weight; }
       const isPr = p.weight >= pb;
-      return `<div class="waffle-cell ${isPr ? "pr" : "lv" + lv}" title="${p.date}: ${p.weight}${m.unit||'kg'}">${star}</div>`;
+      // de PR-cel krijgt de kleur van de vijfpuntsschaal mee: hoe voelde dat record?
+      const prCol = isPr ? feelColor(p.feel || avgFeel) : null;
+      const st = prCol ? ` style="background:${prCol};box-shadow:0 0 14px color-mix(in srgb, ${prCol} 65%, transparent);"` : "";
+      const ft = p.feel ? ` · ${FEEL_LABELS[p.feel].toLowerCase()}` : "";
+      return `<div class="waffle-cell ${isPr ? "pr" : "lv" + lv}"${st} title="${p.date}: ${p.weight}${m.unit||'kg'}${ft}">${star}</div>`;
     }).join("");
     const stepLbl = milestoneStep % 1 === 0 ? milestoneStep : milestoneStep.toFixed(1);
     block.innerHTML = `<div class="m-name" style="font-size:1.2rem;">${m.name}</div><div class="waffle">${cells}</div>
       ${waffleLegendHtml()}
-      <div class="legend">${iconFill("star-solid",14)} = +${stepLbl}${m.unit||'kg'} mijlpaal · PR: ${pb}${m.unit||'kg'}</div>`;
+      <div class="legend">${iconFill("star-solid",14)} = +${stepLbl}${m.unit||'kg'} mijlpaal · PR: ${pb}${m.unit||'kg'}${avgFeel ? ` · PR-cel kleurt naar het gevoel (gem. ${avgFeel.toFixed(1)}/5)` : ""}</div>`;
     wrap.appendChild(block);
   });
 }
@@ -5328,18 +5767,11 @@ function renderTips() {
   }).join("");
   // per-oefening: wat gaat er vaak mis + extra tips
   const machines = store.machines();
-  const blocks = machines.map(m => ({ m, mistakes: machineMistakes(m), tips: machineExtraTips(m) })).filter(x => x.mistakes.length || x.tips.length);
+  const blocks = machines.filter(m => machineMistakes(m).length || machineExtraTips(m).length || m.dosEdited || m.dontsEdited);
   if (blocks.length) {
     html += `<div class="section-title">Per oefening: do's &amp; don'ts</div>`;
-    html += blocks.map(({ m, mistakes, tips }) => `<details class="tip"><summary>${esc(m.name)}</summary><div class="tip-body">
-      ${tips.length ? `<div class="sub">${icon("check",15)}Do's — zo doe je het goed</div><ul>${tips.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      ${mistakes.length ? `<div class="sub" style="margin-top:6px;">${icon("ban",15)}Don'ts — gaat vaak mis</div><ul>${mistakes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
-      <div class="speak-row">
-        ${tips.length ? `<button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="dos">${icon("sound",15)}Do's</button>` : ""}
-        ${mistakes.length ? `<button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="donts">${icon("sound",15)}Don'ts</button>` : ""}
-        <button class="btn small ghost tips-speak" data-mid="${m.id}" data-part="alles">${icon("sound",15)}Alles</button>
-      </div>
-    </div></details>`).join("");
+    // zelfde blok als in de sessiekaart, dus wat je hier weghaalt is daar ook weg
+    html += blocks.map(m => `<details class="tip"${tipEditFor === m.id ? " open" : ""}><summary>${esc(m.name)}</summary>${dosDontsHtml(m, { bare: true })}</details>`).join("");
   }
   if (GENERAL_MISTAKES.length) {
     html += `<div class="section-title">Algemene valkuilen</div>`;
@@ -5357,19 +5789,8 @@ function renderTips() {
       </div></details>`;
   }
   wrap.innerHTML = html;
-  wrap.querySelectorAll(".tips-speak").forEach(b => b.onclick = () => {
-    const m = store.machines().find(x => x.id === b.dataset.mid);
-    if (!m) return;
-    const parts = [m.name + "."];
-    const part = b.dataset.part || "alles";
-    if (part === "dos") { parts.push("De do's."); machineExtraTips(m).forEach(x => parts.push(x)); }
-    else if (part === "donts") { parts.push("De don'ts, dit gaat vaak mis."); machineMistakes(m).forEach(x => parts.push(x)); }
-    else {
-      machineExtraTips(m).forEach(x => parts.push("Tip: " + x));
-      machineMistakes(m).forEach(x => parts.push("Let op: " + x));
-    }
-    voiceCoach.speak(parts.join(" "), { force: true, interrupt: true });
-  });
+  // voorlezen én de selectiemodus voor het weghalen van regels
+  blocks.forEach(m => bindDosDonts(wrap, m, () => { renderTips(); if (document.getElementById("view-session").classList.contains("active")) renderSession(); }));
   wrap.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => {
     const np = store.profile();
     if (b.dataset.plan === "days") np.daysPerWeek = Math.max(1, Math.min(6, (np.daysPerWeek || 2) + parseInt(b.dataset.d)));
@@ -5427,7 +5848,29 @@ document.getElementById("reset-checklist").addEventListener("click", () => {
 /* ============================================================
    INSTELLINGEN
    ============================================================ */
-function renderSettings() { renderThemeGrid(); renderManageMachines(); renderCoachSettings(); renderLocationSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
+function renderSettings() { renderThemeGrid(); renderHeroSettings(); renderManageMachines(); renderCoachSettings(); renderLocationSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
+/* Welke snelknoppen (hero-rijen) op Home staan. Uitzetten haalt de rij weg; via de
+   balk onderin blijft alles bereikbaar. */
+const HERO_KINDS = [["gym", "De Gym In"], ["home", "Thuis Gymmen"], ["calf", "Calf raises"], ["push", "Push-ups"], ["situp", "Sit-ups"]];
+function renderHeroSettings() {
+  const box = document.getElementById("hero-settings");
+  if (!box) return;
+  const p = store.prefs();
+  const on = HERO_KINDS.filter(([k]) => p.heroes[k]).length;
+  box.innerHTML = `
+    <div class="card">
+      <p style="font-weight:600; opacity:0.8; line-height:1.45; font-size:0.95rem;">Kies welke grote snelknoppen bovenaan Home staan. Wat je uitzet komt onderaan Home terug als gewone, rustige knop — je raakt dus niets kwijt.</p>
+      ${HERO_KINDS.map(([k, lbl]) => `<label style="display:flex; align-items:center; gap:10px; cursor:pointer; min-height:44px;"><input type="checkbox" data-hero="${k}" ${p.heroes[k] ? "checked" : ""}/> ${esc(lbl)}</label>`).join("")}
+      ${on === 0 ? `<div class="muted" style="font-weight:600; margin-top:6px;">Alle grote knoppen staan uit — Home is nu een rustige lijst.</div>` : ""}
+    </div>`;
+  box.querySelectorAll("[data-hero]").forEach(cb => cb.onchange = () => {
+    const np = store.prefs();
+    np.heroes[cb.dataset.hero] = cb.checked;
+    store.setPrefs(np);
+    renderHeroSettings();
+    renderHome();
+  });
+}
 function renderLocationSettings() {
   const box = document.getElementById("location-settings");
   if (!box) return;
@@ -5559,12 +6002,24 @@ function renderThemeGrid() {
 function renderMachineQuestions() {
   const box = document.getElementById("machine-questions");
   if (!box) return;
-  const names = store.machines().map(m => m.name).filter(n => MACHINE_OPEN_QUESTIONS[n]);
-  box.innerHTML = names.length ? `
-    <details class="tip" style="margin-bottom:12px;"><summary>Nog te checken bij je apparaten (${names.length})</summary><div class="tip-body">
-      <p style="font-weight:600; opacity:0.75; margin-bottom:8px;">De kilo-sprongen zijn ingesteld op basis van je foto's. Dit staat nog open — stuur een foto of pas het aan via "Bewerk":</p>
-      <ul>${names.map(n => `<li><b>${esc(n)}:</b> ${esc(MACHINE_OPEN_QUESTIONS[n])}</li>`).join("")}</ul>
-    </div></details>` : "";
+  const known = store.machines().filter(m => MACHINE_OPEN_QUESTIONS[m.name]);
+  if (!known.length) { box.innerHTML = ""; return; }
+  const open = known.filter(m => openQuestionFor(m));
+  const rest = known.filter(m => !openQuestionFor(m));
+  const again = () => { renderMachineQuestions(); if (document.getElementById("view-session").classList.contains("active")) renderSession(); };
+  box.innerHTML = `
+    <details class="tip" style="margin-bottom:12px;"${open.length ? " open" : ""}><summary>Nog te checken bij je apparaten (${open.length})</summary><div class="tip-body">
+      <p style="font-weight:600; opacity:0.75; margin-bottom:10px;">De kilo-sprongen komen uit je foto's. Wat hieronder openstaat kun je hier meteen afhandelen: foto maken, het antwoord typen, of de gewichten doorgeven (dan wordt de stapel direct ingesteld). Zit je gemiddelde al boven de onduidelijke plaatjes, dan verdwijnt de vraag vanzelf.</p>
+      ${open.length ? open.map(m => askBoxHtml(m, { showName: true })).join("") : `<p style="font-weight:600; opacity:0.75;">Alles afgehandeld — niets meer nodig.</p>`}
+      ${open.length ? `<button class="btn ghost full small" id="ask-copy-all" style="margin-top:10px;">${icon("upload",15)}Kopieer alle open punten voor Claude</button>` : ""}
+      ${rest.length ? `<div class="sub" style="margin-top:16px;">Al afgehandeld</div>${rest.map(m => askBoxHtml(m, { showResolved: true })).join("")}` : ""}
+    </div></details>`;
+  known.forEach(m => bindAskBox(box, m, again));
+  const all = box.querySelector("#ask-copy-all");
+  if (all) all.onclick = async () => {
+    const ok = await copyText(askReportText(machinesWithOpenQuestion()));
+    toast(ok ? "Gekopieerd — plak het in Claude" : "Kopiëren lukte niet; selecteer de tekst handmatig");
+  };
 }
 function renderManageMachines() {
   renderMachineQuestions();
@@ -5617,7 +6072,7 @@ function buildEditForm(m) {
     </div>
     <label>Gewichtsstapel (kg van alle platen, kommagescheiden — leeg = losse stappen)</label>
     <textarea class="edit-stack" rows="2" placeholder="bijv. 9, 14, 18, 23, 29, 36">${Array.isArray(m.stack) ? m.stack.join(", ") : ""}</textarea>
-    ${MACHINE_OPEN_QUESTIONS[m.name] ? `<div class="muted" style="font-size:0.85rem; font-weight:600; margin-top:4px;">${icon("camera",13)} Nog te checken: ${esc(MACHINE_OPEN_QUESTIONS[m.name])}</div>` : ""}
+    ${openQuestionFor(m) ? `<div class="muted" style="font-size:0.85rem; font-weight:600; margin-top:4px;">${icon("camera",13)} Nog te checken: ${esc(openQuestionFor(m).q)}</div>` : ""}
     <label>Tempo (tellen: heen / terug / pauze tussen reps)</label>
     <div style="display:flex; gap:10px;">
       <input type="number" class="edit-tempo-up" min="1" max="10" value="${tempo.up}" />
@@ -5751,15 +6206,24 @@ document.getElementById("reset-data").addEventListener("click", () => {
    MODAL
    ============================================================ */
 let modalConfirmCb = null;
+// Soms betekent "Annuleren" niet niets-doen maar een tweede keuze (bijv. wel bewaren,
+// niet toepassen). Zet modalCancelCb dan direct ná showModal; hij geldt voor één modal.
+let modalCancelCb = null;
 function showModal(title, body, onConfirm) {
   document.getElementById("modal-title").textContent = title;
   document.getElementById("modal-body").textContent = body;
   modalConfirmCb = onConfirm;
+  modalCancelCb = null;
   document.getElementById("modal").classList.add("show");
 }
-document.getElementById("modal-cancel").onclick = () => document.getElementById("modal").classList.remove("show");
+document.getElementById("modal-cancel").onclick = () => {
+  document.getElementById("modal").classList.remove("show");
+  const cb = modalCancelCb; modalCancelCb = null;
+  if (cb) cb();
+};
 document.getElementById("modal-confirm").onclick = () => {
   document.getElementById("modal").classList.remove("show");
+  modalCancelCb = null;
   if (modalConfirmCb) modalConfirmCb();
 };
 
@@ -5768,7 +6232,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions","gymwave_machine_answers","gymwave_prefs"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 
