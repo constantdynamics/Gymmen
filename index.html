@@ -468,7 +468,30 @@ details.tip[open] > summary::after { transform: rotate(-135deg); margin-top: 2px
 .nextup-badge { display: block; font-weight: 700; font-size: 0.98rem; padding: 10px 14px; margin-bottom: 12px; border-radius: 12px; background: color-mix(in srgb, var(--primary) 16%, transparent); border: 1px solid color-mix(in srgb, var(--primary) 55%, transparent); }
 .nextup-btn.active { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 0 18px color-mix(in srgb, var(--glow) 55%, transparent); }
 .exercise-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-/* Eén regel die het verschil tussen bewaren en afvinken uitlegt */
+/* Vier acties naast elkaar, elk met een eigen kleur uit het palet: terug (blauw),
+   zwaarder (roze), klaar (paars) en overslaan (rood). Icoon boven, label eronder. */
+.act-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.act-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.act-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  min-height: 66px; padding: 10px 3px; border: none; border-radius: var(--radius-btn);
+  color: #fff; cursor: pointer; overflow: hidden;
+  box-shadow: var(--inset-top);
+  transition: transform 0.15s ease, filter 0.2s ease;
+}
+.act-btn:active { transform: scale(0.96); }
+.act-btn .ico { flex-shrink: 0; }
+.act-lbl {
+  font-family: "Rajdhani", sans-serif; font-weight: 800; font-size: 9px;
+  letter-spacing: 0.5px; text-transform: uppercase; line-height: 1; white-space: nowrap;
+}
+.act-back { background: linear-gradient(135deg, #12379e, #1f7ae0); }
+.act-up   { background: linear-gradient(135deg, #a8125c, #e8348c); }
+.act-done { background: linear-gradient(135deg, var(--home-a), var(--push-b)); }
+.act-skip { background: linear-gradient(135deg, #8f1520, #d92d33); }
+/* Genoteerd-stand van "zwaarder": lichte inzet, zoals de gekozen gevoelsknop */
+.act-btn.active { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6); filter: brightness(1.12); }
+/* Eén regel die het verschil tussen terug en afvinken uitlegt */
 .action-hint { font-size: 0.8rem; font-weight: 600; line-height: 1.4; color: var(--text-label); text-align: center; padding: 2px 4px; }
 details.tip.inline-tip { margin: 0 0 14px; }
 details.tip.inline-tip > summary { font-size: 0.95rem; padding: 12px 14px; }
@@ -1103,6 +1126,8 @@ body::after { content: none; }
 <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 20.8s6.4-6.1 6.4-10.4a6.4 6.4 0 1 0-12.8 0C5.6 14.7 12 20.8 12 20.8z"></path><circle cx="12" cy="10.2" r="2.5"></circle></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M4.6 6.4h14.8v13.2H4.6zM4.6 10.4h14.8M9 4.2v4M15 4.2v4"></path></symbol>
 <symbol id="i-save" viewBox="0 0 24 24"><path d="M5.5 5.5h9.8l3.2 3.2v10.3h-13zM8.6 5.5v4.2h6.2V5.5M8.6 19v-5.2h6.8V19"></path></symbol>
+<symbol id="i-dumbbells" viewBox="0 0 24 24"><path d="M3.4 5.2v3.8M6 3.4v7.4M10 3.4v7.4M12.6 5.2v3.8M6 7.1h4"></path><path d="M11.4 15.2v3.8M14 13.4v7.4M18 13.4v7.4M20.6 15.2v3.8M14 17.1h4"></path></symbol>
+<symbol id="i-hop" viewBox="0 0 24 24"><path d="M2.8 17.4h3.5v3.5H2.8zM10.2 17.4h3.5v3.5h-3.5zM17.7 17.4h3.5v3.5h-3.5z"></path><path d="M4.6 14.2C5.6 6.6 18.4 6.6 19.4 14.2"></path><path d="M16.7 11.9l2.7 2.5 2.2-2.8"></path></symbol>
 <symbol id="i-gift" viewBox="0 0 24 24"><path d="M4.6 10.8h14.8v8.8H4.6zM3.4 7.4h17.2v3.4H3.4zM12 7.4v12.2M12 7.4S10.6 4 8.6 4a1.9 1.9 0 0 0 0 3.4M12 7.4s1.4-3.4 3.4-3.4a1.9 1.9 0 0 1 0 3.4"></path></symbol>
 <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.8 12a7.8 7.8 0 1 1-2.3-5.5M19.8 3.8v4.6h-4.6"></path></symbol>
 <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8.6 5.6 4.4 9.8l4.2 4.2M4.4 9.8h9.8a5.2 5.2 0 0 1 0 10.4H9.2"></path></symbol>
@@ -3805,6 +3830,7 @@ function renderSession() {
       const nextupBadge = nextUpAdvies && !done ? (nextUpAdvies.dir === "down"
         ? `<div class="nextup-badge">${icon("arrow",15,'style="transform:rotate(90deg)"')} Vorige keer te zwaar — probeer nu <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`
         : `<div class="nextup-badge">${icon("arrow",15,'style="transform:rotate(-90deg)"')} Vorige keer aangegeven: meer gewicht! Probeer <b>${nextUpAdvies.suggested} ${m.unit || "kg"}</b> (was ${nextUpAdvies.from} ${m.unit || "kg"}).</div>`) : "";
+      const nextUpActive = !!(m.nextUp && m.nextUp.dir !== "down");
       body.innerHTML = `
         ${nextupBadge}
         ${askBoxHtml(m)}
@@ -3820,12 +3846,14 @@ function renderSession() {
         ${feelHtml}
         ${m.settings.length ? `<div class="settings-grid">${settingsHtml}</div>` : ""}
         <div class="exercise-actions">
-          ${m.cardio ? "" : `<button class="btn ghost full small save-btn">${icon("save",15)}Bewaren zonder afvinken</button>
-          <button class="btn ghost full small nextup-btn ${m.nextUp && m.nextUp.dir !== "down" ? "active" : ""}">${m.nextUp && m.nextUp.dir !== "down" ? icon("check",15) + "Genoteerd: volgende keer zwaarder" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer zwaarder"}</button>`}
-          <button class="btn full done-btn">${icon("check",20)}${done ? "WIJZIGING OPSLAAN" : "KLAAR — AFVINKEN"}</button>
-          ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">${icon("undo",15)}Heropenen (vink uit)</button>`
-                 : `<button class="btn ghost full small skip-btn" style="margin-top:0;">${skipped ? icon("undo",15) + "Toch doen — zet terug in de lijst" : icon("skip",15) + "Deze keer overslaan"}</button>`}
-          ${m.cardio ? "" : `<div class="action-hint">Bewaren = je gewicht onthouden, oefening blijft open. Klaar = afvinken, telt mee in je sessie.</div>`}
+          <div class="act-row${m.cardio ? " cols-3" : ""}">
+            <button class="act-btn act-back back-btn" title="Terug naar de lijst — je invoer blijft bewaard">${icon("undo",21)}<span class="act-lbl">Terug</span></button>
+            ${m.cardio ? "" : `<button class="act-btn act-up nextup-btn ${nextUpActive ? "active" : ""}" title="Volgende keer een plaatje zwaarder">${icon("dumbbells",21)}<span class="act-lbl">${nextUpActive ? "Genoteerd" : "Zwaarder"}</span></button>`}
+            <button class="act-btn act-done done-btn" title="${done ? "Wijziging opslaan" : "Afvinken — telt mee in je sessie"}">${icon("save",21)}<span class="act-lbl">${done ? "Opslaan" : "Klaar"}</span></button>
+            <button class="act-btn act-skip skip-btn" title="${skipped ? "Toch doen — terug in de lijst" : "Deze keer overslaan"}">${icon("hop",21)}<span class="act-lbl">${skipped ? "Toch doen" : "Overslaan"}</span></button>
+          </div>
+          ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">${icon("undo",15)}Heropenen (vink uit)</button>` : ""}
+          <div class="action-hint">Terug klapt alleen dicht — je invoer blijft staan. Klaar vinkt de oefening af.</div>
         </div>`;
       card.appendChild(body);
       if (!m.cardio) {
@@ -3941,14 +3969,11 @@ function renderSession() {
                 m.nextUp = target.nextUp;
                 toast(`Genoteerd! Volgende keer: ${sug} ${target.unit || "kg"}`);
                 const nuBtn2 = body.querySelector(".nextup-btn");
-                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("check",15) + "Genoteerd: volgende keer zwaarder"; }
+                if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Genoteerd</span>`; }
               });
             }
           }
         });
-        // opslaan zonder afronden
-        const saveBtn = body.querySelector(".save-btn");
-        if (saveBtn) saveBtn.onclick = () => saveMachineState(m, body);
         // volgende keer meer gewicht
         const nuBtn = body.querySelector(".nextup-btn");
         if (nuBtn) nuBtn.onclick = () => {
@@ -3969,13 +3994,23 @@ function renderSession() {
           m.nextUp = target.nextUp;
           const active = !!(target.nextUp && target.nextUp.dir !== "down");
           nuBtn.classList.toggle("active", active);
-          nuBtn.innerHTML = active ? icon("check",15) + "Genoteerd: volgende keer zwaarder" : icon("arrow",15,'style="transform:rotate(-90deg)"') + "Volgende keer zwaarder";
+          nuBtn.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">${active ? "Genoteerd" : "Zwaarder"}</span>`;
         };
       }
       // voorleesknoppen én de selectiemodus om regels weg te halen zitten in dit blok
       bindDosDonts(body, m, () => { renderSession(); renderTips(); });
       bindAskBox(body, m, () => { renderSession(); renderMachineQuestions(); });
       body.querySelector(".done-btn").onclick = () => completeMachine(m, body);
+      // Terug: alleen dichtklappen. Je gewicht, sets en reps blijven bewaard, zodat je
+      // niets kwijtraakt als je even iets anders wilt bekijken.
+      const backBtn = body.querySelector(".back-btn");
+      if (backBtn) backBtn.onclick = () => {
+        if (!m.cardio && !done) saveMachineState(m, body, { quiet: true });
+        if (metronome.machineId === m.id) metronome.stop();
+        expandedMachineId = null;
+        renderSession();
+        scrollSessionToTop();
+      };
       const undo = body.querySelector(".undo-btn");
       if (undo) undo.onclick = () => undoMachine(m);
       const skipBtn = body.querySelector(".skip-btn");
@@ -3985,7 +4020,7 @@ function renderSession() {
   });
   updateProgress();
 }
-function saveMachineState(m, body) {
+function saveMachineState(m, body, opts) {
   // gewicht/standen/sets/reps bewaren zónder de oefening af te ronden
   const { weight, settings, sets, reps } = readExerciseInputs(m, body);
   const machines = store.machines();
@@ -3996,7 +4031,7 @@ function saveMachineState(m, body) {
   if (sets) target.sets = sets;
   if (reps) target.reps = reps;
   store.setMachines(machines);
-  toast("Opgeslagen — de oefening blijft open");
+  if (!(opts && opts.quiet)) toast("Opgeslagen — de oefening blijft open");
 }
 function completeMachine(m, body) {
   const { weight, settings, sets, reps } = readExerciseInputs(m, body);
@@ -4091,6 +4126,10 @@ function scrollSessionToTop() {
 }
 function skipMachine(m) {
   // deze keer overslaan: schuift naar onderen en telt niet mee als gedaan
+  // Was hij al afgevinkt, dan haalt overslaan dat vinkje er eerst af — anders
+  // zou de knop niets zichtbaars doen (een afgeronde oefening wint van overgeslagen).
+  currentSession.entries = currentSession.entries.filter(e => e.machineId !== m.id);
+  if (currentSession.partial) delete currentSession.partial[m.id];
   currentSession.skipped = currentSession.skipped || {};
   currentSession.skipped[m.id] = true;
   restTimer.stop();
