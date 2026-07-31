@@ -247,6 +247,17 @@ input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow
 .mc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; cursor: pointer; }
 .mc-header .m-name { font-size: 1.25rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); margin: 0; }
 .mc-header .m-hint { display: flex; align-items: center; gap: 10px; font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.95rem; opacity: 0.7; flex-shrink: 0; }
+/* Gewichtsvierkantje: het getal groot en zonder eenheid, de dikke rand vertelt hoe
+   zwaar het vorige keer voelde (kleuren van de vijfpuntsschaal). */
+.w-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 46px; height: 46px; padding: 0 6px; border-radius: 12px;
+  border: 3px solid var(--line-strong); background: rgba(0,0,0,0.45);
+  font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.05rem;
+  color: #fff; line-height: 1; flex-shrink: 0;
+}
+.w-badge.none { border-style: dashed; color: var(--text-body); }
+.mc-header .m-sr { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.85rem; color: var(--text-label); }
 .mc-header .chev { font-size: 1.1rem; transition: transform 0.3s ease; opacity: 0.8; }
 .machine-card.open .mc-header .chev { transform: rotate(180deg); color: var(--primary); }
 .mc-body { padding: 0 18px 18px; animation: slideIn 0.3s ease; }
@@ -409,10 +420,22 @@ details.tip[open] > summary::after { transform: rotate(-135deg); margin-top: 2px
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .modal-overlay.show { display: flex; animation: slideIn 0.3s ease; }
 .modal { background: linear-gradient(160deg, #15001f, #050008); max-width: 380px; width: 100%; border: var(--border-w) var(--card-border-style) var(--primary); border-radius: var(--radius); padding: 26px; box-shadow: 0 0 40px color-mix(in srgb, var(--glow) 50%, transparent); text-align: center; }
-.modal h3 { font-size: 1.4rem; margin-bottom: 12px; }
-.modal p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 22px; }
-.modal-actions { display: flex; gap: 12px; }
-.modal-actions .btn { flex: 1; }
+.modal h3 { font-size: 1.4rem; margin-bottom: 12px; overflow-wrap: anywhere; }
+.modal p { font-size: 1.05rem; opacity: 0.85; margin-bottom: 22px; overflow-wrap: anywhere; }
+.modal-actions { display: flex; gap: 10px; }
+/* min-width:0 en kortere letterafstand: anders duwen twee Orbitron-labels de knoppen
+   op een telefoon van 360 px breed uit het venster. */
+.modal-actions .btn { flex: 1 1 0; min-width: 0; padding: 14px 8px; font-size: 0.92rem; letter-spacing: 0.4px; }
+
+/* Intensiteit van een sessie: één cijfer met een balkje in de kleur van de schaal */
+.si-box { margin: 14px 0 4px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); text-align: left; }
+.si-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.si-lbl { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-label); }
+.si-num { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.45rem; line-height: 1; }
+.si-max { font-size: 0.8rem; color: var(--text-label); }
+.si-bar { height: 9px; border-radius: 99px; background: rgba(255,255,255,0.1); overflow: hidden; margin: 9px 0 7px; }
+.si-fill { display: block; height: 100%; border-radius: 99px; }
+.si-note { font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 0.85rem; color: var(--text-body); line-height: 1.35; }
 
 /* Sessie-samenvatting: barchart met stippellijn-referenties */
 .ss-kg { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.9rem; text-align: center; color: var(--primary); text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent); }
@@ -1995,9 +2018,9 @@ function bindHwSpeak(root, s) {
   wire(".hw-speak-dos", "De do's. " + (s.tips || []).join(". ") + ".");
   wire(".hw-speak-donts", "De don'ts, dit gaat vaak mis. " + (s.mistakes || []).join(". ") + ".");
 }
-/* Gevoelsschaal thuis (zelfde 5 kleuren als de gym) + gevolg voor het doel:
-   groen/donkergroen → zwaarder-vraag. Omlaag gaat het doel nooit meteen bij het aantikken:
-   dat gebeurt pas bij het afvinken, en alleen als het donkerrood was (zie hwLowerIfDarkRed). */
+/* Gevoelsschaal thuis (zelfde 5 kleuren als de gym): groen/donkergroen vraagt of het
+   volgende keer zwaarder mag. Omlaag gaat je doel nooit vanzelf — net als in de gym
+   bepaal je dat zelf, met de kleur van vorige keer als leidraad. */
 function hwFeelHtml(feel) {
   return `<div class="feel-row" style="margin-top:10px;margin-bottom:4px;">
     <span class="feel-lbl">Hoe voelde dit?</span>
@@ -2034,20 +2057,6 @@ function hwFeelFollowUp(s, feel, metric) {
         setHwTarget(s.name, { reps: nextReps }); toast(`Genoteerd! Volgende keer: ${nextReps} ${unit}`);
       });
     }
-  }
-}
-/* Het doel gaat alleen omlaag als je de oefening hebt afgevinkt én hem donkerrood
-   ("veel te zwaar") noemde. Lichtrood laat je doel dus staan. */
-function hwLowerIfDarkRed(s, feel, metric) {
-  if (feel !== 1) return;
-  const sug = hwSuggest(s);
-  if (hwWeighted(s)) {
-    const downKg = s.equipment === "kettlebell" ? stackPrev(KETTLEBELL_WEIGHTS, sug.kg) : Math.max(0.5, Math.round((sug.kg - 1) * 2) / 2);
-    if (downKg !== sug.kg) { setHwTarget(s.name, { kg: downKg }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downKg} kg`); }
-  } else {
-    const unit = metric === "sec" ? "seconden" : "herhalingen";
-    const downReps = Math.max(1, sug.reps - (metric === "sec" ? 5 : 2));
-    if (downReps !== sug.reps) { setHwTarget(s.name, { reps: downReps }); toast(`Voelde ${FEEL_LABELS[feel].toLowerCase()} — volgende keer ${downReps} ${unit}`); }
   }
 }
 function exVideoSearch(s) {
@@ -3297,6 +3306,32 @@ function feelBarStyle(avg, glow) {
 function feelBarTip(avg) {
   return avg ? ` · gevoel ${avg.toFixed(1)}/5 (${FEEL_LABELS[Math.round(avg)]})` : "";
 }
+/* Intensiteit is de gevoelsschaal omgedraaid: donkerrood (veel te zwaar) telt als 5,
+   geel als 3 en donkergroen (veel te licht) als 1. Zo staat een hoger cijfer voor een
+   zwaardere sessie in plaats van voor een lichter gewicht. */
+function intensityOf(feeling) { return feeling > 0 ? 6 - feeling : null; }
+function sessionIntensity(s) {
+  const v = (s.entries || []).map(e => intensityOf(e.feeling)).filter(x => x > 0);
+  return v.length ? { avg: v.reduce((a, b) => a + b, 0) / v.length, n: v.length } : null;
+}
+const INTENSITY_LABELS = ["", "heel licht", "licht", "precies goed", "pittig", "heel zwaar"];
+/* Blok onder het grote cijfer op het samenvattingsbord: één intensiteitscijfer met een
+   balkje in de kleur van de vijfpuntsschaal. */
+function intensityBlockHtml(s, totalCount) {
+  const it = sessionIntensity(s);
+  if (!it) return "";
+  const col = feelColor(6 - it.avg); // terug naar de gevoelskleur die bij deze intensiteit hoort
+  const pct = Math.max(6, Math.round((it.avg / 5) * 100));
+  const missing = Math.max(0, (totalCount || 0) - it.n);
+  return `<div class="si-box">
+      <div class="si-top">
+        <span class="si-lbl">Intensiteit</span>
+        <span class="si-num" style="color:${col};">${it.avg.toFixed(1).replace(".", ",")}<span class="si-max"> / 5</span></span>
+      </div>
+      <div class="si-bar"><span class="si-fill" style="width:${pct}%;background:${col};"></span></div>
+      <div class="si-note">${esc(INTENSITY_LABELS[Math.max(1, Math.min(5, Math.round(it.avg)))])} — gemiddeld over ${it.n} ${it.n === 1 ? "oefening" : "oefeningen"}${missing ? ` (${missing} zonder gevoel ingevuld)` : ""}</div>
+    </div>`;
+}
 /* Legenda onder de grafieken: de vijfpuntsschaal als kleurbalk. */
 function feelLegendHtml(what) {
   return `<div class="feel-legend">
@@ -3646,6 +3681,29 @@ function historicalBest(machineId) {
   store.sessions().forEach(s => s.entries.forEach(e => { if (e.machineId === machineId) best = Math.max(best, parseFloat(e.weight) || 0); }));
   return best;
 }
+/* Hoe voelde dit apparaat de laatste keer dat je het deed? Geeft { feeling, date, weight }
+   of null. Voedt het gekleurde randje om het gewichtsvierkantje op de kaart. */
+function lastFeelFor(machineId) {
+  const sessions = store.sessions();
+  for (let i = sessions.length - 1; i >= 0; i--) {
+    const e = (sessions[i].entries || []).find(en => en.machineId === machineId);
+    if (e && e.feeling > 0) return { feeling: e.feeling, date: sessions[i].date, weight: e.weight };
+  }
+  return null;
+}
+/* Het vierkantje naast de oefeningnaam: het gewicht in cijfers, zonder eenheid, met een
+   dikke rand in de kleur van hoe zwaar het vorige keer voelde. */
+function weightBadgeHtml(m, entry) {
+  if (m.cardio) return "";
+  const now = entry ? entry.weight : m.lastWeight;
+  const cur = entry && entry.feeling > 0 ? { feeling: entry.feeling, date: null } : null;
+  const prev = cur || lastFeelFor(m.id);
+  const col = prev ? FEEL_COLORS[prev.feeling] : null;
+  const tip = prev
+    ? `${cur ? "Deze keer" : "Vorige keer" + (prev.date ? ` (${fmtNice(prev.date)})` : "")}: ${FEEL_LABELS[prev.feeling].toLowerCase()}`
+    : "Nog niet ingevuld hoe dit voelde";
+  return `<span class="w-badge${col ? "" : " none"}"${col ? ` style="border-color:${col};box-shadow:0 0 12px color-mix(in srgb, ${col} 55%, transparent);"` : ""} title="${esc(tip)}">${Math.round(now || 0)}</span>`;
+}
 function machineHistory(machineId, n = 10) {
   const rows = [];
   const sessions = store.sessions();
@@ -3670,10 +3728,9 @@ function readExerciseInputs(m, body) {
 function speakMachineSettings(m) {
   const parts = [m.name + "."];
   (m.settings || []).forEach(s => { if (s.lastValue) parts.push(s.label + " op " + s.lastValue + "."); });
-  if (!m.cardio) {
-    parts.push("Gewicht " + Math.round(m.lastWeight) + " " + (m.unit === "lbs" ? "pond" : "kilo") + ".");
-    parts.push((m.sets || 3) + " sets van " + (m.reps || 12) + ".");
-  }
+  // sets en reps worden bewust niet voorgelezen — die staan op de kaart en het
+  // maakte de intro elke keer onnodig lang
+  if (!m.cardio) parts.push("Gewicht " + Math.round(m.lastWeight) + " " + (m.unit === "lbs" ? "pond" : "kilo") + ".");
   const txt = parts.join(" ");
   voiceCoach.speak(txt, { force: true, interrupt: true });
   if (store.coach().speakSettingsTimes === 2) voiceCoach.speak("I repeat. " + txt, { force: true });
@@ -3720,11 +3777,14 @@ function renderSession() {
 
     // zwaarder/lichter-advies geldt pas in een volgende sessie (niet in de sessie waarin je 'm aanzette)
     const nextUpAdvies = m.nextUp && (!currentSession || m.nextUp.sid !== currentSession.id) ? m.nextUp : null;
+    // Het gewichtsvierkantje staat in elke stand naast de naam: het cijfer zonder eenheid,
+    // met een dikke rand in de kleur van hoe zwaar het de vorige keer voelde.
+    const badge = weightBadgeHtml(m, entry);
     const hint = done
-      ? (expanded ? `<span class="chev">${icon("chev",16)}</span>` : `<span class="chk">${icon("check",18)}</span>`)
+      ? `${badge}${expanded ? `<span class="chev">${icon("chev",16)}</span>` : `<span class="chk">${icon("check",18)}</span>`}`
       : skipped
-        ? `<span class="skip-tag">${icon("skip",15)}overgeslagen</span><span class="chev">${icon("chev",16)}</span>`
-        : `${openQuestionFor(m) ? `<span title="Foto van de gewichtsstapel nodig">${icon("camera",15)}</span>` : ""}${m.cardio ? "" : `<span>${nextUpAdvies ? (nextUpAdvies.dir === "down" ? icon("arrow",14,'style="transform:rotate(90deg)"') + " " : icon("arrow",14,'style="transform:rotate(-90deg)"') + " ") : ""}${Math.round(m.lastWeight)}${m.unit||'kg'} · ${m.sets||3}×${m.reps||12}</span>`}<span class="chev">${icon("chev",16)}</span>`;
+        ? `<span class="skip-tag">${icon("skip",15)}overgeslagen</span>${badge}<span class="chev">${icon("chev",16)}</span>`
+        : `${openQuestionFor(m) ? `<span title="Foto van de gewichtsstapel nodig">${icon("camera",15)}</span>` : ""}${nextUpAdvies && nextUpAdvies.dir !== "down" ? icon("arrow",14,'style="transform:rotate(-90deg)"') : ""}${badge}${m.cardio ? "" : `<span class="m-sr">${m.sets||3}×${m.reps||12}</span>`}<span class="chev">${icon("chev",16)}</span>`;
     const header = document.createElement("div");
     header.className = "mc-header";
     header.innerHTML = `<div class="m-name">${esc(m.name)}</div><div class="m-hint">${hint}</div>`;
@@ -3974,7 +4034,9 @@ function renderSession() {
             }
           }
         });
-        // volgende keer meer gewicht
+        // Volgende keer zwaarder: noteert het vlaggetje én rondt de oefening meteen af,
+        // zodat één tik genoeg is. Stond hij al genoteerd, dan haal je hem er hier weer
+        // af en blijft de kaart open — anders kun je een vergissing niet corrigeren.
         const nuBtn = body.querySelector(".nextup-btn");
         if (nuBtn) nuBtn.onclick = () => {
           const machines2 = store.machines();
@@ -3982,19 +4044,21 @@ function renderSession() {
           if (!target) return;
           if (target.nextUp && target.nextUp.dir !== "down") {
             delete target.nextUp;
+            store.setMachines(machines2);
+            m.nextUp = undefined;
             toast("Oké — gewoon dit gewicht aanhouden");
-          } else {
-            const { weight } = readExerciseInputs(m, body);
-            const w = weight || Math.round(target.lastWeight);
-            target.nextUp = { from: w, suggested: suggestNextFor(target, w), dir: "up", sid: currentSession ? currentSession.id : null };
-            toast(`Genoteerd! Volgende keer: ${target.nextUp.suggested} ${target.unit || "kg"}`);
-            voiceCoach.say("nextUp", {}, { minGap: 0 });
+            nuBtn.classList.remove("active");
+            nuBtn.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Zwaarder</span>`;
+            return;
           }
+          const { weight } = readExerciseInputs(m, body);
+          const w = weight || Math.round(target.lastWeight);
+          target.nextUp = { from: w, suggested: suggestNextFor(target, w), dir: "up", sid: currentSession ? currentSession.id : null };
           store.setMachines(machines2);
           m.nextUp = target.nextUp;
-          const active = !!(target.nextUp && target.nextUp.dir !== "down");
-          nuBtn.classList.toggle("active", active);
-          nuBtn.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">${active ? "Genoteerd" : "Zwaarder"}</span>`;
+          toast(`Genoteerd! Volgende keer: ${target.nextUp.suggested} ${target.unit || "kg"}`);
+          voiceCoach.say("nextUp", {}, { minGap: 0 });
+          completeMachine(m, body); // afvinken en inklappen in dezelfde tik
         };
       }
       // voorleesknoppen én de selectiemodus om regels weg te halen zitten in dit blok
@@ -4052,23 +4116,13 @@ function completeMachine(m, body) {
     if (!m.cardio) {
       const best = historicalBest(m.id);
       isPr = best > 0 && weight > best;
-      const prevWeight = target.lastWeight; // gewicht vóór deze sessie, om dubbel verlagen te herkennen
       target.lastWeight = weight;
       if (sets) target.sets = sets;
       if (reps) target.reps = reps;
-      // verlaging afhandelen op basis van vlag en gevoel (verhoging wordt al gevraagd bij het aantikken van groen)
-      if (target.nextUp && ((target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) || (target.nextUp.dir === "down" && weight <= target.nextUp.suggested))) delete target.nextUp;
-      // Alleen donkerrood ("veel te zwaar") verlaagt het gewicht, en pas nu je de oefening
-      // afrondt. Lichtrood is een signaal, geen reden om automatisch terug te gaan.
-      if (entry.feeling === 1 && !target.nextUp) {
-        if (weight < prevWeight) {
-          // al verlaagd tijdens deze sessie: niet nóg een keer verlagen — het nieuwe gewicht blijft staan
-          toast(`Gewicht al verlaagd naar ${weight} ${target.unit || "kg"} — dat blijft zo (niet dubbel verlaagd)`);
-        } else {
-          target.nextUp = { from: weight, suggested: suggestPrevFor(target, weight), dir: "down", sid: currentSession ? currentSession.id : null };
-          toast(`Voelde ${FEEL_LABELS[entry.feeling].toLowerCase()} — volgende keer ${target.nextUp.suggested} ${target.unit || "kg"}`);
-        }
-      }
+      // Het gewicht gaat nooit meer vanzelf omlaag als iets zwaar voelde. Hoe zwaar het
+      // vorige keer was zie je aan de rand van het gewichtsvierkantje op de kaart; wat je
+      // daarmee doet bepaal je zelf. Alleen de zwaarder-vlag ruimen we op als je hem haalt.
+      if (target.nextUp && target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) delete target.nextUp;
     }
     settings.forEach((s, i) => { if (target.settings[i]) target.settings[i].lastValue = s.value; });
     store.setMachines(machines);
@@ -4228,6 +4282,7 @@ function showSessionSummary(fin) {
   box.innerHTML = `
     <div class="ss-kg">${curKg} kg</div>
     <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    ${intensityBlockHtml(fin, fin.entries.length)}
     ${incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
@@ -5362,7 +5417,6 @@ function renderHwPlayer(hw) {
   };
   card.querySelector("#hwp-done").onclick = () => {
     clearInterval(hwTimerInt);
-    let feltAs = null;
     save(w => {
       const rr = Object.assign({ metric }, w.results[s.name] || {});
       rr.done = true;
@@ -5370,9 +5424,7 @@ function renderHwPlayer(hw) {
       if (weighted) rr.weight = wtIn && wtIn.value !== "" ? parseFloat(wtIn.value) : sug.kg;
       w.results[s.name] = rr;
       w.playIdx = idx + 1;
-      feltAs = rr.feel;
     });
-    hwLowerIfDarkRed(s, feltAs, metric); // verlagen pas nu je afvinkt, en alleen bij donkerrood
     voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -5479,7 +5531,6 @@ function hwCard(s, hw) {
     w.results[s.name] = rr; store.setHomeWorkout(w);
     renderHomeWorkout();
     if (rr.done) { // net als in de gym: door naar de volgende openstaande oefening
-      hwLowerIfDarkRed(s, rr.feel, metric); // verlagen pas nu, en alleen bij donkerrood
       voiceCoach.say("exerciseDone", {}, { minGap: 2000 });
       setTimeout(() => { const nxt = document.querySelector("#hw-plan .snack-card:not(.hw-done)"); if (nxt) nxt.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     }
@@ -5568,6 +5619,7 @@ function showHomeSummary(fin) {
   box.innerHTML = `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
     <div class="ss-sub">Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    ${intensityBlockHtml(fin, curN)}
     ${incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>

@@ -300,32 +300,211 @@ test.describe('Neon-driehoekjes', () => {
   });
 });
 
-test.describe('Gewicht verlagen: alleen donkerrood, alleen na afronden', () => {
-  test('lichtrood zet geen verlaging klaar', async ({ page }) => {
+test.describe('Het gewicht gaat nooit meer vanzelf omlaag', () => {
+  for (const feel of [1, 2]) {
+    test(`gevoel ${feel} zet geen verlaging klaar, ook niet na afvinken`, async ({ page }) => {
+      await openApp(page);
+      const body = await openExercise(page, 'Seated Chest Press');
+      const before = await page.evaluate(() =>
+        store.machines().find(m => m.name === 'Seated Chest Press').lastWeight);
+      await body.locator(`[data-feel="${feel}"]`).click();
+      await page.waitForTimeout(150);
+      await page.locator('.machine-card.open .done-btn').click();
+      await page.waitForTimeout(300);
+      const after = await page.evaluate(() => {
+        const m = store.machines().find(x => x.name === 'Seated Chest Press');
+        return { nextUp: m.nextUp, weight: m.lastWeight };
+      });
+      expect(after.nextUp == null || after.nextUp.dir !== 'down').toBe(true);
+      expect(after.weight).toBe(before);
+    });
+  }
+
+  test('thuis stelt het doel ook niet meer vanzelf naar beneden bij', async ({ page }) => {
     await openApp(page);
-    const body = await openExercise(page, 'Seated Chest Press');
-    await body.locator('[data-feel="2"]').click();
-    await page.waitForTimeout(150);
-    await page.locator('.machine-card.open .done-btn').click();
+    // hwLowerIfDarkRed bestaat niet meer; er is dus geen pad dat een doel verlaagt
+    const gone = await page.evaluate(() => typeof window.hwLowerIfDarkRed === 'undefined');
+    expect(gone).toBe(true);
+  });
+});
+
+test.describe('Gewichtsvierkantje naast de oefeningnaam', () => {
+  test('toont het gewicht in cijfers, zonder eenheid', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
     await page.waitForTimeout(300);
-    const nextUp = await page.evaluate(() =>
-      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
-    expect(nextUp == null || nextUp.dir !== 'down').toBe(true);
+    const badge = page.locator('.machine-card', { hasText: 'Seated Chest Press' }).locator('.w-badge').first();
+    await expect(badge).toHaveText('23');
+    await expect(badge).not.toContainText('kg');
   });
 
-  test('donkerrood zet de verlaging pas klaar bij het afvinken', async ({ page }) => {
+  test('de rand krijgt de kleur van hoe zwaar het vorige keer voelde', async ({ page }) => {
     await openApp(page);
-    const body = await openExercise(page, 'Seated Chest Press');
-    await body.locator('[data-feel="1"]').click();
-    await page.waitForTimeout(150);
-    const during = await page.evaluate(() =>
-      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
-    expect(during == null || during.dir !== 'down').toBe(true);
+    await page.evaluate(() => {
+      const m = store.machines().find(x => x.name === 'Seated Chest Press');
+      store.setSessions([{ id: 'a', date: '2026-07-20',
+        entries: [{ machineId: m.id, weight: 23, feeling: 1 }] }]);
+      renderSession();
+    });
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    const border = await page.locator('.machine-card', { hasText: 'Seated Chest Press' })
+      .locator('.w-badge').first().evaluate(el => getComputedStyle(el).borderTopColor);
+    expect(border).toBe('rgb(127, 29, 29)'); // donkerrood = veel te zwaar
+  });
+
+  test('zonder ingevuld gevoel blijft de rand neutraal en gestippeld', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    const badge = page.locator('.machine-card', { hasText: 'Seated Chest Press' }).locator('.w-badge').first();
+    await expect(badge).toHaveClass(/none/);
+    expect(await badge.evaluate(el => getComputedStyle(el).borderTopStyle)).toBe('dashed');
+  });
+
+  test('de rand is dik genoeg om af te lezen', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    const w = await page.locator('.w-badge').first().evaluate(el => parseFloat(getComputedStyle(el).borderTopWidth));
+    expect(w).toBeGreaterThanOrEqual(3);
+  });
+
+  test('cardio-oefeningen hebben geen vierkantje', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    const n = await page.locator('.machine-card', { hasText: 'Warming-up' }).locator('.w-badge').count();
+    expect(n).toBe(0);
+  });
+});
+
+test.describe('Intensiteit op het samenvattingsbord', () => {
+  test('donkerrood telt als 5, geel als 3 en donkergroen als 1', async ({ page }) => {
+    await openApp(page);
+    expect(await page.evaluate(() => intensityOf(1))).toBe(5);
+    expect(await page.evaluate(() => intensityOf(3))).toBe(3);
+    expect(await page.evaluate(() => intensityOf(5))).toBe(1);
+    expect(await page.evaluate(() => intensityOf(null))).toBe(null);
+  });
+
+  test('het gemiddelde telt alleen oefeningen waar je een gevoel invulde', async ({ page }) => {
+    await openApp(page);
+    const it = await page.evaluate(() => sessionIntensity({ entries: [
+      { feeling: 1 }, { feeling: 3 }, {}, { feeling: 5 },
+    ] }));
+    expect(it.n).toBe(3);
+    expect(it.avg).toBeCloseTo(3, 5); // (5 + 3 + 1) / 3
+  });
+
+  test('het blok staat op het bord met cijfer, balk en kleur', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    // twee oefeningen afronden, allebei donkerrood
+    for (let i = 0; i < 2; i++) {
+      await page.locator('.machine-card:not(.done)').filter({ hasNot: page.locator('.chk') }).nth(1).locator('.mc-header').click();
+      await page.waitForTimeout(250);
+      const feel = page.locator('.machine-card.open [data-feel="1"]');
+      if (await feel.count()) await feel.click();
+      await page.waitForTimeout(150);
+      await page.locator('.machine-card.open .done-btn').click();
+      await page.waitForTimeout(300);
+    }
+    await page.click('#finish-session');
+    await page.waitForTimeout(1200);
+    const box = page.locator('#summary-content .si-box');
+    await expect(box).toHaveCount(1);
+    await expect(box.locator('.si-num')).toContainText('5,0');
+    const col = await box.locator('.si-fill').evaluate(el => el.style.background);
+    expect(col.replace(/\s/g, '')).toContain('rgb(127,29,29)'); // donkerrood
+  });
+
+  test('zonder ingevuld gevoel verschijnt het blok niet', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    await page.locator('.mc-header').nth(1).click();
+    await page.waitForTimeout(250);
     await page.locator('.machine-card.open .done-btn').click();
     await page.waitForTimeout(300);
-    const after = await page.evaluate(() =>
-      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
-    expect(after.dir).toBe('down');
+    await page.click('#finish-session');
+    await page.waitForTimeout(1200);
+    await expect(page.locator('#summary-content .si-box')).toHaveCount(0);
+  });
+});
+
+test.describe('Zwaarder vinkt meteen af', () => {
+  test('één tik noteert, vinkt af en klapt in', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('.act-up').click();
+    await page.waitForTimeout(400);
+    await expect(page.locator('.machine-card.open')).toHaveCount(0);
+    const state = await page.evaluate(() => {
+      const m = store.machines().find(x => x.name === 'Seated Chest Press');
+      return { entries: currentSession.entries.length, dir: m.nextUp && m.nextUp.dir };
+    });
+    expect(state.entries).toBe(1);
+    expect(state.dir).toBe('up');
+  });
+
+  test('nog een keer tikken haalt het vlaggetje eraf zonder af te vinken', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('.act-up').click();
+    await page.waitForTimeout(400);
+    // heropenen en het vlaggetje eraf halen
+    await page.locator('.mc-header', { hasText: 'Seated Chest Press' }).first().click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.machine-card.open .act-up')).toHaveClass(/active/);
+    await page.locator('.machine-card.open .act-up').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.machine-card.open')).toHaveCount(1); // blijft open
+    const dir = await page.evaluate(() => {
+      const m = store.machines().find(x => x.name === 'Seated Chest Press');
+      return m.nextUp && m.nextUp.dir;
+    });
+    expect(dir).toBeFalsy();
+  });
+});
+
+test.describe('De coach houdt het kort', () => {
+  test('sets en reps worden niet meer voorgelezen', async ({ page }) => {
+    await openApp(page);
+    const spoken = await page.evaluate(() => {
+      const said = [];
+      const orig = voiceCoach.speak;
+      voiceCoach.speak = (t) => said.push(t);
+      speakMachineSettings(store.machines()[1]);
+      voiceCoach.speak = orig;
+      return said.join(' ');
+    });
+    expect(spoken).toMatch(/Gewicht \d+ kilo/);
+    expect(spoken).not.toMatch(/sets van/i);
+  });
+});
+
+test.describe('Modals passen op een telefoon', () => {
+  test('de zwaarder-vraag blijft binnen 360 px', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('[data-feel="5"]').click();
+    await page.waitForTimeout(400);
+    await expect(page.locator('#modal.show')).toHaveCount(1);
+    const fit = await page.evaluate(() => {
+      const modal = document.querySelector('#modal');
+      const r = modal.getBoundingClientRect();
+      const btns = [...modal.querySelectorAll('.modal-actions .btn')];
+      return {
+        modalOverflow: r.left < 0 || r.right > window.innerWidth,
+        scrollX: modal.scrollWidth > modal.clientWidth + 1,
+        btnOverflow: btns.some(b => b.scrollWidth > b.clientWidth + 1),
+        btnOutside: btns.some(b => b.getBoundingClientRect().right > r.right + 1),
+      };
+    });
+    expect(fit).toEqual({ modalOverflow: false, scrollX: false, btnOverflow: false, btnOutside: false });
   });
 });
 
@@ -577,13 +756,16 @@ test.describe('Vier gekleurde actieknoppen naast elkaar', () => {
     await openApp(page);
     const body = await openExercise(page, 'Seated Chest Press');
     await expect(body.locator('.act-up .act-lbl')).toHaveText('Zwaarder');
+    // één tik noteert én vinkt af, dus de kaart klapt dicht — heropenen om de stand te zien
     await body.locator('.act-up').click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(400);
+    await page.locator('.mc-header', { hasText: 'Seated Chest Press' }).first().click();
+    await page.waitForTimeout(300);
     const up = page.locator('.machine-card.open .act-up');
     await expect(up.locator('.act-lbl')).toHaveText('Genoteerd');
     await expect(up).toHaveClass(/active/);
     await up.click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
     await expect(page.locator('.machine-card.open .act-up .act-lbl')).toHaveText('Zwaarder');
   });
 
