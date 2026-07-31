@@ -188,16 +188,58 @@ test.describe('Geen vraag meer als je er allang boven traint', () => {
     expect(txt).toContain('Shoulder Press');
     expect(txt).not.toContain('Pulldown');
     expect(txt).not.toContain('Seated Chest Press');
+    expect(txt).not.toContain('Leg Curl'); // foto binnen, stapel staat erin
   });
 
-  test('de Leg Curl-vraag vervalt nooit vanzelf: de hele stapel is onbekend', async ({ page }) => {
+  test('een vraag zonder drempel vervalt nooit vanzelf', async ({ page }) => {
     await openApp(page);
     const open = await page.evaluate(() => {
-      const m = store.machines().find(x => x.name === 'Leg Curl');
+      // stapel volledig onbekend: dan helpt een hoog gemiddelde niet, de vraag blijft
+      MACHINE_OPEN_QUESTIONS['Dumbells'] = { q: 'test', mootAbove: null };
+      const m = store.machines().find(x => x.name === 'Dumbells');
       store.setSessions([{ id: 's1', date: '2026-07-01', entries: [{ machineId: m.id, weight: 200 }] }]);
       return !!openQuestionFor(store.machines().find(x => x.id === m.id));
     });
     expect(open).toBe(true);
+  });
+});
+
+test.describe('Gewichtsstapel van de leg curl', () => {
+  test('komt uit de foto: 9 t/m 90 kg, veertien platen', async ({ page }) => {
+    await openApp(page);
+    const stack = await page.evaluate(() =>
+      store.machines().find(m => m.name === 'Leg Curl').stack);
+    expect(stack).toEqual([9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90]);
+  });
+
+  test('de leg curl heeft geen openstaande vraag meer', async ({ page }) => {
+    await openApp(page);
+    const open = await page.evaluate(() => machinesWithOpenQuestion().map(m => m.name));
+    expect(open).not.toContain('Leg Curl');
+  });
+
+  test('een bestaande leg curl zonder stapel krijgt hem alsnog', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      delete ms.find(m => m.name === 'Leg Curl').stack;
+      store.setMachines(ms);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const stack = await page.evaluate(() =>
+      store.machines().find(m => m.name === 'Leg Curl').stack);
+    expect(stack).toHaveLength(14);
+    expect(stack[stack.length - 1]).toBe(90);
+  });
+
+  test('het gewicht klikt nu op de echte platen', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Leg Curl');
+    await expect(body.locator('.stack-row')).toHaveCount(1);
+    await expect(body.locator('.weight-display')).toHaveValue('23');
+    await body.locator('[data-act="inc"]').click();
+    await expect(body.locator('.weight-display')).toHaveValue('29'); // volgende plaat, niet +1
   });
 });
 
