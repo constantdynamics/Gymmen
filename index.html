@@ -1538,6 +1538,9 @@ const MACHINE_STACKS = {
   "Seated Chest Press":   [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Seated Leg Press":     [18, 29, 41, 52, 63, 75, 86, 97, 109, 120, 131, 143, 154, 165, 177, 188],
   "Seated Leg Extension": [14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
+  // Leg curl: afgelezen van de foto's van 28-07. 20 t/m 200 lbs, dus 9 t/m 90 kg —
+  // deze stapel stopt bij 200 lbs, waar de chest press nog doorloopt tot 230.
+  "Leg Curl":             [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90],
   "Dumbells":             [1, 2, 3, 4, 5],
   "Shoulder Press":       [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Pulldown":             [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
@@ -1554,7 +1557,6 @@ const MACHINE_OPEN_QUESTIONS = {
   "Shoulder Press": { q: "Zit er boven 9 kg nog een lichter plaatje (bijv. 5 kg)?", mootAbove: 23 },
   "Pulldown": { q: "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?", mootAbove: 36 },
   "Horizontal Row (Pulley)": { q: "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?", mootAbove: 36 },
-  "Leg Curl": { q: "Nog geen foto van de gewichtsstapel — stuur die een keer, dan worden de kilo-sprongen exact ingesteld.", mootAbove: null },
 };
 const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
 /* Kettlebell-oefeningen met do's & don'ts — getoond op de Kettlebell-kaart in de sessie (squat eerst) */
