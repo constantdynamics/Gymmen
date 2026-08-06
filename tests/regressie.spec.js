@@ -5,10 +5,10 @@ const { VIEWS, openApp, seedHistory, goto } = require('./helpers');
    Regressie — de werking mag niet veranderen door de restyling
    ============================================================ */
 
-test('onboarding laadt het standaardschema met elf onderdelen', async ({ page }) => {
+test('onboarding laadt het standaardschema met twaalf onderdelen', async ({ page }) => {
   const errors = await openApp(page);
   const n = await page.evaluate(() => store.machines().length);
-  expect(n).toBe(11);
+  expect(n).toBe(12);
   await expect(page.locator('.view.active')).toHaveAttribute('id', 'view-home');
   expect(errors).toEqual([]);
 });
@@ -17,7 +17,7 @@ test('sessie starten, gewicht opslaan en afronden geeft het samenvattingsbord', 
   await openApp(page);
   await page.click('#enter-gym');
   await expect(page.locator('.view.active')).toHaveAttribute('id', 'view-session');
-  await expect(page.locator('.machine-card')).toHaveCount(11);
+  await expect(page.locator('.machine-card')).toHaveCount(12);
 
   await page.locator('.mc-header').nth(1).click();
   await page.waitForTimeout(250);
@@ -27,7 +27,7 @@ test('sessie starten, gewicht opslaan en afronden geeft het samenvattingsbord', 
   await page.waitForTimeout(400);
 
   await expect(page.locator('.machine-card.done')).toHaveCount(1);
-  await expect(page.locator('#sess-progress')).toContainText('1 / 11');
+  await expect(page.locator('#sess-progress')).toContainText('1 / 12');
 
   await page.click('#finish-session');
   await page.waitForTimeout(1300);
@@ -115,11 +115,10 @@ test('reeks-speler loopt de oefeningen af', async ({ page }) => {
   await expect(page.locator('.snack-card').first()).toBeVisible();
 });
 
-test('beloningen: tien sterren, eentje gevuld na een afgeronde sessie', async ({ page }) => {
+test('sterrenwinkel: saldo loopt op na een afgeronde sessie', async ({ page }) => {
   await openApp(page);
-  await goto(page, 'thuis');
-  await expect(page.locator('.inc-star')).toHaveCount(10);
-  await expect(page.locator('.inc-star.full')).toHaveCount(0);
+  await goto(page, 'shop');
+  await expect(page.locator('.shop-balance .sb-num')).toContainText('0');
 
   await goto(page, 'home');
   await page.click('#enter-gym');
@@ -131,19 +130,57 @@ test('beloningen: tien sterren, eentje gevuld na een afgeronde sessie', async ({
   await page.click('#summary-close');
   await page.waitForTimeout(400);
 
-  await goto(page, 'thuis');
-  await expect(page.locator('.inc-star.full')).toHaveCount(1);
+  await goto(page, 'shop');
+  await expect(page.locator('.shop-balance .sb-num')).toContainText('1');
 });
 
-test('beloning toevoegen en kiezen', async ({ page }) => {
+test('sterrenwinkel: item toevoegen, aanpassen en verwijderen', async ({ page }) => {
   await openApp(page);
-  await goto(page, 'thuis');
-  const before = await page.locator('.inc-chip').count();
-  await page.fill('#inc-new', 'Nieuwe koptelefoon');
-  await page.click('#inc-add');
+  await goto(page, 'shop');
+  const before = await page.locator('.shop-item').count();
+  await page.fill('#shop-new-name', 'Nieuwe koptelefoon');
+  await page.fill('#shop-new-price', '22');
+  await page.click('#shop-add');
   await page.waitForTimeout(400);
-  await expect(page.locator('.inc-chip')).toHaveCount(before + 1);
-  await expect(page.locator('#incentives-box')).toContainText('Nieuwe koptelefoon');
+  await expect(page.locator('.shop-item')).toHaveCount(before + 1);
+  const item = page.locator('.shop-item', { hasText: 'Nieuwe koptelefoon' });
+  await expect(item.locator('.si-price')).toContainText('22');
+
+  await item.locator('.shop-edit').click();
+  await page.waitForTimeout(300);
+  const item2 = page.locator('.shop-item', { hasText: 'Nieuwe koptelefoon' });
+  await item2.locator('.se-price').fill('7');
+  await item2.locator('.shop-save').click();
+  await page.waitForTimeout(300);
+  await expect(page.locator('.shop-item', { hasText: 'Nieuwe koptelefoon' }).locator('.si-price')).toContainText('7');
+
+  await page.locator('.shop-item', { hasText: 'Nieuwe koptelefoon' }).locator('.shop-del').click();
+  await page.click('#modal-confirm');
+  await page.waitForTimeout(300);
+  await expect(page.locator('.shop-item')).toHaveCount(before);
+});
+
+test('sterrenwinkel: kopen trekt de prijs van je saldo af', async ({ page }) => {
+  await openApp(page);
+  await page.evaluate(() => { const v = store.incentives(); v.stars = 12; store.setIncentives(v); });
+  await goto(page, 'shop');
+  const item = page.locator('.shop-item.can').first();
+  const name = await item.locator('.si-name').innerText();
+  const price = parseInt((await item.locator('.si-price').innerText()).replace(/\D/g, ''));
+  await item.locator('.shop-buy').click();
+  await page.click('#modal-confirm');
+  await page.waitForTimeout(400);
+  const stars = await page.evaluate(() => store.incentives().stars);
+  expect(stars).toBe(12 - price);
+  await expect(page.locator('.shop-item', { hasText: name })).toHaveCount(0);
+  await expect(page.locator('#shop-content')).toContainText('Gekocht (1)');
+});
+
+test('sterrenwinkel: te duur item kan niet gekocht worden', async ({ page }) => {
+  await openApp(page);
+  await goto(page, 'shop');
+  const pricey = page.locator('.shop-item:not(.can)').first();
+  await expect(pricey.locator('.shop-buy')).toBeDisabled();
 });
 
 test('calf raises: poging opslaan en PR bijwerken', async ({ page }) => {
@@ -235,10 +272,10 @@ test('thema wisselen zet data-theme en de tokens', async ({ page }) => {
 test('apparaten beheren blijft werken', async ({ page }) => {
   await openApp(page);
   await goto(page, 'settings');
-  await expect(page.locator('.machine-row')).toHaveCount(11);
+  await expect(page.locator('.machine-row')).toHaveCount(12);
   await page.click('#load-preset-settings');
   await page.waitForTimeout(400);
-  await expect(page.locator('.machine-row')).toHaveCount(11);
+  await expect(page.locator('.machine-row')).toHaveCount(12);
 });
 
 test('door de hele app klikken geeft geen JS-fouten', async ({ page }) => {

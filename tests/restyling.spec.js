@@ -67,12 +67,12 @@ test.describe('§4 iconen: nul emoji, nul unicode-symbolen', () => {
 });
 
 test.describe('§3.2 bottom-nav', () => {
-  test('vier zichtbare knoppen, acht in de DOM', async ({ page }) => {
+  test('vijf zichtbare knoppen, negen in de DOM', async ({ page }) => {
     await openApp(page);
-    await expect(page.locator('.nav-item')).toHaveCount(8);
-    await expect(page.locator('.nav-item:visible')).toHaveCount(4);
+    await expect(page.locator('.nav-item')).toHaveCount(9);
+    await expect(page.locator('.nav-item:visible')).toHaveCount(5);
     const labels = await page.locator('.nav-item:visible .nav-label').allTextContents();
-    expect(labels).toEqual(['HOME', 'SESSIE', 'STATS', 'INSTEL']);
+    expect(labels).toEqual(['HOME', 'SESSIE', 'WINKEL', 'STATS', 'INSTEL']);
   });
 
   test('de verborgen tabs houden hun data-view en blijven routeerbaar', async ({ page }) => {
@@ -281,11 +281,11 @@ test.describe('§3.4 stats', () => {
 });
 
 test.describe('§3.6 thuis en calf raises', () => {
-  test('beloningssterren zijn SVG, tien stuks', async ({ page }) => {
+  test('sterrenwinkel toont het saldo als SVG-ster, geen emoji', async ({ page }) => {
     await openApp(page);
-    await goto(page, 'thuis');
-    await expect(page.locator('.inc-star')).toHaveCount(10);
-    await expect(page.locator('.inc-star svg')).toHaveCount(10);
+    await goto(page, 'shop');
+    await expect(page.locator('.shop-balance .sb-num svg')).toHaveCount(1);
+    expect(await visibleGlyphs(page)).toEqual([]);
   });
 
   test('calf: readout, rep-rondjes met markering en PR-rij per modus', async ({ page }) => {

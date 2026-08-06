@@ -28,6 +28,11 @@ async function openDosDonts(page) {
   await page.waitForTimeout(150);
 }
 
+
+/* Datums in deze tests zijn relatief aan vandaag: vaste datums vallen na verloop van
+   tijd buiten het standaard statistiek-bereik van een maand en laten tests dan zakken.
+   De berekening staat inline omdat hij binnen page.evaluate in de browser draait. */
+
 test.describe('Gewichtsstapel van de chest press', () => {
   test('komt uit de foto: 14 t/m 104 kg, geen plaatje van 9', async ({ page }) => {
     await openApp(page);
@@ -153,7 +158,7 @@ test.describe('Geen vraag meer als je er allang boven traint', () => {
       const before = !!openQuestionFor(m);
       // vier sessies ruim boven de drempel van 23 kg
       store.setSessions([1, 2, 3, 4].map((i) => ({
-        id: 's' + i, date: '2026-07-0' + i, entries: [{ machineId: m.id, weight: 43 }],
+        id: 's' + i, date: new Date(Date.now() - (10 - i) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m.id, weight: 43 }],
       })));
       return { before, after: !!openQuestionFor(store.machines().find(x => x.id === m.id)) };
     }, OPEN_MACHINE);
@@ -165,7 +170,7 @@ test.describe('Geen vraag meer als je er allang boven traint', () => {
     await openApp(page);
     const open = await page.evaluate(n => {
       const m = store.machines().find(x => x.name === n);
-      store.setSessions([{ id: 's1', date: '2026-07-01', entries: [{ machineId: m.id, weight: 14 }] }]);
+      store.setSessions([{ id: 's1', date: new Date(Date.now() - (9) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m.id, weight: 14 }] }]);
       return !!openQuestionFor(store.machines().find(x => x.id === m.id));
     }, OPEN_MACHINE);
     expect(open).toBe(true);
@@ -197,7 +202,7 @@ test.describe('Geen vraag meer als je er allang boven traint', () => {
       // stapel volledig onbekend: dan helpt een hoog gemiddelde niet, de vraag blijft
       MACHINE_OPEN_QUESTIONS['Dumbells'] = { q: 'test', mootAbove: null };
       const m = store.machines().find(x => x.name === 'Dumbells');
-      store.setSessions([{ id: 's1', date: '2026-07-01', entries: [{ machineId: m.id, weight: 200 }] }]);
+      store.setSessions([{ id: 's1', date: new Date(Date.now() - (9) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m.id, weight: 200 }] }]);
       return !!openQuestionFor(store.machines().find(x => x.id === m.id));
     });
     expect(open).toBe(true);
@@ -384,7 +389,7 @@ test.describe('Gewichtsvierkantje naast de oefeningnaam', () => {
     await openApp(page);
     await page.evaluate(() => {
       const m = store.machines().find(x => x.name === 'Seated Chest Press');
-      store.setSessions([{ id: 'a', date: '2026-07-20',
+      store.setSessions([{ id: 'a', date: new Date(Date.now() - (7) * 864e5).toISOString().slice(0, 10),
         entries: [{ machineId: m.id, weight: 23, feeling: 1 }] }]);
       renderSession();
     });
@@ -556,7 +561,7 @@ test.describe('Gevoelskleur in de grafieken', () => {
     await page.evaluate(() => {
       const ms = store.machines().filter(m => !m.cardio);
       store.setSessions([1, 2].map((i) => ({
-        id: 's' + i, date: '2026-07-0' + i,
+        id: 's' + i, date: new Date(Date.now() - (10 - i) * 864e5).toISOString().slice(0, 10),
         entries: ms.map(m => ({ machineId: m.id, weight: 40, feeling: i === 1 ? 1 : 5 })),
       })));
     });
@@ -582,8 +587,8 @@ test.describe('Gevoelskleur in de grafieken', () => {
     await page.evaluate(() => {
       const m = store.machines().find(x => !x.cardio);
       store.setSessions([
-        { id: 'a', date: '2026-07-01', entries: [{ machineId: m.id, weight: 20, feeling: 3 }] },
-        { id: 'b', date: '2026-07-02', entries: [{ machineId: m.id, weight: 40, feeling: 5 }] },
+        { id: 'a', date: new Date(Date.now() - (9) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m.id, weight: 20, feeling: 3 }] },
+        { id: 'b', date: new Date(Date.now() - (8) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m.id, weight: 40, feeling: 5 }] },
       ]);
     });
     await goto(page, 'stats');
@@ -614,8 +619,8 @@ test.describe('PR op Home = de zwaarste hele sessie', () => {
     await page.evaluate(() => {
       const m = store.machines().filter(x => !x.cardio).slice(0, 3);
       store.setSessions([
-        { id: 'a', date: '2026-07-01', entries: m.map(x => ({ machineId: x.id, weight: 30 })) }, // 90
-        { id: 'b', date: '2026-07-02', entries: [{ machineId: m[0].id, weight: 80 }] },          // 80
+        { id: 'a', date: new Date(Date.now() - (9) * 864e5).toISOString().slice(0, 10), entries: m.map(x => ({ machineId: x.id, weight: 30 })) }, // 90
+        { id: 'b', date: new Date(Date.now() - (8) * 864e5).toISOString().slice(0, 10), entries: [{ machineId: m[0].id, weight: 80 }] },          // 80
       ]);
       renderHome();
     });
@@ -628,8 +633,8 @@ test.describe('PR op Home = de zwaarste hele sessie', () => {
     await openApp(page);
     await page.evaluate(() => {
       store.setHomeSessions([
-        { date: '2026-07-01', entries: [{ exerciseName: 'a', value: 10, weight: 16 }, { exerciseName: 'b', value: 10, weight: 16 }] },
-        { date: '2026-07-02', entries: [{ exerciseName: 'a', value: 10, weight: 20 }] },
+        { date: new Date(Date.now() - (9) * 864e5).toISOString().slice(0, 10), entries: [{ exerciseName: 'a', value: 10, weight: 16 }, { exerciseName: 'b', value: 10, weight: 16 }] },
+        { date: new Date(Date.now() - (8) * 864e5).toISOString().slice(0, 10), entries: [{ exerciseName: 'a', value: 10, weight: 20 }] },
       ]);
       renderHome();
     });
@@ -852,5 +857,280 @@ test.describe('Vier gekleurde actieknoppen naast elkaar', () => {
       })
       .map(e => e.querySelector('.act-lbl').textContent));
     expect(overflow).toEqual([]);
+  });
+});
+
+/* ============================================================
+   Feedbackronde 3
+   ============================================================ */
+
+const AGO = n => `new Date(Date.now() - ${n} * 864e5).toISOString().slice(0, 10)`;
+
+test.describe('Single seated leg press', () => {
+  test('staat in het schema op 41 kg, direct na de leg press', async ({ page }) => {
+    await openApp(page);
+    const info = await page.evaluate(() => {
+      const ms = store.machines();
+      const i = ms.findIndex(m => m.name === 'Single Seated Leg Press');
+      return { i, prev: i > 0 ? ms[i - 1].name : null, w: ms[i] && ms[i].lastWeight, stack: ms[i] && ms[i].stack };
+    });
+    expect(info.prev).toBe('Seated Leg Press');
+    expect(info.w).toBe(41);
+    expect(info.stack).toContain(41);
+  });
+
+  test('heeft eigen do\'s en don\'ts', async ({ page }) => {
+    await openApp(page);
+    const n = await page.evaluate(() => {
+      const m = store.machines().find(x => x.name === 'Single Seated Leg Press');
+      return { dos: machineExtraTips(m).length, donts: machineMistakes(m).length };
+    });
+    expect(n.dos).toBeGreaterThan(0);
+    expect(n.donts).toBeGreaterThan(0);
+  });
+
+  test('krijgt één gele sessie in de geschiedenis als je er al historie had', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(agoExpr => {
+      // doe alsof de oefening nog niet bestond en er al een sessie was
+      const ms = store.machines().filter(m => m.name !== 'Single Seated Leg Press');
+      store.setMachines(ms);
+      store.setSessions([{ id: 'oud', date: eval(agoExpr), entries: [{ machineId: ms[1].id, weight: 100 }] }]);
+      const p = store.profile(); delete p.singleLegPress;
+      localStorage.setItem('gymwave_profile', JSON.stringify(p));
+    }, AGO(5));
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const res = await page.evaluate(() => {
+      const m = store.machines().find(x => x.name === 'Single Seated Leg Press');
+      const e = store.sessions()[0].entries.find(x => x.machineId === m.id);
+      return { feel: e && e.feeling, weight: e && e.weight, pr: historicalBest(m.id) };
+    });
+    expect(res.feel).toBe(3);   // geel
+    expect(res.weight).toBe(41);
+    expect(res.pr).toBe(41);
+  });
+});
+
+test.describe('Warming-up en cooling-down zijn cardio', () => {
+  test('geen gevoelsschaal en geen sets/reps', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    for (const n of ['Warming-up', 'Cooling-down']) {
+      await page.locator('.mc-header', { hasText: n }).first().click();
+      await page.waitForTimeout(300);
+      const body = page.locator('.machine-card.open .mc-body');
+      await expect(body.locator('[data-feel]')).toHaveCount(0);
+      await expect(body.locator('[data-sr]')).toHaveCount(0);
+      await page.locator('.mc-header', { hasText: n }).first().click();
+      await page.waitForTimeout(200);
+    }
+  });
+
+  test('een kwijtgeraakte cardio-vlag wordt hersteld', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      ms.filter(m => m.name === 'Warming-up' || m.name === 'Cooling-down').forEach(m => { m.cardio = false; });
+      store.setMachines(ms);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const flags = await page.evaluate(() =>
+      store.machines().filter(m => /Warming-up|Cooling-down/.test(m.name)).map(m => m.cardio));
+    expect(flags).toEqual([true, true]);
+  });
+});
+
+test.describe('De app verzet je gewicht nooit zelf', () => {
+  test('een zwaarder-advies vult het veld niet vooraf in', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      const m = ms.find(x => x.name === 'Seated Chest Press');
+      m.nextUp = { from: 23, suggested: 29, dir: 'up', sid: null };
+      store.setMachines(ms);
+    });
+    const body = await openExercise(page, 'Seated Chest Press');
+    await expect(body.locator('.weight-display')).toHaveValue('23'); // niet 29
+    await expect(body.locator('.nextup-badge')).toHaveCount(1);      // advies staat er wel
+  });
+
+  test('de knop in het advies zet het gewicht pas als je hem indrukt', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      ms.find(x => x.name === 'Seated Chest Press').nextUp = { from: 23, suggested: 29, dir: 'up', sid: null };
+      store.setMachines(ms);
+    });
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('.nextup-badge .apply-suggest').click();
+    await page.waitForTimeout(250);
+    await expect(page.locator('.machine-card.open .weight-display')).toHaveValue('29');
+  });
+
+  test('oude verlaag-adviezen worden opgeruimd', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      ms.find(x => x.name === 'Pulldown').nextUp = { from: 43, suggested: 36, dir: 'down', sid: null };
+      store.setMachines(ms);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const nu = await page.evaluate(() => store.machines().find(x => x.name === 'Pulldown').nextUp);
+    expect(nu).toBeFalsy();
+  });
+});
+
+test.describe('Voorstel na zeven keer minstens geel', () => {
+  const seed = (page, feels) => page.evaluate(({ feels, agoExpr }) => {
+    const m = store.machines().find(x => x.name === 'Seated Chest Press');
+    store.setSessions(feels.map((f, i) => ({
+      id: 's' + i, date: new Date(Date.now() - (feels.length - i) * 864e5).toISOString().slice(0, 10),
+      entries: [{ machineId: m.id, weight: 23, feeling: f }],
+    })));
+  }, { feels, agoExpr: null });
+
+  test('feelStreak telt alleen gevoelens van 3 of hoger, tot de reeks breekt', async ({ page }) => {
+    await openApp(page);
+    await seed(page, [3, 4, 5, 3, 3, 4, 3]);
+    let n = await page.evaluate(() => feelStreak(store.machines().find(x => x.name === 'Seated Chest Press').id).n);
+    expect(n).toBe(7);
+    // terugtellend vanaf de nieuwste: 3, 4, 3 — daarna breekt de 2 de reeks
+    await seed(page, [3, 4, 5, 2, 3, 4, 3]);
+    n = await page.evaluate(() => feelStreak(store.machines().find(x => x.name === 'Seated Chest Press').id).n);
+    expect(n).toBe(3);
+  });
+
+  test('bij zeven op rij staat het voorstel op de kaart', async ({ page }) => {
+    await openApp(page);
+    await seed(page, [3, 3, 3, 3, 3, 3, 3]);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const badge = body.locator('.nextup-badge.streak');
+    await expect(badge).toHaveCount(1);
+    await expect(badge).toContainText('7');
+    // en ook hier verzet de app niets uit zichzelf
+    await expect(body.locator('.weight-display')).toHaveValue('23');
+    await badge.locator('.apply-suggest').click();
+    await page.waitForTimeout(250);
+    await expect(page.locator('.machine-card.open .weight-display')).toHaveValue('29');
+  });
+
+  test('bij zes op rij nog niet', async ({ page }) => {
+    await openApp(page);
+    await seed(page, [3, 3, 3, 3, 3, 3]);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await expect(body.locator('.nextup-badge.streak')).toHaveCount(0);
+  });
+});
+
+test.describe('Sets en reps zitten achter een uitklapper', () => {
+  test('het blok is een details, net als de metronoom', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const det = body.locator('details', { has: page.locator('.set-track') });
+    await expect(det).toHaveCount(1);
+    await expect(det.locator('summary')).toContainText('Sets & reps');
+  });
+});
+
+test.describe('Doorscrollen na het invullen van de kleur', () => {
+  test('de knoppenrij komt in beeld', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 700 });
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('[data-feel="3"]').click();
+    await page.waitForTimeout(900);
+    const vis = await page.locator('.machine-card.open .exercise-actions').evaluate(el => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    });
+    expect(vis).toBe(true);
+  });
+});
+
+test.describe('Records per oefening', () => {
+  test('staan onderaan de Statistieken-tab, na de waffles', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    await page.waitForTimeout(500);
+    await expect(page.locator('#records-section .rec-row').first()).toBeVisible();
+    const order = await page.evaluate(() => {
+      const ids = ['total-chart-card', 'waffle-section', 'records-section'];
+      return ids.map(id => document.getElementById(id).getBoundingClientRect().top);
+    });
+    expect(order[0]).toBeLessThan(order[1]);
+    expect(order[1]).toBeLessThan(order[2]);
+  });
+
+  test('elke oefening met historie krijgt een eigen rij, zwaarste eerst', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    await page.waitForTimeout(400);
+    const vals = await page.locator('#records-section .rec-val').allInnerTexts();
+    expect(vals.length).toBeGreaterThan(1);
+    const nums = vals.map(v => parseFloat(v.replace(/[^\d.]/g, '')));
+    expect(nums).toEqual([...nums].sort((a, b) => b - a));
+  });
+});
+
+test.describe('Calf raises: één doel voor alle standen', () => {
+  test('het doel blijft staan als je van been wisselt', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'thuis');
+    for (let i = 0; i < 12; i++) await page.locator('#calf-goal-inc').click();
+    await expect(page.locator('.calf-goal .cg-val')).toHaveText('12');
+    await page.locator('[data-cm="R"]').click();
+    await page.waitForTimeout(200);
+    await expect(page.locator('.calf-goal .cg-val')).toHaveText('12');
+    await page.locator('[data-cm="2"]').click();
+    await page.waitForTimeout(200);
+    await expect(page.locator('.calf-goal .cg-val')).toHaveText('12');
+    expect(await page.evaluate(() => store.home().calfGoal)).toBe(12);
+  });
+
+  test('het doel krijgt een eigen markering in het rep-raster', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'thuis');
+    for (let i = 0; i < 8; i++) await page.locator('#calf-goal-inc').click();
+    await expect(page.locator('#calf-box .rep-dot.goal-mark')).toHaveCount(1);
+    await expect(page.locator('#calf-box .rep-dot.goal-mark')).toHaveText('8');
+  });
+
+  test('het doel overleeft herladen', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'thuis');
+    for (let i = 0; i < 5; i++) await page.locator('#calf-goal-inc').click();
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    await goto(page, 'thuis');
+    await expect(page.locator('.calf-goal .cg-val')).toHaveText('5');
+  });
+});
+
+test.describe('De coach spreekt "I repeat" Engels uit', () => {
+  test('de herhaling wordt als Engels segment herkend', async ({ page }) => {
+    await openApp(page);
+    const segs = await page.evaluate(() => voiceCoach.segments('I repeat. Shoulder Press. Gewicht 14 kilo.'));
+    expect(segs[0].text.toLowerCase()).toBe('i repeat');
+    expect(segs[0].en).toBe(true);
+  });
+
+  test('speakMachineSettings zet de herhaling vooraan', async ({ page }) => {
+    await openApp(page);
+    const spoken = await page.evaluate(() => {
+      const said = [];
+      const orig = voiceCoach.speak;
+      voiceCoach.speak = (t) => said.push(t);
+      const c = store.coach(); c.speakSettingsTimes = 2; store.setCoach(c);
+      speakMachineSettings(store.machines()[1]);
+      voiceCoach.speak = orig;
+      return said;
+    });
+    expect(spoken.some(t => /^I repeat\./.test(t))).toBe(true);
   });
 });
