@@ -3,7 +3,7 @@ const path = require('path');
 const APP_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
 /** Alle views die de app kent, in de volgorde waarin ze in de DOM staan. */
-const VIEWS = ['home', 'session', 'coach', 'goals', 'thuis', 'homeworkout',
+const VIEWS = ['home', 'session', 'coach', 'goals', 'thuis', 'homeworkout', 'shop',
   'stats', 'tips', 'checklist', 'settings'];
 
 /**
