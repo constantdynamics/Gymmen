@@ -3,7 +3,7 @@ name: Deploy GymWave to GitHub Pages
 on:
   push:
     branches:
-      - claude/gymwave-fitness-tracker-rOZRi
+      - main
   workflow_dispatch:
 
 permissions:
