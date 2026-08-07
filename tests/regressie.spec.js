@@ -72,6 +72,11 @@ test('sets aftikken houdt de voortgang bij', async ({ page }) => {
   await page.click('#enter-gym');
   await page.locator('.mc-header').nth(1).click();
   await page.waitForTimeout(250);
+  // sets & reps staat standaard ingeklapt — eerst openzetten, dan pas aftikken
+  const det = page.locator('.machine-card.open details', { has: page.locator('.set-track') });
+  expect(await det.evaluate(el => el.open)).toBe(false);
+  await det.locator('summary').click();
+  await page.waitForTimeout(200);
   const dots = page.locator('.machine-card.open .set-dot');
   expect(await dots.count()).toBeGreaterThan(0);
   await dots.first().click();

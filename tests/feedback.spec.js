@@ -1134,3 +1134,269 @@ test.describe('De coach spreekt "I repeat" Engels uit', () => {
     expect(spoken.some(t => /^I repeat\./.test(t))).toBe(true);
   });
 });
+
+/* ============================================================
+   Feedbackronde: uitklapper dicht, één gewichtscijfer, ruimte
+   onder het samenvattingsbord en sessies bijwerken
+   ============================================================ */
+
+test.describe('Sets & reps staat standaard ingeklapt', () => {
+  test('de uitklapper is dicht als je een oefening opent', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const det = body.locator('details', { has: page.locator('.set-track') });
+    expect(await det.evaluate(el => el.open)).toBe(false);
+    await expect(det.locator('summary')).toContainText('Sets & reps');
+    await expect(body.locator('.set-dot').first()).toBeHidden();
+  });
+
+  test('hij blijft dicht als je al sets hebt afgetikt', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const det = body.locator('details', { has: page.locator('.set-track') });
+    await det.locator('summary').click();
+    await body.locator('.set-dot').first().click();
+    await page.waitForTimeout(300);
+    // dichtklappen en opnieuw openen: de uitklapper staat weer dicht, maar het
+    // aantal afgetikte sets lees je op de samenvattingsregel af
+    await page.locator('.machine-card.open .mc-header').click();
+    await page.waitForTimeout(250);
+    await page.locator('.mc-header', { hasText: 'Seated Chest Press' }).first().click();
+    await page.waitForTimeout(250);
+    const det2 = page.locator('.machine-card.open details', { has: page.locator('.set-track') });
+    expect(await det2.evaluate(el => el.open)).toBe(false);
+    await expect(det2.locator('summary')).toContainText('1 gedaan');
+  });
+});
+
+test.describe('Het gewicht staat maar één keer als cijfer op de kaart', () => {
+  test('alleen het readout-venster toont het getal', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Leg Press');
+    await expect(body.locator('.wr-num')).toBeVisible();
+    await expect(body.locator('.weight-display')).toHaveCount(1);
+    await expect(body.locator('.weight-display')).toBeHidden();
+    await expect(body.locator('.wcol')).toHaveCount(0);
+  });
+
+  test('min, plus en de slider blijven het gewicht bijstellen', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Seated Leg Press');
+    const before = parseFloat(await body.locator('.wr-num').textContent());
+    await body.locator('[data-act="inc"]').click();
+    await page.waitForTimeout(150);
+    const after = parseFloat(await body.locator('.wr-num').textContent());
+    expect(after).toBeGreaterThan(before);
+    expect(await body.locator('.weight-display').inputValue()).toBe(String(after));
+    await body.locator('[data-act="dec"]').click();
+    await page.waitForTimeout(150);
+    expect(parseFloat(await body.locator('.wr-num').textContent())).toBe(before);
+  });
+});
+
+test.describe('Het samenvattingsbord past binnen het scherm', () => {
+  test('de knop onderin blijft vrij van de schermrand', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await page.evaluate(() => {
+      startNewSession();
+      currentSession.name = 'Een behoorlijk lange sessienaam voor de test';
+      currentSession.entries = store.machines().filter(m => !m.cardio)
+        .map(m => ({ machineId: m.id, weight: 45, sets: 3, reps: 12, setsDone: 3, feeling: 3 }));
+      persistCurrent();
+    });
+    await page.evaluate(() => finishSession());
+    await page.waitForTimeout(1300);
+    await expect(page.locator('#summary-modal.show')).toHaveCount(1);
+    const box = await page.evaluate(() => {
+      const modal = document.querySelector('#summary-modal .modal');
+      const btn = document.getElementById('summary-close');
+      return { vh: innerHeight, top: modal.getBoundingClientRect().top,
+        btnBottom: btn.getBoundingClientRect().bottom };
+    });
+    expect(box.top).toBeGreaterThanOrEqual(0);
+    expect(box.btnBottom).toBeLessThanOrEqual(box.vh - 20);
+    // de inhoud scrollt binnen het venster in plaats van eronder door te lopen
+    expect(await page.locator('#summary-content')
+      .evaluate(el => getComputedStyle(el).overflowY)).toBe('auto');
+  });
+});
+
+test.describe('Lopende sessie weggooien', () => {
+  test('de knop staat in de sessie en vraagt eerst om bevestiging', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    await page.click('#discard-session');
+    await expect(page.locator('#modal.show')).toHaveCount(1);
+    await page.click('#modal-cancel');
+    await page.waitForTimeout(200);
+    expect(await page.evaluate(() => !!currentSession)).toBe(true);
+    await page.click('#discard-session');
+    await page.click('#modal-confirm');
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => currentSession)).toBe(null);
+    expect(await page.evaluate(() => store.currentSession())).toBe(null);
+    await expect(page.locator('.view.active')).toHaveAttribute('id', 'view-home');
+  });
+
+  test('afgeronde sessies blijven staan als je de lopende weggooit', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const before = await page.evaluate(() => store.sessions().length);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(300);
+    await page.click('#discard-session');
+    await page.click('#modal-confirm');
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => store.sessions().length)).toBe(before);
+  });
+
+  test('home biedt hem ook aan zolang er een sessie loopt', async ({ page }) => {
+    await openApp(page);
+    await page.click('#enter-gym');
+    await page.waitForTimeout(200);
+    await goto(page, 'home');
+    const btn = page.locator('#hero-extra button', { hasText: 'Lopende sessie weggooien' });
+    await expect(btn).toHaveCount(1);
+    await btn.click();
+    await page.click('#modal-confirm');
+    await page.waitForTimeout(400);
+    expect(await page.evaluate(() => currentSession)).toBe(null);
+    await expect(page.locator('#hero-extra button')).toHaveCount(0);
+  });
+});
+
+test.describe('Afgeronde sessies bijwerken', () => {
+  /** Zet Statistieken op een bereik waar alle geseede sessies in vallen. */
+  async function openHistory(page) {
+    await goto(page, 'stats');
+    await page.evaluate(() => { statRange = '3month'; renderStats(); });
+    await page.waitForTimeout(250);
+    return page.locator('#history-section .session-row');
+  }
+
+  test('elke afgeronde sessie krijgt een regel met bewerken en wissen', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    expect(await rows.count()).toBe(5);
+    // nieuwste bovenaan
+    await expect(rows.first().locator('.sr-meta')).toContainText('10 oefeningen');
+    await expect(rows.first().locator('.edit-session')).toHaveCount(1);
+    await expect(rows.first().locator('.del-session')).toHaveCount(1);
+  });
+
+  test('gewicht, sets en reps aanpassen landt in de opslag', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    await rows.first().locator('.edit-session').click();
+    await page.waitForTimeout(250);
+    const form = page.locator('.session-edit');
+    await form.locator('.se-name').fill('Bijgewerkte sessie');
+    await form.locator('.se-weight').first().fill('99');
+    await form.locator('.se-sets').first().fill('4');
+    await form.locator('.se-reps').first().fill('8');
+    await form.locator('.se-save').click();
+    await page.waitForTimeout(400);
+    const saved = await page.evaluate(() => {
+      const s = store.sessions().slice().sort((a, b) => b.date.localeCompare(a.date))[0];
+      return { name: s.name, e: s.entries[0] };
+    });
+    expect(saved.name).toBe('Bijgewerkte sessie');
+    expect(saved.e.weight).toBe(99);
+    expect(saved.e.sets).toBe(4);
+    expect(saved.e.reps).toBe(8);
+    // setsDone loopt mee omlaag, nooit meer dan het aantal sets
+    expect(saved.e.setsDone == null || saved.e.setsDone <= 4).toBe(true);
+  });
+
+  test('annuleren laat de sessie ongemoeid', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    const before = await page.evaluate(() =>
+      store.sessions().slice().sort((a, b) => b.date.localeCompare(a.date))[0].entries[0].weight);
+    await rows.first().locator('.edit-session').click();
+    await page.locator('.session-edit .se-weight').first().fill('5');
+    await page.locator('.session-edit .se-cancel').click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.session-edit')).toHaveCount(0);
+    const after = await page.evaluate(() =>
+      store.sessions().slice().sort((a, b) => b.date.localeCompare(a.date))[0].entries[0].weight);
+    expect(after).toBe(before);
+  });
+
+  test('een oefening uit een sessie halen kan', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    await rows.first().locator('.edit-session').click();
+    await page.waitForTimeout(250);
+    const n = await page.locator('.session-edit .se-entry').count();
+    await page.locator('.session-edit .se-del').first().click();
+    await page.waitForTimeout(250);
+    expect(await page.locator('.session-edit .se-entry').count()).toBe(n - 1);
+    await page.locator('.session-edit .se-save').click();
+    await page.waitForTimeout(400);
+    const left = await page.evaluate(() =>
+      store.sessions().slice().sort((a, b) => b.date.localeCompare(a.date))[0].entries.length);
+    expect(left).toBe(n - 1);
+  });
+
+  test('een hele sessie wissen verdwijnt uit de geschiedenis en de grafiek', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    const before = await page.evaluate(() => store.sessions().length);
+    await rows.first().locator('.del-session').click();
+    await expect(page.locator('#modal.show')).toHaveCount(1);
+    await page.click('#modal-confirm');
+    await page.waitForTimeout(500);
+    expect(await page.evaluate(() => store.sessions().length)).toBe(before - 1);
+    expect(await page.locator('#history-section .session-row').count()).toBe(before - 1);
+  });
+
+  test('thuis-workouts zijn op dezelfde manier bij te werken', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    await page.evaluate(() => { statScope = 'thuis'; statRange = '3month'; renderStats(); });
+    await page.waitForTimeout(250);
+    await expect(page.locator('#stat-history-title')).toContainText('thuis-workouts');
+    const rows = page.locator('#history-section .session-row');
+    expect(await rows.count()).toBe(3);
+    await rows.first().locator('.edit-session').click();
+    await page.waitForTimeout(250);
+    await page.locator('.session-edit .se-val').first().fill('42');
+    await page.locator('.session-edit .se-save').click();
+    await page.waitForTimeout(400);
+    const v = await page.evaluate(() =>
+      store.homeSessions().slice().sort((a, b) => b.date.localeCompare(a.date))[0].entries[0].value);
+    expect(v).toBe(42);
+  });
+
+  test('het bewerkscherm past op 360 px en houdt de tap-targets op 44 px', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistory(page);
+    await rows.first().locator('.edit-session').click();
+    await page.waitForTimeout(300);
+    const r = await page.evaluate(() => {
+      const over = [], small = [];
+      document.querySelectorAll('#history-section *').forEach(el => {
+        if (!el.offsetParent) return;
+        const b = el.getBoundingClientRect();
+        if (b.right > 361 || b.left < -1) over.push((el.id || el.className || el.tagName).toString().slice(0, 40));
+        if (el.matches('button') && b.height && b.height < 43.5) {
+          small.push((el.className || el.tagName).toString().slice(0, 40) + ' h=' + b.height.toFixed(1));
+        }
+      });
+      return { w: document.documentElement.scrollWidth, over: [...new Set(over)], small: [...new Set(small)] };
+    });
+    expect(r.w).toBeLessThanOrEqual(360);
+    expect(r.over, 'buiten 360 px: ' + r.over.join(' ; ')).toEqual([]);
+    expect(r.small, 'te kleine knoppen: ' + r.small.join(' ; ')).toEqual([]);
+  });
+});
