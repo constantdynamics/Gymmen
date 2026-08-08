@@ -3,7 +3,12 @@ name: Deploy GymWave to GitHub Pages
 on:
   push:
     branches:
+      # main is waar alles samenkomt. claude/gymwave-fitness-tracker-rOZRi staat
+      # er nog bij zolang die de default branch is: de github-pages-omgeving laat
+      # alleen de default branch deployen, dus een push naar main alléén wordt
+      # geweigerd. Zodra main de default branch is, mag de tweede regel weg.
       - main
+      - claude/gymwave-fitness-tracker-rOZRi
   workflow_dispatch:
 
 permissions:
