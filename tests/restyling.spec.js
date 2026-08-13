@@ -326,8 +326,18 @@ test.describe('§1 randvoorwaarden', () => {
       await goto(page, v);
       const r = await page.evaluate(() => {
         const over = [];
+        // Inhoud van een bewust zijwaarts scrollend blok (de historie-regel) mag wél
+        // breder zijn dan het scherm: die scrollt binnen zijn eigen kader. De pagina
+        // zelf mag dat nooit, en dat blijft de scrollWidth-controle hieronder bewaken.
+        const inScroller = (el) => {
+          for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+            const ox = getComputedStyle(p).overflowX;
+            if ((ox === 'auto' || ox === 'scroll') && p.scrollWidth > p.clientWidth + 1) return true;
+          }
+          return false;
+        };
         document.querySelectorAll('#app *').forEach(el => {
-          if (!el.offsetParent) return;
+          if (!el.offsetParent || inScroller(el)) return;
           const b = el.getBoundingClientRect();
           if (b.right > 361 || b.left < -1) over.push((el.id || el.className || el.tagName).toString().slice(0, 40));
         });

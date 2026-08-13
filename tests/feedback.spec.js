@@ -1400,3 +1400,213 @@ test.describe('Afgeronde sessies bijwerken', () => {
     expect(r.small, 'te kleine knoppen: ' + r.small.join(' ; ')).toEqual([]);
   });
 });
+
+/* ============================================================
+   Feedbackronde: cardio telt niet mee bij het gevoel, geschiedenis
+   als één regel, en de schouders bij de kettlebell deadlift
+   ============================================================ */
+
+/** Vult de geschiedenis van één apparaat met gewichten en gevoelens. */
+async function seedMachine(page, name, weights, feelings) {
+  await page.evaluate(({ name, weights, feelings }) => {
+    const t = store.machines().find(m => m.name === name);
+    store.setSessions(weights.map((kg, i) => {
+      const d = new Date(Date.now() - (weights.length - i) * 3 * 864e5);
+      return {
+        id: 'h' + i, name: 'Full body', date: d.toISOString().slice(0, 10), endedAt: d.toISOString(),
+        entries: [{ machineId: t.id, weight: kg, sets: 3, reps: 20, setsDone: 3, feeling: feelings[i] }],
+      };
+    }));
+  }, { name, weights, feelings });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => typeof window.route === 'function');
+}
+
+test.describe('Warming-up en cooling-down tellen niet als ontbrekend gevoel', () => {
+  /** Vinkt alles af; cardio zonder gevoel, de rest met het meegegeven gevoel. */
+  async function finishAll(page, feelings) {
+    await page.evaluate(f => {
+      startNewSession();
+      let i = 0;
+      currentSession.entries = store.machines().map(m => m.cardio
+        ? { machineId: m.id, weight: 0, settings: [] }
+        : { machineId: m.id, weight: 40, settings: [], sets: 3, reps: 12, setsDone: 3, feeling: f[i++] });
+      persistCurrent();
+      finishSession();
+    }, feelings);
+    await page.waitForTimeout(1300);
+    return page.locator('#summary-content .si-note');
+  }
+
+  test('met overal een gevoel staat er geen ontbrekend-melding', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const nCardio = await page.evaluate(() => store.machines().filter(m => m.cardio).length);
+    expect(nCardio).toBeGreaterThan(0); // anders zegt deze test niets
+    const note = await finishAll(page, Array(20).fill(3));
+    await expect(note).not.toContainText('zonder gevoel');
+    await expect(note).toContainText('gemiddeld over');
+  });
+
+  test('een oefening die je wél had kunnen invullen telt nog steeds mee', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const note = await finishAll(page, [null, ...Array(20).fill(3)]);
+    await expect(note).toContainText('(1 zonder gevoel ingevuld)');
+  });
+
+  test('feelableEntries laat cardio buiten beschouwing', async ({ page }) => {
+    await openApp(page);
+    const n = await page.evaluate(() => {
+      const ms = store.machines();
+      const s = { entries: ms.map(m => ({ machineId: m.id, weight: 10, sets: m.cardio ? undefined : 3 })) };
+      return { alles: ms.length, telt: feelableEntries(s).length, cardio: ms.filter(m => m.cardio).length };
+    });
+    expect(n.telt).toBe(n.alles - n.cardio);
+  });
+});
+
+test.describe('Geschiedenis als één regel bovenaan de oefening', () => {
+  test('staat bovenaan de kaart, zonder datums, nieuwste vooraan', async ({ page }) => {
+    await openApp(page);
+    await seedMachine(page, 'Seated Chest Press', [23, 18, 23, 29], [3, 4, 2, 1]);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const strip = body.locator('.hist-strip');
+    await expect(strip).toHaveCount(1);
+    // eerste element in de kaart
+    expect(await body.evaluate(el => el.firstElementChild.className)).toBe('hist-strip');
+    // nieuwste vooraan: 29 was de laatste keer
+    const cells = await strip.locator('.hs-w').allTextContents();
+    expect(cells.map(t => t.trim())).toEqual(['29', '23', '18', '23']);
+    // label met aantal en PR, geen datum in de regel
+    await expect(strip.locator('.hs-lbl')).toHaveText('Vorige 4× · PR 29 kg');
+    expect(await strip.textContent()).not.toMatch(/jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec/i);
+    // de oude uitklapper met datumregels bestaat niet meer
+    await expect(body.locator('.hist-row')).toHaveCount(0);
+  });
+
+  test('elke keer krijgt zijn gevoelskleur, records een bekertje', async ({ page }) => {
+    await openApp(page);
+    await seedMachine(page, 'Seated Chest Press', [23, 29], [1, 4]);
+    const body = await openExercise(page, 'Seated Chest Press');
+    const cells = body.locator('.hist-strip .hs-cell');
+    await expect(cells).toHaveCount(2);
+    // 29 is het record en staat vooraan
+    await expect(cells.nth(0)).toHaveClass(/pr/);
+    await expect(cells.nth(0).locator('svg use')).toHaveAttribute('href', '#i-trophy');
+    await expect(cells.nth(1)).not.toHaveClass(/pr/);
+    await expect(cells.nth(1).locator('svg')).toHaveCount(0);
+    // kleuren komen uit de vijfpuntsschaal
+    const kleuren = await cells.locator('.hs-dot').evaluateAll(els => els.map(e => e.style.background));
+    expect(kleuren[0]).toBe('rgb(74, 222, 128)');  // gevoel 4
+    expect(kleuren[1]).toBe('rgb(127, 29, 29)');   // gevoel 1
+  });
+
+  test('zonder ingevuld gevoel blijft het balkje neutraal', async ({ page }) => {
+    await openApp(page);
+    await seedMachine(page, 'Seated Chest Press', [23], [null]);
+    const body = await openExercise(page, 'Seated Chest Press');
+    expect(await body.locator('.hist-strip .hs-dot').evaluate(el => el.style.background)).toBe('');
+  });
+
+  test('veel keren blijven één regel en laten de pagina niet zijwaarts schuiven', async ({ page }) => {
+    await openApp(page);
+    await seedMachine(page, 'Seated Chest Press', Array.from({ length: 10 }, (_, i) => 20 + i), Array(10).fill(3));
+    const body = await openExercise(page, 'Seated Chest Press');
+    const r = await body.locator('.hist-strip .hs-row').evaluate(el => ({
+      regels: new Set([...el.children].map(c => Math.round(c.getBoundingClientRect().top))).size,
+      schuift: el.scrollWidth > el.clientWidth,
+      overflowX: getComputedStyle(el).overflowX,
+      pagina: document.documentElement.scrollWidth,
+    }));
+    expect(r.regels).toBe(1);          // echt één regel, geen tweede rij
+    expect(r.schuift).toBe(true);      // en hij scrollt binnen zijn eigen kader
+    expect(r.overflowX).toBe('auto');
+    expect(r.pagina).toBeLessThanOrEqual(360);
+  });
+
+  test('cardio-oefeningen krijgen geen regel', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await page.click('#enter-gym');
+    await page.locator('.mc-header', { hasText: 'Warming-up' }).first().click();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.machine-card.open .hist-strip')).toHaveCount(0);
+  });
+
+  test('de lijstjes van de trackers en de winkel houden hun eigen opmaak', async ({ page }) => {
+    // .hist-row is gedeeld: de oefeningkaart gebruikt hem niet meer, maar de
+    // rep-trackers en de sterrenwinkel wel. Die opmaak mag niet meeverdwijnen.
+    await openApp(page);
+    await page.evaluate(() => {
+      store.setPushups([3, 2, 1].map(d => ({
+        date: new Date(Date.now() - d * 864e5).toISOString().slice(0, 10), reps: 10 + d,
+      })));
+    });
+    await goto(page, 'thuis');
+    await page.evaluate(() => document.querySelectorAll('#pushup-box details').forEach(d => d.open = true));
+    await page.waitForTimeout(250);
+    const row = page.locator('#pushup-box .hist-row').first();
+    await expect(row).toHaveCount(1);
+    const css = await row.evaluate(el => {
+      const cs = getComputedStyle(el);
+      return { display: cs.display, justify: cs.justifyContent, datum: getComputedStyle(el.querySelector('.h-date')).color };
+    });
+    expect(css.display).toBe('flex');
+    expect(css.justify).toBe('space-between');
+    expect(css.datum).not.toBe('rgba(0, 0, 0, 0)');
+  });
+});
+
+test.describe('Kettlebell deadlift: wat je met je schouders doet', () => {
+  /** Do's en don'ts van één kettlebell-oefening uit het uitklapblok. */
+  async function kbLists(page, naam) {
+    await page.click('#enter-gym');
+    await page.locator('.mc-header', { hasText: 'Kettlebell' }).first().click();
+    await page.waitForTimeout(250);
+    return page.evaluate(n => {
+      const sub = [...document.querySelectorAll('.machine-card.open .sub')].find(x => x.textContent.includes(n));
+      const out = { dos: [], donts: [] };
+      let el = sub.nextElementSibling, bucket = null;
+      while (el && !el.classList.contains('sub')) {
+        if (el.classList.contains('dos-list')) bucket = 'dos';
+        else if (el.classList.contains('donts-list')) bucket = 'donts';
+        if (el.tagName === 'UL' && bucket) out[bucket] = [...el.querySelectorAll('li')].map(li => li.textContent);
+        el = el.nextElementSibling;
+      }
+      return out;
+    }, naam);
+  }
+
+  test('de do noemt schouders omlaag, naar achteren en oksels dicht', async ({ page }) => {
+    await openApp(page);
+    const { dos } = await kbLists(page, 'Kettlebell deadlift');
+    const schouder = dos.find(d => /schouders/i.test(d) && /vast/i.test(d));
+    expect(schouder, 'do over de schouders: ' + dos.join(' | ')).toBeTruthy();
+    expect(schouder).toMatch(/omlaag|beneden/i);
+    expect(schouder).toMatch(/naar achteren/i);
+    expect(schouder).toMatch(/oksels/i);
+    expect(schouder).toMatch(/schouderbladen/i);
+  });
+
+  test('de don\'ts waarschuwen voor rollende en opgetrokken schouders', async ({ page }) => {
+    await openApp(page);
+    const { donts } = await kbLists(page, 'Kettlebell deadlift');
+    expect(donts.some(d => /naar voren.*rollen|rollen.*naar voren/i.test(d))).toBe(true);
+    expect(donts.some(d => /optrekken.*oren|oren/i.test(d))).toBe(true);
+  });
+
+  test('het knie-advies blijft een heupscharnier, geen squat', async ({ page }) => {
+    await openApp(page);
+    const { dos, donts } = await kbLists(page, 'Kettlebell deadlift');
+    expect(donts.some(d => /knie/i.test(d) && /squat/i.test(d))).toBe(true);
+    expect(dos.some(d => /diep.*door de knie/i.test(d))).toBe(false);
+  });
+
+  test('de thuis-versie geeft hetzelfde schouderadvies', async ({ page }) => {
+    await openApp(page);
+    const ex = await page.evaluate(() => SNACK_POOL.find(s => s.name === 'Kettlebell deadlift'));
+    expect(ex.tips.some(t => /schouders/i.test(t) && /oksels/i.test(t))).toBe(true);
+    expect(ex.mistakes.some(m => /schouders.*rollen|rollen/i.test(m))).toBe(true);
+  });
+});
