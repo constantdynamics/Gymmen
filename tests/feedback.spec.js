@@ -1610,3 +1610,284 @@ test.describe('Kettlebell deadlift: wat je met je schouders doet', () => {
     expect(ex.mistakes.some(m => /schouders.*rollen|rollen/i.test(m))).toBe(true);
   });
 });
+
+/* ============================================================
+   Feedbackronde: reeks opnieuw tellen na een record, geen
+   tegenstrijdig zwaarder-advies, scrollbare grafiek en het
+   samenvattingsbord terug in Statistieken
+   ============================================================ */
+
+/** Zet één apparaat vol met sessies: gewicht + gevoel per keer, oudste eerst. */
+async function seedExercise(page, naam, gewichten, gevoelens) {
+  await page.evaluate(({ naam, gewichten, gevoelens }) => {
+    const t = store.machines().find(m => m.name === naam);
+    store.setSessions(gewichten.map((kg, i) => {
+      const d = new Date(Date.now() - (gewichten.length - i) * 3 * 864e5);
+      return {
+        id: 'e' + i, name: 'Full body', date: d.toISOString().slice(0, 10), endedAt: d.toISOString(),
+        entries: [{ machineId: t.id, weight: kg, sets: 3, reps: 12, setsDone: 3, feeling: gevoelens[i] }],
+      };
+    }));
+  }, { naam, gewichten, gevoelens });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => typeof window.route === 'function');
+}
+
+test.describe('Na een nieuw record telt de reeks opnieuw', () => {
+  test('feelStreak begint bij het nieuwe gewicht', async ({ page }) => {
+    await openApp(page);
+    await seedExercise(page, 'Seated Leg Extension',
+      [29, 29, 29, 29, 29, 29, 29, 29, 36], Array(9).fill(3));
+    const st = await page.evaluate(() =>
+      feelStreak(store.machines().find(m => m.name === 'Seated Leg Extension').id));
+    expect(st.n).toBe(1);
+    expect(st.weight).toBe(36);
+  });
+
+  test('het zwaarder-voorstel verdwijnt dus na dat record', async ({ page }) => {
+    await openApp(page);
+    await seedExercise(page, 'Seated Leg Extension',
+      [29, 29, 29, 29, 29, 29, 29, 29, 36], Array(9).fill(3));
+    const body = await openExercise(page, 'Seated Leg Extension');
+    await expect(body.locator('.nextup-badge.streak')).toHaveCount(0);
+  });
+
+  test('zonder gewichtswissel telt de reeks gewoon door', async ({ page }) => {
+    await openApp(page);
+    await seedExercise(page, 'Seated Leg Extension', Array(8).fill(29), Array(8).fill(3));
+    const st = await page.evaluate(() =>
+      feelStreak(store.machines().find(m => m.name === 'Seated Leg Extension').id));
+    expect(st.n).toBe(8);
+    const body = await openExercise(page, 'Seated Leg Extension');
+    await expect(body.locator('.nextup-badge.streak')).toHaveCount(1);
+    await expect(body.locator('.nextup-badge.streak')).toContainText('op 29 kg');
+  });
+});
+
+test.describe('Zwaarder-advies spreekt de gevoelskleur nooit tegen', () => {
+  /** Noteert "zwaarder" op een apparaat, met een sessie-id uit het verleden. */
+  async function noteerZwaarder(page, naam, van, naar) {
+    await page.evaluate(({ naam, van, naar }) => {
+      const ms = store.machines();
+      const t = ms.find(m => m.name === naam);
+      t.nextUp = { from: van, suggested: naar, dir: 'up', sid: 'oude-sessie' };
+      store.setMachines(ms);
+    }, { naam, van, naar });
+  }
+
+  test('een te zwaar bevonden poging haalt het advies weg bij het afvinken', async ({ page }) => {
+    await openApp(page);
+    await noteerZwaarder(page, 'Seated Chest Press', 23, 29);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await expect(body.locator('.nextup-badge').first()).toContainText('Vorige keer aangegeven');
+    await body.locator('[data-feel="1"]').click();   // veel te zwaar
+    await page.waitForTimeout(300);
+    await body.locator('.done-btn').click();
+    await page.waitForTimeout(400);
+    const nu = await page.evaluate(() =>
+      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
+    expect(nu).toBeFalsy();
+  });
+
+  test('het advies blijft staan als het juist te licht voelde', async ({ page }) => {
+    await openApp(page);
+    await noteerZwaarder(page, 'Seated Chest Press', 23, 29);
+    const body = await openExercise(page, 'Seated Chest Press');
+    await body.locator('[data-feel="3"]').click();   // precies goed
+    await page.waitForTimeout(300);
+    await body.locator('.done-btn').click();
+    await page.waitForTimeout(400);
+    const nu = await page.evaluate(() =>
+      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
+    expect(nu).toBeTruthy();
+  });
+
+  test('een oud advies naast een rode laatste keer wordt niet getoond', async ({ page }) => {
+    await openApp(page);
+    // laatste keer voelde te zwaar; het advies stamt van dáárvoor
+    await seedExercise(page, 'Seated Chest Press', [23, 23, 23], [3, 3, 2]);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      const t = ms.find(m => m.name === 'Seated Chest Press');
+      t.nextUp = { from: 23, suggested: 29, dir: 'up', sid: 'oude-sessie' };
+      store.setMachines(ms);
+    });
+    const body = await openExercise(page, 'Seated Chest Press');
+    await expect(body.locator('.nextup-badge')).toHaveCount(0);
+    // en ook geen pijltje op de dichtgeklapte kaart
+    await expect(page.locator('.machine-card.open .mc-header .ico[href="#i-arrow"]')).toHaveCount(0);
+  });
+
+  test('migratie ruimt zulke oude vlaggen bij het opstarten op', async ({ page }) => {
+    await openApp(page);
+    await seedExercise(page, 'Seated Chest Press', [23, 23], [3, 1]);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      ms.find(m => m.name === 'Seated Chest Press').nextUp = { from: 23, suggested: 29, dir: 'up', sid: 'oud' };
+      store.setMachines(ms);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const nu = await page.evaluate(() =>
+      store.machines().find(m => m.name === 'Seated Chest Press').nextUp);
+    expect(nu).toBeFalsy();
+  });
+});
+
+test.describe('De voortgangsgrafiek past en schuift', () => {
+  /** Veel sessies, zodat de balken niet meer naast elkaar passen. */
+  async function seedVeel(page, n) {
+    await page.evaluate(count => {
+      const ms = store.machines().filter(m => !m.cardio);
+      store.setSessions(Array.from({ length: count }, (_, i) => {
+        const d = new Date(Date.now() - (count - i) * 5 * 864e5);
+        return { id: 'v' + i, name: 'Full body', date: d.toISOString().slice(0, 10), endedAt: d.toISOString(),
+          entries: ms.map(m => ({ machineId: m.id, weight: 20 + i * 2, sets: 3, reps: 12, setsDone: 3, feeling: 3 })) };
+      }));
+    }, n);
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    await goto(page, 'stats');
+    await page.evaluate(() => { statRange = '3month'; renderStats(); });
+    await page.waitForTimeout(600);
+  }
+
+  test('bij veel sessies schuift de grafiek zijwaarts, niet de pagina', async ({ page }) => {
+    await openApp(page);
+    await seedVeel(page, 14);
+    const r = await page.evaluate(() => {
+      const c = document.querySelector('#total-chart-card .wave-chart');
+      return { schuift: c.scrollWidth > c.clientWidth, overflowX: getComputedStyle(c).overflowX,
+        pagina: document.documentElement.scrollWidth };
+    });
+    expect(r.schuift).toBe(true);
+    expect(r.overflowX).toBe('auto');
+    expect(r.pagina).toBeLessThanOrEqual(360);
+  });
+
+  test('de nieuwste sessie staat meteen in beeld, helemaal rechts', async ({ page }) => {
+    await openApp(page);
+    await seedVeel(page, 14);
+    const r = await page.evaluate(() => {
+      const c = document.querySelector('#total-chart-card .wave-chart');
+      const bars = [...c.querySelectorAll('.wave-bar')];
+      const last = bars[bars.length - 1].getBoundingClientRect(), box = c.getBoundingClientRect();
+      return { helemaalRechts: Math.round(c.scrollLeft) >= Math.round(c.scrollWidth - c.clientWidth) - 1,
+        zichtbaar: last.left >= box.left - 1 && last.right <= box.right + 1,
+        waarde: !!bars[bars.length - 1].querySelector('.bar-val') };
+    });
+    expect(r.helemaalRechts).toBe(true);
+    expect(r.zichtbaar).toBe(true);
+    expect(r.waarde).toBe(true);
+  });
+
+  test('de datums onder de balken blijven leesbaar', async ({ page }) => {
+    await openApp(page);
+    await seedVeel(page, 14);
+    const r = await page.evaluate(() => {
+      const bars = [...document.querySelectorAll('#total-chart-card .wave-bar')];
+      const zichtbaar = bars.map(b => b.querySelector('.bar-date'))
+        .filter(d => d && d.style.display !== 'none')
+        .map(d => d.getBoundingClientRect());
+      let overlap = 0;
+      for (let i = 1; i < zichtbaar.length; i++) if (zichtbaar[i].left < zichtbaar[i - 1].right) overlap++;
+      const laatste = bars[bars.length - 1].querySelector('.bar-date');
+      return { overlap, aantal: zichtbaar.length, laatsteStaatEr: laatste.style.display !== 'none' };
+    });
+    expect(r.overlap).toBe(0);
+    expect(r.aantal).toBeGreaterThan(1);
+    expect(r.laatsteStaatEr).toBe(true);   // de nieuwste datum staat er altijd
+  });
+
+  test('met weinig sessies vullen de balken de breedte gewoon', async ({ page }) => {
+    await openApp(page);
+    await seedVeel(page, 4);
+    const r = await page.evaluate(() => {
+      const c = document.querySelector('#total-chart-card .wave-chart');
+      return { schuift: c.scrollWidth > c.clientWidth + 1,
+        alleDatums: [...c.querySelectorAll('.bar-date')].every(d => d.style.display !== 'none') };
+    });
+    expect(r.schuift).toBe(false);
+    expect(r.alleDatums).toBe(true);
+  });
+});
+
+test.describe('Het samenvattingsbord is terug te zien in Statistieken', () => {
+  async function openHistorie(page) {
+    await goto(page, 'stats');
+    await page.evaluate(() => { statRange = '3month'; renderStats(); });
+    await page.waitForTimeout(250);
+    return page.locator('#history-section .session-row');
+  }
+
+  test('elke sessie heeft een knop die het bord opent', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistorie(page);
+    await expect(rows.first().locator('.board-session')).toHaveCount(1);
+    await rows.first().locator('.board-session').click();
+    await page.waitForTimeout(400);
+    await expect(page.locator('#summary-modal.show')).toHaveCount(1);
+    // hetzelfde bord: groot totaal, intensiteit en de stippellijnen met gemiddelden
+    await expect(page.locator('#summary-content .ss-kg')).toHaveCount(1);
+    await expect(page.locator('#summary-content .ss-line')).not.toHaveCount(0);
+    await expect(page.locator('#summary-content .ss-legend')).toHaveCount(1);
+  });
+
+  test('terugkijken toont de sessienaam en een sluitknop, geen sterrenmelding', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistorie(page);
+    await rows.first().locator('.board-session').click();
+    await page.waitForTimeout(400);
+    await expect(page.locator('#summary-modal h3')).toHaveText('Full body');
+    await expect(page.locator('#summary-close')).toContainText('Sluiten');
+    await expect(page.locator('#summary-content .inc-summary')).toHaveCount(0);
+  });
+
+  test('sluiten brengt je terug naar Statistieken, niet naar Home', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistorie(page);
+    await rows.first().locator('.board-session').click();
+    await page.waitForTimeout(400);
+    await page.click('#summary-close');
+    await page.waitForTimeout(300);
+    await expect(page.locator('#summary-modal.show')).toHaveCount(0);
+    await expect(page.locator('.view.active')).toHaveAttribute('id', 'view-stats');
+  });
+
+  test('"vorige sessie" is de sessie ervóór, ook bij een oudere sessie', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    const rows = await openHistorie(page);
+    // rijen staan nieuwste eerst; pak de op één na oudste
+    const n = await rows.count();
+    await rows.nth(n - 2).locator('.board-session').click();
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const totals = store.sessions().slice()
+        .sort((a, b) => (a.date + (a.endedAt || '')).localeCompare(b.date + (b.endedAt || '')))
+        .map(s => Math.round((s.entries || []).reduce((x, e) => x + (parseFloat(e.weight) || 0), 0)));
+      const rij = [...document.querySelectorAll('#summary-content .ss-legend .row')]
+        .find(el => /Vorige sessie/.test(el.textContent));
+      return { getoond: rij ? rij.textContent.match(/(\d+) kg/)[1] : null, verwacht: String(totals[0]) };
+    });
+    expect(r.getoond).toBe(r.verwacht);  // de oudste sessie is de voorganger van de op één na oudste
+  });
+
+  test('na het afronden heet de knop nog gewoon Naar Home', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await page.evaluate(() => {
+      startNewSession();
+      currentSession.entries = store.machines().filter(m => !m.cardio)
+        .map(m => ({ machineId: m.id, weight: 40, settings: [], sets: 3, reps: 12, setsDone: 3, feeling: 3 }));
+      persistCurrent();
+      finishSession();
+    });
+    await page.waitForTimeout(1300);
+    await expect(page.locator('#summary-modal h3')).toHaveText('Sessie afgerond!');
+    await expect(page.locator('#summary-close')).toContainText('Naar Home');
+  });
+});
