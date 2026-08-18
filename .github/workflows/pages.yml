@@ -30,6 +30,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # De versieregel in de app moet de commit tonen die er echt op staat. Handmatig
+      # bijhouden gaat een keer mis, dus stempelen we hem hier. De controle erna laat de
+      # deploy falen als de vervanging niet lukte: een versieregel die iets anders beweert
+      # dan er staat is erger dan geen versieregel.
+      - name: Versie stempelen
+        run: |
+          set -euo pipefail
+          VERSIE="${GITHUB_SHA:0:7} · $(date -u '+%d-%m-%Y')"
+          sed -i "s|^const APP_VERSION = \"dev\";$|const APP_VERSION = \"$VERSIE\";|" index.html
+          grep -qxF "const APP_VERSION = \"$VERSIE\";" index.html \
+            || { echo "::error::Versieregel niet gevonden of niet vervangen in index.html"; exit 1; }
+          echo "Gestempeld: $VERSIE"
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
