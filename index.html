@@ -353,7 +353,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .waffle-cell .star { color: #fff; text-shadow: 0 0 6px #000; font-size: 0.85rem; }
 .legend { font-size: 0.95rem; opacity: 0.8; margin-top: 10px; font-weight: 600; }
 .wave-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 14px 6px 24px; overflow-x: auto; }
-.wave-bar { flex: 1; min-width: 22px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--primary), var(--accent)); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); position: relative; transition: height 0.8s cubic-bezier(.2,.9,.3,1.2); display: flex; align-items: flex-start; justify-content: center; }
+.wave-bar { flex: 1; min-width: 15px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--primary), var(--accent)); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); position: relative; transition: height 0.8s cubic-bezier(.2,.9,.3,1.2); display: flex; align-items: flex-start; justify-content: center; }
 .wave-bar .bar-val { font-size: 0.7rem; font-weight: 700; margin-top: -18px; white-space: nowrap; opacity: 0.85; }
 .wave-bar .bar-date { position: absolute; bottom: -22px; font-size: 0.6rem; opacity: 0.6; white-space: nowrap; }
 .empty-state { text-align: center; opacity: 0.6; padding: 36px 20px; font-size: 1.1rem; font-weight: 600; }
@@ -857,7 +857,13 @@ label { color: var(--text-body); opacity: 1; }
 .filter-pills button { min-height: 44px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.03); color: rgba(244,238,251,0.8); border-radius: 22px; }
 .filter-pills button.active { background: linear-gradient(135deg, var(--home-a), var(--home-b)); border-color: transparent; color: #fff; box-shadow: 0 6px 20px rgba(123,47,255,0.35); }
 .chart-wrap { position: relative; height: 210px; background: rgba(255,255,255,0.045); border: 1px solid var(--line); border-radius: 16px; }
-.wave-chart { height: 100%; padding: 20px 74px 30px 12px; gap: 8px; overflow: visible; }
+/* Zijwaarts scrollen in plaats van uitpuilen: veel sessies passen niet naast elkaar op
+   een telefoon. De grafiek staat standaard helemaal rechts, zodat je de nieuwste sessie
+   ziet en naar links veegt voor het verleden. Boven- en ondermarge zijn ruim genoeg voor
+   het cijfer boven de balk en de datum eronder — die vallen binnen het scrollvlak, want
+   overflow-x dwingt de verticale kant mee te klippen. */
+.wave-chart { height: 100%; padding: 26px 74px 30px 12px; gap: 6px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none; }
+.wave-chart::-webkit-scrollbar { display: none; }
 .wave-bar { border-radius: 5px 5px 2px 2px; background: linear-gradient(180deg, rgba(178,120,255,0.85), rgba(123,47,255,0.35)); box-shadow: none; }
 .wave-bar.newest { background: linear-gradient(180deg, var(--primary), #ff69a8); box-shadow: 0 0 24px rgba(255,45,120,0.55); }
 .wave-bar .bar-val { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 11px; margin-top: -21px; color: #fff; opacity: 1; display: flex; align-items: center; gap: 4px; }
@@ -894,7 +900,9 @@ label { color: var(--text-body); opacity: 1; }
 .rec-date { grid-column: 1 / -1; font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 0.8rem; color: var(--text-label); }
 
 /* Afgeronde sessies: datum groot, naam en totalen eronder, knoppen rechts */
+.session-row { flex-direction: column; align-items: stretch; gap: 10px; }
 .session-row .mr-name { display: flex; flex-direction: column; gap: 3px; min-width: 0; font-size: 1rem; }
+.session-row .row-actions { justify-content: flex-end; }
 .session-row .sr-meta { font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 0.82rem; color: var(--text-label); text-transform: none; letter-spacing: 0; }
 .session-row .row-actions .btn { padding: 10px 13px; font-size: 0.78rem; }
 .session-edit { margin: -4px 0 12px; }
@@ -2406,6 +2414,14 @@ function migrateMachines() {
   // Adviezen die het gewicht omláág stelden maken we niet meer aan; oude exemplaren
   // opruimen, anders blijft de app een verlaging voorstellen die je niet vroeg.
   machines.forEach(m => { if (m.nextUp && m.nextUp.dir === "down") { delete m.nextUp; changed = true; } });
+  // Zwaarder-vlaggen die je inmiddels hebt weersproken: je draaide het daarna nog een keer
+  // en gaf aan dat het te zwaar was. Zulke oude vlaggen laten de kaart zichzelf tegenspreken
+  // ("probeer 36 kg" naast een rood vierkantje), dus die ruimen we eenmalig op.
+  machines.forEach(m => {
+    if (!m.nextUp || m.nextUp.dir === "down") return;
+    const last = lastFeelFor(m.id);
+    if (last && last.feeling <= 2) { delete m.nextUp; changed = true; }
+  });
   // Single seated leg press erbij, direct na de gewone leg press. Op verzoek op 41 kg,
   // met één afgeronde keer in je laatste sessie die "precies goed" (geel) voelde.
   if (machines.length && !prof.singleLegPress) {
@@ -3846,19 +3862,37 @@ function lastFeelFor(machineId) {
   return null;
 }
 /* Hoe vaak op rij voelde deze oefening minstens "precies goed" (geel of lichter)?
-   Zeven keer achter elkaar is voor de app aanleiding om een plaatje zwaarder voor te stellen. */
+   Zeven keer achter elkaar is voor de app aanleiding om een plaatje zwaarder voor te stellen.
+   De reeks telt alleen keren op hetzelfde gewicht als de laatste keer: ging je een plaatje
+   omhoog of omlaag, dan begint het tellen bij dat nieuwe gewicht opnieuw. Anders zou de app
+   je vlak na een net gehaald record meteen alweer zwaarder voorstellen. */
 const FEEL_STREAK_N = 7;
 function feelStreak(machineId) {
   const sessions = store.sessions();
-  let n = 0;
+  let n = 0, kg = null;
   for (let i = sessions.length - 1; i >= 0; i--) {
     const e = (sessions[i].entries || []).find(en => en.machineId === machineId);
     if (!e) continue;                 // niet gedaan die sessie: telt niet mee en breekt de reeks niet
     if (!(e.feeling > 0)) break;      // wel gedaan maar geen gevoel ingevuld: reeks stopt hier
     if (e.feeling < 3) break;         // zwaarder dan "precies goed": reeks stopt
+    const w = parseFloat(e.weight) || 0;
+    if (kg == null) kg = w;
+    else if (w !== kg) break;         // ander gewicht: de reeks op dít gewicht houdt hier op
     n++;
   }
-  return { n };
+  return { n, weight: kg };
+}
+/* Het zwaarder-advies en de gevoelskleur mogen elkaar nooit tegenspreken. Heb je sinds het
+   noteren gedraaid en voelde dat te zwaar, dan telt wat je voelde — niet wat je eerder van
+   plan was. Zonder deze controle blijft de app "probeer 36 kg" roepen terwijl het
+   gewichtsvierkantje rood kleurt van "te zwaar". */
+function nextUpAdviceFor(m) {
+  const nu = m.nextUp;
+  if (!nu || nu.dir === "down") return null;
+  if (currentSession && nu.sid === currentSession.id) return null; // net in deze sessie genoteerd
+  const last = lastFeelFor(m.id);
+  if (last && last.feeling <= 2) return null;                      // laatste keer te zwaar
+  return nu;
 }
 /* Het vierkantje naast de oefeningnaam: het gewicht in cijfers, zonder eenheid, met een
    dikke rand in de kleur van hoe zwaar het vorige keer voelde. */
@@ -3945,7 +3979,7 @@ function renderSession() {
     card.dataset.id = m.id;
 
     // zwaarder/lichter-advies geldt pas in een volgende sessie (niet in de sessie waarin je 'm aanzette)
-    const nextUpAdvies = m.nextUp && (!currentSession || m.nextUp.sid !== currentSession.id) ? m.nextUp : null;
+    const nextUpAdvies = nextUpAdviceFor(m);
     // Het gewichtsvierkantje staat in elke stand naast de naam: het cijfer zonder eenheid,
     // met een dikke rand in de kleur van hoe zwaar het de vorige keer voelde.
     const badge = weightBadgeHtml(m, entry);
@@ -4093,7 +4127,7 @@ function renderSession() {
       const streakBadge = (!done && !m.cardio && streak.n >= FEEL_STREAK_N && !nextUpAdvies) ? (() => {
         const sug = suggestNextFor(m, Math.round(m.lastWeight));
         return sug > Math.round(m.lastWeight)
-          ? `<div class="nextup-badge streak">${icon("trophy",15)} <b>${streak.n}× op rij</b> minstens "precies goed" — tijd voor een plaatje zwaarder?
+          ? `<div class="nextup-badge streak">${icon("trophy",15)} <b>${streak.n}× op rij</b> op ${streak.weight} ${m.unit || "kg"} minstens "precies goed" — tijd voor een plaatje zwaarder?
                <button class="btn small ghost apply-suggest" data-w="${sug}">${icon("check",15)}Zet op ${sug} ${m.unit || "kg"}</button></div>`
           : "";
       })() : "";
@@ -4218,6 +4252,20 @@ function renderSession() {
           const p = currentSession.partial[m.id] = currentSession.partial[m.id] || {};
           p.feeling = p.feeling === val ? null : val;
           if (done) { const e = currentSession.entries.find(x => x.machineId === m.id); if (e) e.feeling = p.feeling; }
+          // Rood of oranje na het afvinken: het zwaarder-advies vervalt meteen, zodat de
+          // kaart niet tegelijk "probeer zwaarder" en "was te zwaar" laat zien.
+          if (p.feeling >= 1 && p.feeling <= 2 && !m.cardio) {
+            const machines3 = store.machines();
+            const t3 = machines3.find(x => x.id === m.id);
+            if (t3 && t3.nextUp && t3.nextUp.dir !== "down") {
+              delete t3.nextUp;
+              store.setMachines(machines3);
+              m.nextUp = undefined;
+              const nuBtn3 = body.querySelector(".nextup-btn");
+              if (nuBtn3) { nuBtn3.classList.remove("active"); nuBtn3.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Zwaarder</span>`; }
+              toast("Dit voelde te zwaar — het zwaarder-advies is eraf gehaald");
+            }
+          }
           persistCurrent();
           body.querySelectorAll("[data-feel]").forEach(b2 => { b2.classList.toggle("sel", parseInt(b2.dataset.feel) === p.feeling); b2.innerHTML = parseInt(b2.dataset.feel) === p.feeling ? icon("check",17) : ""; });
           body.querySelector(".feel-caption").textContent = p.feeling ? FEEL_LABELS[p.feeling] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)";
@@ -4347,8 +4395,13 @@ function completeMachine(m, body) {
       if (reps) target.reps = reps;
       // Het gewicht gaat nooit meer vanzelf omlaag als iets zwaar voelde. Hoe zwaar het
       // vorige keer was zie je aan de rand van het gewichtsvierkantje op de kaart; wat je
-      // daarmee doet bepaal je zelf. Alleen de zwaarder-vlag ruimen we op als je hem haalt.
-      if (target.nextUp && target.nextUp.dir !== "down" && weight >= target.nextUp.suggested) delete target.nextUp;
+      // daarmee doet bepaal je zelf. De zwaarder-vlag ruimen we in twee gevallen op: je
+      // hebt hem gehaald, óf je vulde in dat het te zwaar voelde. Dat laatste voorkomt dat
+      // de app zwaarder blijft voorstellen terwijl het vierkantje rood kleurt.
+      if (target.nextUp && target.nextUp.dir !== "down"
+          && (weight >= target.nextUp.suggested || entry.feeling >= 1 && entry.feeling <= 2)) {
+        delete target.nextUp;
+      }
     }
     settings.forEach((s, i) => { if (target.settings[i]) target.settings[i].lastValue = s.value; });
     store.setMachines(machines);
@@ -4504,20 +4557,33 @@ document.getElementById("discard-session").addEventListener("click", askDiscardC
 let summaryToast = "Sessie opgeslagen";
 function sessionTotalKg(s) { return (s.entries || []).reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0); }
 function fmtDur(a, b) { if (!a || !b) return null; const min = Math.round((new Date(b) - new Date(a)) / 60000); return min > 0 ? `${min} min` : null; }
-function showSessionSummary(fin) {
+/* Het samenvattingsbord. Verschijnt na het afronden van een sessie, en is via de
+   sessiegeschiedenis in Statistieken later opnieuw op te vragen. In dat tweede geval
+   staat er geen sterrenmelding bij (die hoort bij het moment van verdienen) en heet de
+   knop "Sluiten", want je gaat terug naar waar je vandaan kwam. */
+function showSessionSummary(fin, opts) {
+  const terug = !!(opts && opts.fromHistory);
   const box = document.getElementById("summary-content");
   const modal = document.getElementById("summary-modal");
   if (!box || !modal) return;
-  summaryToast = "Sessie opgeslagen — je hersteltijdlijn staat op Home";
+  const closeBtn = document.getElementById("summary-close");
+  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
+  const titel = modal.querySelector("h3");
+  if (titel) titel.textContent = terug ? (fin.name || "Sessie") : "Sessie afgerond!";
+  summaryToast = terug ? "" : "Sessie opgeslagen — je hersteltijdlijn staat op Home";
   const sessions = store.sessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
   const totals = sessions.map(s => ({ id: s.id, kg: Math.round(sessionTotalKg(s)), date: s.date }));
   const curKg = Math.round(sessionTotalKg(fin));
-  const others = totals.filter(t => t.id !== fin.id);
+  // De sessie die chronologisch vóór deze kwam. Bij een net afgeronde sessie is dat de
+  // vorige; open je een oudere sessie uit de geschiedenis, dan is het de sessie ervóór —
+  // niet zomaar de nieuwste, want dan zou "vorige sessie" een latere sessie aanwijzen.
+  const curIdx = totals.findIndex(t => t.id === fin.id);
+  const prev = curIdx > 0 ? totals[curIdx - 1] : null;
   const avgAll = Math.round(totals.reduce((a, t) => a + t.kg, 0) / Math.max(1, totals.length));
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
   const last30 = totals.filter(t => t.date >= cutoff);
   const avg30 = last30.length ? Math.round(last30.reduce((a, t) => a + t.kg, 0) / last30.length) : avgAll;
-  const prevKg = others.length ? others[others.length - 1].kg : null;
+  const prevKg = prev ? prev.kg : null;
   const H = 200;
   const maxVal = Math.max(1, ...totals.map(t => t.kg), avgAll, avg30, prevKg || 0) * 1.12; // koppie ruimte boven de hoogste
   const y = v => Math.round(v / maxVal * H);
@@ -4528,9 +4594,9 @@ function showSessionSummary(fin) {
   };
   box.innerHTML = `
     <div class="ss-kg">${curKg} kg</div>
-    <div class="ss-sub">${esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    <div class="ss-sub">${terug ? esc(fmtNice(fin.date)) : esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     ${intensityBlockHtml(fin)}
-    ${incentiveSummaryHtml()}
+    ${terug ? "" : incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -4544,12 +4610,20 @@ function showSessionSummary(fin) {
       ${prevKg != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige sessie: <b>${prevKg} kg</b> ${deltaTag(prevKg)}</div>` : ""}
     </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste sessie staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt!</div>`}`;
   modal.classList.add("show");
+  scrollSummaryBars(box);
+}
+/* De sessie waar het bord over gaat in beeld brengen: bij het afronden is dat de
+   nieuwste (helemaal rechts), bij een oudere sessie uit de geschiedenis die balk zelf. */
+function scrollSummaryBars(box) {
   const bars = box.querySelector(".ss-bars");
-  bars.scrollLeft = bars.scrollWidth; // nieuwste sessie in beeld
+  if (!bars) return;
+  const cur = bars.querySelector(".ss-bar.cur");
+  if (cur) bars.scrollLeft = Math.max(0, cur.offsetLeft - bars.clientWidth / 2 + cur.offsetWidth / 2);
+  else bars.scrollLeft = bars.scrollWidth;
 }
 document.getElementById("summary-close").addEventListener("click", () => {
   document.getElementById("summary-modal").classList.remove("show");
-  toast(summaryToast);
+  if (summaryToast) toast(summaryToast);
 });
 
 /* ============================================================
@@ -5931,21 +6005,27 @@ function finishHomeWorkout() {
   setTimeout(() => { route("thuis"); showHomeSummary(session); }, 700);
 }
 /* Samenvatting na een thuis-workout — zelfde bord als de gym, maar dan in oefeningen (+ kg als je met gewicht werkte) */
-function showHomeSummary(fin) {
+function showHomeSummary(fin, opts) {
+  const terug = !!(opts && opts.fromHistory);
   const box = document.getElementById("summary-content");
   const modal = document.getElementById("summary-modal");
   if (!box || !modal) return;
-  summaryToast = "Thuis-workout opgeslagen — voortgang staat bij Thuis en in Statistieken";
+  const closeBtn = document.getElementById("summary-close");
+  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
+  const titel = modal.querySelector("h3");
+  if (titel) titel.textContent = terug ? (fin.name || "Thuis-workout") : "Sessie afgerond!";
+  summaryToast = terug ? "" : "Thuis-workout opgeslagen — voortgang staat bij Thuis en in Statistieken";
   const all = store.homeSessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
   const totals = all.map(s => ({ id: s.id, n: (s.entries || []).length, date: s.date }));
   const curN = (fin.entries || []).length;
   const curKg = Math.round((fin.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0));
-  const others = totals.filter(t => t.id !== fin.id);
+  const curIdx = totals.findIndex(t => t.id === fin.id);
+  const prev = curIdx > 0 ? totals[curIdx - 1] : null;
   const avgAll = Math.round(totals.reduce((a, t) => a + t.n, 0) / Math.max(1, totals.length));
   const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
   const last30 = totals.filter(t => t.date >= cutoff);
   const avg30 = last30.length ? Math.round(last30.reduce((a, t) => a + t.n, 0) / last30.length) : avgAll;
-  const prevN = others.length ? others[others.length - 1].n : null;
+  const prevN = prev ? prev.n : null;
   const H = 200;
   const maxVal = Math.max(1, ...totals.map(t => t.n), avgAll, avg30, prevN || 0) * 1.12;
   const y = v => Math.round(v / maxVal * H);
@@ -5956,9 +6036,9 @@ function showHomeSummary(fin) {
   };
   box.innerHTML = `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
-    <div class="ss-sub">Thuis-workout${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    <div class="ss-sub">${terug ? esc(fmtNice(fin.date)) : "Thuis-workout"}${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     ${intensityBlockHtml(fin)}
-    ${incentiveSummaryHtml()}
+    ${terug ? "" : incentiveSummaryHtml()}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -5972,8 +6052,7 @@ function showHomeSummary(fin) {
       ${prevN != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige workout: <b>${prevN} oef.</b> ${deltaTag(prevN)}</div>` : ""}
     </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste thuis-workout staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt!</div>`}`;
   modal.classList.add("show");
-  const bars = box.querySelector(".ss-bars");
-  bars.scrollLeft = bars.scrollWidth;
+  scrollSummaryBars(box);
 }
 
 /* ============================================================
@@ -6098,6 +6177,9 @@ function renderSessionHistory() {
       <span class="sr-meta">${esc(s.name || sc.noun)} · ${n} oefening${n === 1 ? "" : "en"}${kg ? ` · ${kg} kg` : ""}</span></span>`;
     const actions = document.createElement("div");
     actions.className = "row-actions";
+    const board = mkBtn("Bord", "btn small ghost board-session");
+    board.title = "Het samenvattingsbord van deze sessie terugzien";
+    board.onclick = () => (sc.thuis ? showHomeSummary(s, { fromHistory: true }) : showSessionSummary(s, { fromHistory: true }));
     const edit = mkBtn(open ? "Sluiten" : "Bewerk", "btn small ghost edit-session");
     edit.onclick = () => {
       if (open) closeSessionEditor();
@@ -6109,7 +6191,7 @@ function renderSessionHistory() {
     };
     const del = mkBtn("Wis", "btn small warn del-session");
     del.onclick = () => askDeleteSession(sc, s);
-    actions.append(edit, del);
+    actions.append(board, edit, del);
     row.appendChild(actions);
     wrap.appendChild(row);
     if (open) wrap.appendChild(buildSessionEditForm(sc));
@@ -6247,7 +6329,11 @@ function renderHomeTotalChart(list) {
   }).join("");
   card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.n), max, "")}<div class="wave-chart">${bars}</div></div><div class="legend" style="margin-top:8px;">Aantal afgeronde oefeningen per thuis-workout</div>`
     + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die workout") : "");
-  requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
+  requestAnimationFrame(() => {
+    scrollChartToNewest(card);
+    thinBarDates(card);
+    card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60));
+  });
 }
 function renderHomeWaffles(list) {
   const wrap = document.getElementById("waffle-section");
@@ -6308,7 +6394,30 @@ function renderTotalChart(sessions) {
   }).join("");
   card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.total), max, "kg")}<div class="wave-chart">${bars}</div></div>`
     + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die sessie") : "");
-  requestAnimationFrame(() => card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60)));
+  requestAnimationFrame(() => {
+    scrollChartToNewest(card);
+    thinBarDates(card);
+    card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 60));
+  });
+}
+/* De nieuwste sessie is waar je naar kijkt, dus de grafiek begint helemaal rechts. */
+function scrollChartToNewest(card) {
+  const chart = card.querySelector(".wave-chart");
+  if (chart) chart.scrollLeft = chart.scrollWidth;
+}
+/* Smalle balken betekenen weinig ruimte voor de datums eronder: bij veel sessies zouden
+   ze tegen elkaar aan plakken. We meten hoe breed een balk werkelijk staat en laten er
+   dan net zoveel weg dat ze leesbaar blijven — terugtellend vanaf de nieuwste, zodat de
+   laatste datum er altijd staat. De volledige datum blijft in de tooltip staan. */
+function thinBarDates(card) {
+  const bars = [...card.querySelectorAll(".wave-bar")];
+  if (bars.length < 2) return;
+  const pitch = bars[1].offsetLeft - bars[0].offsetLeft;
+  const step = Math.max(1, Math.ceil(30 / Math.max(1, pitch))); // "08/13" is zo'n 30 px breed
+  bars.forEach((b, i) => {
+    const d = b.querySelector(".bar-date");
+    if (d) d.style.display = (bars.length - 1 - i) % step === 0 ? "" : "none";
+  });
 }
 /* Referentielijnen: 2 px, volle kleur met eigen gloed, en elk met een
    label-chip mét achtergrond zodat de waarde altijd leesbaar blijft (§3.4). */
@@ -6321,8 +6430,8 @@ function refLinesHtml(values, max, unit) {
   // 30-daagse lijn alleen tonen als hij merkbaar van het gemiddelde afwijkt,
   // anders vallen lijn en chip precies over elkaar heen
   if (Math.abs(avg30 - avg) / (max || 1) > 0.04) rows.push({ cls: "ref-30d", label: "30D", val: avg30 });
-  // grafiekvlak loopt van 20 px onder de top tot 30 px boven de bodem (zie .wave-chart)
-  const H = 210, TOP = 20, BOT = 30;
+  // grafiekvlak loopt van 26 px onder de top tot 30 px boven de bodem (zie .wave-chart)
+  const H = 210, TOP = 26, BOT = 30;
   return rows.map(r => {
     const y = TOP + (1 - Math.min(1, r.val / max)) * (H - TOP - BOT);
     return `<span class="ref-line ${r.cls}" style="top:${y.toFixed(1)}px"></span>
