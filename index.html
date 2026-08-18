@@ -353,7 +353,7 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; justif
 .waffle-cell .star { color: #fff; text-shadow: 0 0 6px #000; font-size: 0.85rem; }
 .legend { font-size: 0.95rem; opacity: 0.8; margin-top: 10px; font-weight: 600; }
 .wave-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding: 14px 6px 24px; overflow-x: auto; }
-.wave-bar { flex: 1; min-width: 15px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--primary), var(--accent)); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); position: relative; transition: height 0.8s cubic-bezier(.2,.9,.3,1.2); display: flex; align-items: flex-start; justify-content: center; }
+.wave-bar { flex: 1; min-width: 24px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--primary), var(--accent)); box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 55%, transparent); position: relative; transition: height 0.8s cubic-bezier(.2,.9,.3,1.2); display: flex; align-items: flex-start; justify-content: center; }
 .wave-bar .bar-val { font-size: 0.7rem; font-weight: 700; margin-top: -18px; white-space: nowrap; opacity: 0.85; }
 .wave-bar .bar-date { position: absolute; bottom: -22px; font-size: 0.6rem; opacity: 0.6; white-space: nowrap; }
 .empty-state { text-align: center; opacity: 0.6; padding: 36px 20px; font-size: 1.1rem; font-weight: 600; }
@@ -868,6 +868,9 @@ label { color: var(--text-body); opacity: 1; }
 .wave-bar.newest { background: linear-gradient(180deg, var(--primary), #ff69a8); box-shadow: 0 0 24px rgba(255,45,120,0.55); }
 .wave-bar .bar-val { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 11px; margin-top: -21px; color: #fff; opacity: 1; display: flex; align-items: center; gap: 4px; }
 .wave-bar .bar-date { bottom: -24px; font-size: 9px; color: var(--text-label); opacity: 1; }
+/* Intensiteitscijfer onderin de balk. De balken zijn daarvoor net breed genoeg gemaakt;
+   dat het er meer worden dan er passen geeft niet, want de grafiek schuift zijwaarts. */
+.wave-bar .bar-int { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-family: "Rajdhani", sans-serif; font-weight: 800; font-size: 10px; line-height: 1; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.9); pointer-events: none; }
 /* Referentielijnen: 2 px, volle kleur, eigen gloed, en een label-chip mét
    achtergrond zodat de waarde altijd leesbaar blijft. */
 .ref-line { position: absolute; left: 12px; right: 74px; height: 0; border-top: 2px dashed; pointer-events: none; }
@@ -898,6 +901,13 @@ label { color: var(--text-body); opacity: 1; }
 .rec-name { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 1rem; color: #fff; }
 .rec-val { display: flex; align-items: center; gap: 6px; font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 0.95rem; color: var(--primary); white-space: nowrap; }
 .rec-date { grid-column: 1 / -1; font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 0.8rem; color: var(--text-label); }
+
+/* Versieregel onderaan Instellingen: rustig, maar wel leesbaar genoeg om voor te lezen. */
+.app-version { margin-top: 18px; text-align: center; font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px; color: var(--text-label); }
+
+/* Het bord van de laatste sessie als vast blok bovenaan Statistieken. Zelfde inhoud als
+   in het venster, alleen met een kopregel met de sessienaam erboven. */
+.latest-board .lb-head { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1.05rem; color: #fff; text-align: center; margin-bottom: 12px; overflow-wrap: anywhere; }
 
 /* Afgeronde sessies: datum groot, naam en totalen eronder, knoppen rechts */
 .session-row { flex-direction: column; align-items: stretch; gap: 10px; }
@@ -1386,6 +1396,8 @@ body::after { content: none; }
       <label>Tot</label><input type="date" id="range-to" />
       <button class="btn small full" id="apply-range" style="margin-top:12px;">Toepassen</button>
     </div>
+    <div class="section-title" id="stat-board-title">Laatste sessie</div>
+    <div id="board-section"></div>
     <div class="section-title" id="stat-total-title">Totale voortgang</div>
     <div class="card" id="total-chart-card"></div>
     <div class="section-title" id="stat-per-title">Voortgang per apparaat</div>
@@ -1444,6 +1456,7 @@ body::after { content: none; }
     <div id="cloud-box"></div>
     <div class="section-title" style="color:#ff4d6a;">Gevarenzone</div>
     <button class="btn warn full" id="reset-data">Alle data wissen</button>
+    <div class="app-version" id="app-version"></div>
   </section>
 </div>
 
@@ -3465,6 +3478,16 @@ function feelBarStyle(avg, glow) {
 function feelBarTip(avg) {
   return avg ? ` · gevoel ${avg.toFixed(1)}/5 (${FEEL_LABELS[Math.round(avg)]})` : "";
 }
+/* Het intensiteitscijfer onderin de balk: hetzelfde getal als op het samenvattingsbord,
+   zodat je per sessie niet alleen aan de kleur maar ook aan een cijfer ziet hoe zwaar hij
+   was. Zonder ingevuld gevoel valt het cijfer weg — dan is er niets te melden. */
+function intBarHtml(it) {
+  if (!it) return "";
+  return `<span class="bar-int">${it.avg.toFixed(1).replace(".", ",")}</span>`;
+}
+function intBarTip(it) {
+  return it ? ` · intensiteit ${it.avg.toFixed(1).replace(".", ",")}/5 (${INTENSITY_LABELS[Math.max(1, Math.min(5, Math.round(it.avg)))]})` : "";
+}
 /* Intensiteit is de gevoelsschaal omgedraaid: donkerrood (veel te zwaar) telt als 5,
    geel als 3 en donkergroen (veel te licht) als 1. Zo staat een hoger cijfer voor een
    zwaardere sessie in plaats van voor een lichter gewicht. */
@@ -4561,16 +4584,13 @@ function fmtDur(a, b) { if (!a || !b) return null; const min = Math.round((new D
    sessiegeschiedenis in Statistieken later opnieuw op te vragen. In dat tweede geval
    staat er geen sterrenmelding bij (die hoort bij het moment van verdienen) en heet de
    knop "Sluiten", want je gaat terug naar waar je vandaan kwam. */
-function showSessionSummary(fin, opts) {
-  const terug = !!(opts && opts.fromHistory);
-  const box = document.getElementById("summary-content");
-  const modal = document.getElementById("summary-modal");
-  if (!box || !modal) return;
-  const closeBtn = document.getElementById("summary-close");
-  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
-  const titel = modal.querySelector("h3");
-  if (titel) titel.textContent = terug ? (fin.name || "Sessie") : "Sessie afgerond!";
-  summaryToast = terug ? "" : "Sessie opgeslagen — je hersteltijdlijn staat op Home";
+/* De inhoud van het samenvattingsbord. Los van het venster, zodat hetzelfde bord op drie
+   plekken kan staan: als venster na het afronden, als venster vanuit de sessiegeschiedenis,
+   en als vast blok bovenaan Statistieken. `ster` bepaalt of de sterrenmelding meedoet —
+   die hoort alleen bij het moment van verdienen. */
+function sessionBoardHtml(fin, opts) {
+  const ster = !!(opts && opts.ster);
+  const datumInSub = !(opts && opts.naamInSub);
   const sessions = store.sessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
   const totals = sessions.map(s => ({ id: s.id, kg: Math.round(sessionTotalKg(s)), date: s.date }));
   const curKg = Math.round(sessionTotalKg(fin));
@@ -4592,11 +4612,11 @@ function showSessionSummary(fin, opts) {
     if (!d) return `<span class="ss-delta">± 0 kg</span>`;
     return `<span class="ss-delta ${d > 0 ? "up" : "down"}">${d > 0 ? icon("arrow",13,'style="transform:rotate(-90deg)"') + " +" : icon("arrow",13,'style="transform:rotate(90deg)"') + " -"}${Math.abs(d)} kg</span>`;
   };
-  box.innerHTML = `
+  return `
     <div class="ss-kg">${curKg} kg</div>
-    <div class="ss-sub">${terug ? esc(fmtNice(fin.date)) : esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    <div class="ss-sub">${datumInSub ? esc(fmtNice(fin.date)) : esc(fin.name || "Deze sessie")} · ${fin.entries.length} oefeningen${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     ${intensityBlockHtml(fin)}
-    ${terug ? "" : incentiveSummaryHtml()}
+    ${ster ? incentiveSummaryHtml() : ""}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.kg))}px" title="${esc(t.date)}: ${t.kg} kg"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -4609,6 +4629,18 @@ function showSessionSummary(fin, opts) {
       <div class="row"><span class="ss-swatch d30"></span> Gemiddeld 30 dagen: <b>${avg30} kg</b> ${deltaTag(avg30)}</div>
       ${prevKg != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige sessie: <b>${prevKg} kg</b> ${deltaTag(prevKg)}</div>` : ""}
     </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste sessie staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt!</div>`}`;
+}
+function showSessionSummary(fin, opts) {
+  const terug = !!(opts && opts.fromHistory);
+  const box = document.getElementById("summary-content");
+  const modal = document.getElementById("summary-modal");
+  if (!box || !modal) return;
+  const closeBtn = document.getElementById("summary-close");
+  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
+  const titel = modal.querySelector("h3");
+  if (titel) titel.textContent = terug ? (fin.name || "Sessie") : "Sessie afgerond!";
+  summaryToast = terug ? "" : "Sessie opgeslagen — je hersteltijdlijn staat op Home";
+  box.innerHTML = sessionBoardHtml(fin, { ster: !terug, naamInSub: !terug });
   modal.classList.add("show");
   scrollSummaryBars(box);
 }
@@ -6005,16 +6037,10 @@ function finishHomeWorkout() {
   setTimeout(() => { route("thuis"); showHomeSummary(session); }, 700);
 }
 /* Samenvatting na een thuis-workout — zelfde bord als de gym, maar dan in oefeningen (+ kg als je met gewicht werkte) */
-function showHomeSummary(fin, opts) {
-  const terug = !!(opts && opts.fromHistory);
-  const box = document.getElementById("summary-content");
-  const modal = document.getElementById("summary-modal");
-  if (!box || !modal) return;
-  const closeBtn = document.getElementById("summary-close");
-  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
-  const titel = modal.querySelector("h3");
-  if (titel) titel.textContent = terug ? (fin.name || "Thuis-workout") : "Sessie afgerond!";
-  summaryToast = terug ? "" : "Thuis-workout opgeslagen — voortgang staat bij Thuis en in Statistieken";
+/* Zelfde bord, maar dan geteld in oefeningen: de thuis-variant. */
+function homeBoardHtml(fin, opts) {
+  const ster = !!(opts && opts.ster);
+  const datumInSub = !(opts && opts.naamInSub);
   const all = store.homeSessions().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
   const totals = all.map(s => ({ id: s.id, n: (s.entries || []).length, date: s.date }));
   const curN = (fin.entries || []).length;
@@ -6034,11 +6060,11 @@ function showHomeSummary(fin, opts) {
     if (!d) return `<span class="ss-delta">± 0</span>`;
     return `<span class="ss-delta ${d > 0 ? "up" : "down"}">${d > 0 ? icon("arrow",13,'style="transform:rotate(-90deg)"') + " +" : icon("arrow",13,'style="transform:rotate(90deg)"') + " -"}${Math.abs(d)}</span>`;
   };
-  box.innerHTML = `
+  return `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
-    <div class="ss-sub">${terug ? esc(fmtNice(fin.date)) : "Thuis-workout"}${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    <div class="ss-sub">${datumInSub ? esc(fmtNice(fin.date)) : "Thuis-workout"}${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     ${intensityBlockHtml(fin)}
-    ${terug ? "" : incentiveSummaryHtml()}
+    ${ster ? incentiveSummaryHtml() : ""}
     <div class="ss-chart-wrap">
       <div class="ss-bars">${totals.map(t => `<div class="ss-bar ${t.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(t.n))}px" title="${esc(t.date)}: ${t.n} oefeningen"></div>`).join("")}</div>
       <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
@@ -6051,6 +6077,18 @@ function showHomeSummary(fin, opts) {
       <div class="row"><span class="ss-swatch d30"></span> Gemiddeld 30 dagen: <b>${avg30} oef.</b> ${deltaTag(avg30)}</div>
       ${prevN != null ? `<div class="row"><span class="ss-swatch prev"></span> Vorige workout: <b>${prevN} oef.</b> ${deltaTag(prevN)}</div>` : ""}
     </div>` : `<div class="ss-sub" style="margin-top:8px;">Je allereerste thuis-workout staat op het bord — vanaf nu zie je hier hoe je je ontwikkelt!</div>`}`;
+}
+function showHomeSummary(fin, opts) {
+  const terug = !!(opts && opts.fromHistory);
+  const box = document.getElementById("summary-content");
+  const modal = document.getElementById("summary-modal");
+  if (!box || !modal) return;
+  const closeBtn = document.getElementById("summary-close");
+  if (closeBtn) closeBtn.innerHTML = terug ? icon("undo",18) + "Sluiten" : icon("house",18) + "Naar Home";
+  const titel = modal.querySelector("h3");
+  if (titel) titel.textContent = terug ? (fin.name || "Thuis-workout") : "Sessie afgerond!";
+  summaryToast = terug ? "" : "Thuis-workout opgeslagen — voortgang staat bij Thuis en in Statistieken";
+  box.innerHTML = homeBoardHtml(fin, { ster: !terug, naamInSub: !terug });
   modal.classList.add("show");
   scrollSummaryBars(box);
 }
@@ -6087,6 +6125,7 @@ function filterByRange(list) {
 function renderStats() {
   const perTitle = document.getElementById("stat-per-title");
   if (perTitle) perTitle.textContent = statScope === "thuis" ? "Voortgang per oefening" : "Voortgang per apparaat";
+  renderLatestBoard();
   if (statScope === "thuis") { const hs = filterHomeSessions(); renderHomeTotalChart(hs); renderHomeWaffles(hs); renderRecords(); renderSessionHistory(); return; }
   const sessions = filterSessions(); renderTotalChart(sessions); renderWaffles(sessions); renderRecords(); renderSessionHistory();
 }
@@ -6196,6 +6235,27 @@ function renderSessionHistory() {
     wrap.appendChild(row);
     if (open) wrap.appendChild(buildSessionEditForm(sc));
   });
+}
+/* Het bord van je laatste sessie, vast bovenaan Statistieken. Altijd de nieuwste sessie,
+   los van het gekozen periodefilter — "laatste" is nu eenmaal de laatste. Dezelfde inhoud
+   als het venster na het afronden, dus je kunt het teruglezen zonder ergens op te klikken. */
+function renderLatestBoard() {
+  const wrap = document.getElementById("board-section");
+  const title = document.getElementById("stat-board-title");
+  if (!wrap || !title) return;
+  const sc = historyScope();
+  const lijst = sc.read().slice().sort((a, b) => (a.date + (a.endedAt || "")).localeCompare(b.date + (b.endedAt || "")));
+  const laatste = lijst[lijst.length - 1];
+  title.textContent = sc.thuis ? "Laatste thuis-workout" : "Laatste sessie";
+  if (!laatste) {
+    wrap.innerHTML = `<div class="empty-state">Nog geen afgeronde ${esc(sc.nouns)}.</div>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="card latest-board">
+      <div class="lb-head">${esc(laatste.name || sc.noun)}</div>
+      ${sc.thuis ? homeBoardHtml(laatste, {}) : sessionBoardHtml(laatste, {})}
+    </div>`;
+  scrollSummaryBars(wrap);
 }
 function askDeleteSession(sc, s) {
   const n = (s.entries || []).length;
@@ -6316,19 +6376,19 @@ function saveSessionDraft(sc) {
 function renderHomeTotalChart(list) {
   const card = document.getElementById("total-chart-card");
   if (!list.length) { card.innerHTML = `<div class="empty-state">Geen thuis-workouts in dit bereik.</div>`; return; }
-  const totals = list.map(s => ({ date: s.date, n: (s.entries || []).length, kg: (s.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s) }));
+  const totals = list.map(s => ({ date: s.date, n: (s.entries || []).length, kg: (s.entries || []).reduce((a, e) => a + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s), int: sessionIntensity(s) }));
   const max = Math.max(...totals.map(t => t.n), 1);
   const lastIdx = totals.length - 1;
   const anyFeel = totals.some(t => t.feel);
   const bars = totals.map((t, i) => {
     const h = Math.max(6, (t.n / max) * 100);
     const md = t.date.slice(5).replace("-", "/");
-    const tip = `${t.date}: ${t.n} oefening${t.n === 1 ? "" : "en"}${t.kg ? ` · ${Math.round(t.kg)} kg` : ""}${feelBarTip(t.feel)}`;
+    const tip = `${t.date}: ${t.n} oefening${t.n === 1 ? "" : "en"}${t.kg ? ` · ${Math.round(t.kg)} kg` : ""}${feelBarTip(t.feel)}${intBarTip(t.int)}`;
     const newest = i === lastIdx;
-    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%;${feelBarStyle(t.feel, newest)}" data-h="${h}" title="${tip}">${newest ? `<span class="bar-val">${t.n}</span>` : ""}<span class="bar-date">${md}</span></div>`;
+    return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%;${feelBarStyle(t.feel, newest)}" data-h="${h}" title="${tip}">${newest ? `<span class="bar-val">${t.n}</span>` : ""}${intBarHtml(t.int)}<span class="bar-date">${md}</span></div>`;
   }).join("");
   card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.n), max, "")}<div class="wave-chart">${bars}</div></div><div class="legend" style="margin-top:8px;">Aantal afgeronde oefeningen per thuis-workout</div>`
-    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die workout") : "");
+    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die workout · cijfer in de balk = intensiteit (1-5)") : "");
   requestAnimationFrame(() => {
     scrollChartToNewest(card);
     thinBarDates(card);
@@ -6377,23 +6437,23 @@ function homeWafflesInto(wrap, home) {
 function renderTotalChart(sessions) {
   const card = document.getElementById("total-chart-card");
   if (sessions.length === 0) { card.innerHTML = `<div class="empty-state">Geen sessies in dit bereik.</div>`; return; }
-  const totals = sessions.map(s => ({ date: s.date, name: s.name || "", total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s) }));
+  const totals = sessions.map(s => ({ date: s.date, name: s.name || "", total: s.entries.reduce((sum, e) => sum + (parseFloat(e.weight) || 0), 0), feel: sessionFeelAvg(s), int: sessionIntensity(s) }));
   const max = Math.max(...totals.map(t => t.total), 1);
   const lastIdx = totals.length - 1;
   const anyFeel = totals.some(t => t.feel);
   const bars = totals.map((t, i) => {
     const h = Math.max(6, (t.total / max) * 100);
     const md = t.date.slice(5).replace("-", "/");
-    const tip = (t.name ? t.name + " · " : "") + t.date + ": " + Math.round(t.total) + " kg" + feelBarTip(t.feel);
+    const tip = (t.name ? t.name + " · " : "") + t.date + ": " + Math.round(t.total) + " kg" + feelBarTip(t.feel) + intBarTip(t.int);
     const newest = i === lastIdx;
     // de balk kleurt mee met het gemiddelde van de vijfpuntsschaal van die sessie;
     // alleen de nieuwste balk krijgt de waarde erboven en de gloed (§2 glow-regel)
     return `<div class="wave-bar${newest ? " newest" : ""}" style="height:0%;${feelBarStyle(t.feel, newest)}" data-h="${h}" title="${tip}">${
       newest ? `<span class="bar-val">${Math.round(t.total)}${iconFill("star-solid", 12)}</span>` : ""
-    }<span class="bar-date">${md}</span></div>`;
+    }${intBarHtml(t.int)}<span class="bar-date">${md}</span></div>`;
   }).join("");
   card.innerHTML = `<div class="chart-wrap">${refLinesHtml(totals.map(t => t.total), max, "kg")}<div class="wave-chart">${bars}</div></div>`
-    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die sessie") : "");
+    + (anyFeel ? feelLegendHtml("Balkkleur = gemiddeld gevoel van die sessie · cijfer in de balk = intensiteit (1-5)") : "");
   requestAnimationFrame(() => {
     scrollChartToNewest(card);
     thinBarDates(card);
@@ -7131,10 +7191,24 @@ function renderCloud() {
 }
 
 /* ============================================================
+   VERSIE
+   De regel hieronder wordt bij het deployen vervangen door de commit en de datum
+   (zie de stempel-stap in .github/workflows/pages.yml, die faalt als dat niet lukt).
+   Draai je het bestand lokaal, dan blijft er "dev" staan — dan weet je meteen dat je
+   niet naar de live versie kijkt.
+   ============================================================ */
+const APP_VERSION = "dev";
+function renderAppVersion() {
+  const el = document.getElementById("app-version");
+  if (el) el.textContent = `versie ${APP_VERSION}`;
+}
+
+/* ============================================================
    BOOT
    ============================================================ */
 function boot() {
   applyTheme(store.theme());
+  renderAppVersion();
   voiceCoach.init();
   migrateMachines();
   migrateHomeSessions();

@@ -1891,3 +1891,149 @@ test.describe('Het samenvattingsbord is terug te zien in Statistieken', () => {
     await expect(page.locator('#summary-close')).toContainText('Naar Home');
   });
 });
+
+/* ============================================================
+   Feedbackronde: versienummer, het bord vast bovenaan Statistieken
+   en het intensiteitscijfer in de balken
+   ============================================================ */
+
+test.describe('Versienummer in de app', () => {
+  test('staat onderaan Instellingen', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'settings');
+    const el = page.locator('#app-version');
+    await expect(el).toHaveCount(1);
+    await expect(el).toBeVisible();
+    await expect(el).toContainText('versie');
+  });
+
+  test('lokaal staat er "dev", zodat je ziet dat het niet de live versie is', async ({ page }) => {
+    await openApp(page);
+    expect(await page.evaluate(() => APP_VERSION)).toBe('dev');
+  });
+
+  test('de deploy-workflow stempelt de regel en controleert dat het lukte', async () => {
+    const fs = require('fs'), path = require('path');
+    const wf = fs.readFileSync(path.resolve(__dirname, '..', '.github', 'workflows', 'pages.yml'), 'utf8');
+    expect(wf).toContain('Versie stempelen');
+    expect(wf).toContain('APP_VERSION');
+    expect(wf).toMatch(/grep -qxF/);     // controle dat de vervanging echt gebeurd is
+    expect(wf).toMatch(/exit 1/);        // en dat de deploy faalt als dat niet zo is
+    // de regel in index.html moet exact matchen met wat de sed zoekt
+    const html = fs.readFileSync(path.resolve(__dirname, '..', 'index.html'), 'utf8');
+    expect(html.split('\n').filter(l => l === 'const APP_VERSION = "dev";').length).toBe(1);
+  });
+});
+
+test.describe('Het bord van de laatste sessie staat bovenaan Statistieken', () => {
+  test('vast in beeld, zonder ergens op te klikken', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    await page.waitForTimeout(400);
+    const board = page.locator('#board-section .latest-board');
+    await expect(board).toHaveCount(1);
+    await expect(board).toBeVisible();
+    // staat boven de totale voortgang
+    const volgorde = await page.evaluate(() => {
+      const b = document.getElementById('board-section');
+      const t = document.getElementById('total-chart-card');
+      return b.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING ? 'bord eerst' : 'chart eerst';
+    });
+    expect(volgorde).toBe('bord eerst');
+    // met dezelfde onderdelen als het venster
+    await expect(board.locator('.ss-kg')).toHaveCount(1);
+    await expect(board.locator('.si-box')).toHaveCount(1);
+    await expect(board.locator('.ss-line')).not.toHaveCount(0);
+    await expect(board.locator('.ss-legend')).toHaveCount(1);
+    await expect(board.locator('.inc-summary')).toHaveCount(0);
+  });
+
+  test('het is de nieuwste sessie, ook buiten het gekozen bereik', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    // week-filter laat de meeste sessies weg, maar "laatste" blijft de laatste
+    await page.evaluate(() => { statRange = 'week'; renderStats(); });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const laatste = store.sessions().slice()
+        .sort((a, b) => (a.date + (a.endedAt || '')).localeCompare(b.date + (b.endedAt || ''))).pop();
+      const kg = Math.round((laatste.entries || []).reduce((s, e) => s + (parseFloat(e.weight) || 0), 0));
+      return { getoond: document.querySelector('#board-section .ss-kg').textContent, verwacht: kg + ' kg' };
+    });
+    expect(r.getoond).toBe(r.verwacht);
+  });
+
+  test('bij de thuis-scope hoort de laatste thuis-workout', async ({ page }) => {
+    await openApp(page);
+    await seedHistory(page);
+    await goto(page, 'stats');
+    await page.evaluate(() => { statScope = 'thuis'; renderStats(); });
+    await page.waitForTimeout(400);
+    await expect(page.locator('#stat-board-title')).toContainText('thuis-workout');
+    await expect(page.locator('#board-section .ss-kg')).toContainText('oefening');
+  });
+
+  test('zonder sessies staat er een nette lege melding', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'stats');
+    await page.waitForTimeout(300);
+    await expect(page.locator('#board-section .empty-state')).toHaveCount(1);
+  });
+});
+
+test.describe('Intensiteitscijfer onderin de balken', () => {
+  async function seedFeel(page, feels) {
+    await page.evaluate(f => {
+      const ms = store.machines().filter(m => !m.cardio);
+      store.setSessions(f.map((v, i) => {
+        const d = new Date(Date.now() - (f.length - i) * 5 * 864e5);
+        return { id: 'i' + i, name: 'Full body', date: d.toISOString().slice(0, 10), endedAt: d.toISOString(),
+          entries: ms.map(m => ({ machineId: m.id, weight: 30, sets: 3, reps: 12, setsDone: 3, feeling: v })) };
+      }));
+    }, feels);
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    await goto(page, 'stats');
+    await page.evaluate(() => { statRange = '3month'; renderStats(); });
+    await page.waitForTimeout(600);
+  }
+
+  test('elke balk toont het intensiteitscijfer van die sessie', async ({ page }) => {
+    await openApp(page);
+    await seedFeel(page, [1, 3, 5]);
+    const cijfers = await page.locator('#total-chart-card .wave-bar .bar-int').allTextContents();
+    // intensiteit is de gevoelsschaal omgedraaid: gevoel 1 = intensiteit 5
+    expect(cijfers).toEqual(['5,0', '3,0', '1,0']);
+  });
+
+  test('het cijfer past binnen de balk en overlapt de datum niet', async ({ page }) => {
+    await openApp(page);
+    await seedFeel(page, Array(12).fill(3));
+    const r = await page.evaluate(() => {
+      const bars = [...document.querySelectorAll('#total-chart-card .wave-bar')];
+      return bars.map(b => {
+        const int = b.querySelector('.bar-int'), datum = b.querySelector('.bar-date');
+        const ir = int.getBoundingClientRect(), br = b.getBoundingClientRect();
+        return { past: int.scrollWidth <= int.clientWidth + 1,
+          binnen: ir.left >= br.left - 1 && ir.right <= br.right + 1,
+          bovenDatum: !datum || datum.style.display === 'none' || ir.bottom <= datum.getBoundingClientRect().top + 1 };
+      });
+    });
+    r.forEach(x => { expect(x.past).toBe(true); expect(x.binnen).toBe(true); expect(x.bovenDatum).toBe(true); });
+  });
+
+  test('zonder ingevuld gevoel staat er geen cijfer', async ({ page }) => {
+    await openApp(page);
+    await seedFeel(page, [null, null]);
+    await expect(page.locator('#total-chart-card .bar-int')).toHaveCount(0);
+  });
+
+  test('de legenda legt uit dat het cijfer de intensiteit is', async ({ page }) => {
+    await openApp(page);
+    await seedFeel(page, [2, 4]);
+    await expect(page.locator('#total-chart-card .feel-legend .fl-lbl')).toContainText('intensiteit');
+    await expect(page.locator('#total-chart-card .feel-legend .fl-lbl')).toContainText('Balkkleur');
+  });
+});
