@@ -1564,7 +1564,7 @@ const PRESET_SCHEMA = [
   { name: "Horizontal Row (Pulley)", settings: [{label:"Stoel", lastValue:"3"},{label:"Kussentje", lastValue:"6"}], lastWeight: 27.3, unit: "kg",
     note: "Seated row, 25+2,3 kg (ca. 29 kg op display). Romp recht, handen op schouderhoogte, trek je armen naar achter. Schouderbladen van voor naar achter knijpen — niet via je biceps werken." },
   { name: "Kettlebell", settings: [], lastWeight: 16, unit: "kg",
-    note: "Vrije oefening met de kettlebell van 16 kg — bijvoorbeeld goblet squats, deadlifts of suitcase carries. Rug recht, beweeg vanuit je heupen en houd de kettlebell dicht bij je lichaam." },
+    note: "Vrije oefening met de kettlebell (16 t/m 32 kg) — bijvoorbeeld goblet squats, deadlifts of suitcase carries. Rug recht, beweeg vanuit je heupen en houd de kettlebell dicht bij je lichaam." },
   { name: "Cooling-down", cardio: true, settings: [], lastWeight: 0, unit: "kg",
     note: "5 tot 10 min rustig uitlopen/fietsen." },
 ];
@@ -1654,7 +1654,7 @@ const MACHINE_STACKS = {
   "Shoulder Press":       [9, 14, 18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Pulldown":             [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
   "Horizontal Row (Pulley)": [18, 23, 29, 36, 43, 50, 57, 63, 70, 77, 84, 90, 97, 104],
-  "Kettlebell":           [16, 20],
+  "Kettlebell":           [16, 20, 24, 28, 32],
 };
 /* Openstaande vragen per apparaat — zichtbaar in de app zodat de gebruiker weet welke info nog nodig is.
    `mootAbove` is de kilo waarboven de vraag er niet meer toe doet: gaat het over de lichtste plaatjes
@@ -1667,7 +1667,13 @@ const MACHINE_OPEN_QUESTIONS = {
   "Pulldown": { q: "Zitten er boven 18 kg nog lichtere plaatjes (bijv. 9 en 14 kg)?", mootAbove: 36 },
   "Horizontal Row (Pulley)": { q: "Zitten er boven 18 kg nog lichtere plaatjes? En heeft dit apparaat losse tussengewichtjes (je notitie noemt +2,3 kg)?", mootAbove: 36 },
 };
-const KETTLEBELL_WEIGHTS = [16, 20]; // kg — doorgegeven door de gebruiker
+const KETTLEBELL_WEIGHTS = [16, 20, 24, 28, 32]; // kg — doorgegeven door de gebruiker
+/* De beschikbare kettlebells als korte tekst. Bij meer dan twee gewichten wordt een
+   opsomming te lang voor de chips, dus tonen we dan het bereik. */
+function kettlebellRangeText() {
+  const w = KETTLEBELL_WEIGHTS;
+  return w.length <= 2 ? `${w.join(" of ")} kg` : `${w[0]} t/m ${w[w.length - 1]} kg`;
+}
 /* Kettlebell-oefeningen met do's & don'ts — getoond op de Kettlebell-kaart in de sessie (squat eerst) */
 const KETTLEBELL_EXERCISES = [
   { name: "Kettlebell squat (goblet)", dose: "3×10",
@@ -2418,6 +2424,21 @@ function migrateMachines() {
     }
     prof.chestStackPhoto2607 = true;
     localStorage.setItem("gymwave_profile", JSON.stringify(prof));
+  }
+  // Kettlebell: er zijn zwaardere bellen dan de 16 en 20 waarmee we begonnen. De stapel
+  // loopt nu in stappen van vier tot 32 kg. Alleen bijwerken als de oude lijst er nog
+  // precies zo staat, zodat een zelf aangepaste stapel blijft zoals hij is.
+  if (machines.length && !prof.kbStack32) {
+    const kb = machines.find(mm => (mm.name || "").toLowerCase().includes("kettlebell"));
+    if (kb && Array.isArray(kb.stack) && kb.stack.length === 2 && kb.stack[0] === 16 && kb.stack[1] === 20) {
+      kb.stack = MACHINE_STACKS["Kettlebell"].slice();
+      if (kb.note && kb.note.includes("kettlebell van 16 kg")) {
+        kb.note = kb.note.replace("kettlebell van 16 kg", "kettlebell (16 t/m 32 kg)");
+      }
+      changed = true;
+    }
+    prof.kbStack32 = true;
+    localStorage.setItem("gymwave_profile", JSON.stringify(prof)); // zonder touch: migratie mag geen cloud-push uitlokken
   }
   // Warming-up en cooling-down horen cardio te zijn: geen gewicht, geen sets/reps en
   // geen gevoelsschaal. Bij oude opslag kon die vlag kwijtraken — hier zetten we hem terug.
@@ -5302,7 +5323,7 @@ function renderSnacksBox() {
         <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
         <button class="btn small ${isDone ? "" : "ghost"} sn-check">${isDone ? icon("check",15) + "Gedaan" : "Afvinken"}</button>
       </div>
-      <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}${s.achillesSafe === false ? "<span>niet bij achillesherstel</span>" : ""}</div>
+      <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${kettlebellRangeText()}</span>` : ""}${s.achillesSafe === false ? "<span>niet bij achillesherstel</span>" : ""}</div>
       ${hwVideoBtns(s)}
       ${hwStepsHtml(s)}`;
     card.querySelector(".sn-check").onclick = () => { toggleSnackDone(s.name); renderSnacksBox(); };
@@ -5626,7 +5647,7 @@ function renderEquipmentBox() {
   box.innerHTML = `
     <div class="card">
       <p class="muted" style="font-weight:600; font-size:0.9rem; margin-bottom:6px;">Vink aan wat je thuis hebt — de beweegsnacks passen zich hierop aan.</p>
-      ${EQUIPMENT_OPTIONS.map(eq => `<label class="machine-check"><input type="checkbox" value="${eq}" ${(h.equipment || []).includes(eq) ? "checked" : ""}/> ${eq === "geen" ? "Geen materiaal (lichaamsgewicht)" : eq === "kettlebell" ? `kettlebell (${KETTLEBELL_WEIGHTS.join(" & ")} kg)` : eq === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(eq)}</label>`).join("")}
+      ${EQUIPMENT_OPTIONS.map(eq => `<label class="machine-check"><input type="checkbox" value="${eq}" ${(h.equipment || []).includes(eq) ? "checked" : ""}/> ${eq === "geen" ? "Geen materiaal (lichaamsgewicht)" : eq === "kettlebell" ? `kettlebell (${kettlebellRangeText()})` : eq === "dumbbells" ? "dumbbells (1 t/m 5 kg)" : esc(eq)}</label>`).join("")}
     </div>`;
   box.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
     const nh = store.home();
@@ -5642,7 +5663,7 @@ function renderEquipmentBox() {
    ============================================================ */
 function equipLabel(e) {
   return e === "geen" ? "Geen materiaal (lichaamsgewicht)"
-    : e === "kettlebell" ? `kettlebell (${KETTLEBELL_WEIGHTS.join(" & ")} kg)`
+    : e === "kettlebell" ? `kettlebell (${kettlebellRangeText()})`
     : e === "dumbbells" ? "dumbbells (alle gewichten)" : esc(e);
 }
 /* Voorstel per oefening: reps/seconden + kg, op basis van dosering en je vorige poging.
@@ -5936,7 +5957,7 @@ function hwCard(s, hw) {
       <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
       <button class="btn small ${r.done ? "" : "ghost"} hw-check">${r.done ? icon("check",15) + "Klaar" : "Afvinken"}</button>
     </div>
-    <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${KETTLEBELL_WEIGHTS.join(" of ")} kg</span>` : ""}</div>
+    <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${kettlebellRangeText()}</span>` : ""}</div>
     ${hwVideoBtns(s)}
     ${hwStepsHtml(s)}
     <div class="hw-target"><span class="ht-lbl">${icon("target",15)}voorstel</span> <b class="hw-target-txt">${esc(hwSuggest(s).txt)}</b>

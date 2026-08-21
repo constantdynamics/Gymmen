@@ -2037,3 +2037,80 @@ test.describe('Intensiteitscijfer onderin de balken', () => {
     await expect(page.locator('#total-chart-card .feel-legend .fl-lbl')).toContainText('Balkkleur');
   });
 });
+
+/* ============================================================
+   Feedbackronde: zwaardere kettlebells (24, 28 en 32 kg)
+   ============================================================ */
+
+test.describe('De kettlebell loopt door tot 32 kg', () => {
+  test('de stapel gaat in stappen van vier van 16 naar 32', async ({ page }) => {
+    await openApp(page);
+    const kb = await page.evaluate(() => store.machines().find(m => m.name === 'Kettlebell'));
+    expect(kb.stack).toEqual([16, 20, 24, 28, 32]);
+  });
+
+  test('plus loopt de hele stapel af en stopt op 32', async ({ page }) => {
+    await openApp(page);
+    const body = await openExercise(page, 'Kettlebell');
+    const w = body.locator('.weight-display');
+    await expect(w).toHaveValue('16');
+    for (const verwacht of ['20', '24', '28', '32', '32']) {
+      await body.locator('[data-act="inc"]').click();
+      await expect(w).toHaveValue(verwacht);
+    }
+    await expect(body.locator('.stack-label')).toHaveText('plaat 5 van 5');
+  });
+
+  test('vanaf 24 stelt de app 28 voor, daarna 32', async ({ page }) => {
+    await openApp(page);
+    const r = await page.evaluate(() => {
+      const kb = store.machines().find(m => m.name === 'Kettlebell');
+      return [suggestNextFor(kb, 24), suggestNextFor(kb, 28), suggestNextFor(kb, 32)];
+    });
+    expect(r).toEqual([28, 32, 32]);   // op de zwaarste bel blijft het 32
+  });
+
+  test('een bestaande stapel van 16 en 20 groeit bij het opstarten mee', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      const kb = ms.find(m => m.name === 'Kettlebell');
+      kb.stack = [16, 20];
+      kb.note = 'Vrije oefening met de kettlebell van 16 kg — bijvoorbeeld goblet squats.';
+      store.setMachines(ms);
+      const p = store.profile(); delete p.kbStack32; store.setProfile(p);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const kb = await page.evaluate(() => store.machines().find(m => m.name === 'Kettlebell'));
+    expect(kb.stack).toEqual([16, 20, 24, 28, 32]);
+    expect(kb.note).toContain('16 t/m 32 kg');
+    expect(kb.note).not.toContain('van 16 kg');
+  });
+
+  test('een zelf aangepaste stapel blijft met rust gelaten', async ({ page }) => {
+    await openApp(page);
+    await page.evaluate(() => {
+      const ms = store.machines();
+      ms.find(m => m.name === 'Kettlebell').stack = [12, 16];
+      store.setMachines(ms);
+      const p = store.profile(); delete p.kbStack32; store.setProfile(p);
+    });
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => typeof window.route === 'function');
+    const kb = await page.evaluate(() => store.machines().find(m => m.name === 'Kettlebell'));
+    expect(kb.stack).toEqual([12, 16]);
+  });
+
+  test('thuis kent dezelfde bellen, kort weergegeven', async ({ page }) => {
+    await openApp(page);
+    const r = await page.evaluate(() => ({
+      lijst: KETTLEBELL_WEIGHTS,
+      tekst: kettlebellRangeText(),
+      label: equipLabel("kettlebell"),
+    }));
+    expect(r.lijst).toEqual([16, 20, 24, 28, 32]);
+    expect(r.tekst).toBe('16 t/m 32 kg');       // geen opsomming van vijf gewichten in een chip
+    expect(r.label).toContain('16 t/m 32 kg');
+  });
+});
