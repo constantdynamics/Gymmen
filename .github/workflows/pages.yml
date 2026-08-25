@@ -3,10 +3,9 @@ name: Deploy GymWave to GitHub Pages
 on:
   push:
     branches:
-      # main is waar alles samenkomt. claude/gymwave-fitness-tracker-rOZRi staat
-      # er nog bij zolang die de default branch is: de github-pages-omgeving laat
-      # alleen de default branch deployen, dus een push naar main alléén wordt
-      # geweigerd. Zodra main de default branch is, mag de tweede regel weg.
+      # Beide namen staan erin zodat het blijft werken welke van de twee ook de
+      # default branch is. De job hieronder draait alleen op de default branch,
+      # dus de andere push levert een overgeslagen run op in plaats van een rode.
       - main
       - claude/gymwave-fitness-tracker-rOZRi
   workflow_dispatch:
@@ -16,12 +15,18 @@ permissions:
   pages: write
   id-token: write
 
+# Eén deploy tegelijk, maar een lopende deploy nooit afbreken: een halverwege
+# afgekapte Pages-deploy kan de site offline achterlaten. Nieuwe runs wachten
+# netjes hun beurt af.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    # De github-pages-omgeving laat alleen de default branch deployen. Zonder deze
+    # check faalt elke push naar de andere branch met een rode X die niets zegt.
+    if: github.ref_name == github.event.repository.default_branch
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -43,6 +48,15 @@ jobs:
             || { echo "::error::Versieregel niet gevonden of niet vervangen in index.html"; exit 1; }
           echo "Gestempeld: $VERSIE"
 
+      # Alleen wat de site nodig heeft gaat mee. Zonder deze stap belandt ook .git
+      # met de hele historie op de webserver, en dat hoort daar niet.
+      - name: Site klaarzetten
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html _site/index.html
+          ls -l _site
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -51,7 +65,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
