@@ -3,10 +3,9 @@ name: Deploy GymWave to GitHub Pages
 on:
   push:
     branches:
-      # main is waar alles samenkomt. claude/gymwave-fitness-tracker-rOZRi staat
-      # er nog bij zolang die de default branch is: de github-pages-omgeving laat
-      # alleen de default branch deployen, dus een push naar main alléén wordt
-      # geweigerd. Zodra main de default branch is, mag de tweede regel weg.
+      # Beide namen staan erin zodat het blijft werken welke van de twee ook de
+      # default branch is. De job hieronder draait alleen op de default branch,
+      # dus de andere push levert een overgeslagen run op in plaats van een rode.
       - main
       - claude/gymwave-fitness-tracker-rOZRi
   workflow_dispatch:
@@ -16,12 +15,18 @@ permissions:
   pages: write
   id-token: write
 
+# Eén deploy tegelijk, maar een lopende deploy nooit afbreken: een halverwege
+# afgekapte Pages-deploy kan de site offline achterlaten. Nieuwe runs wachten
+# netjes hun beurt af.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    # De github-pages-omgeving laat alleen de default branch deployen. Zonder deze
+    # check faalt elke push naar de andere branch met een rode X die niets zegt.
+    if: github.ref_name == github.event.repository.default_branch
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -43,6 +48,15 @@ jobs:
             || { echo "::error::Versieregel niet gevonden of niet vervangen in index.html"; exit 1; }
           echo "Gestempeld: $VERSIE"
 
+      # Alleen wat de site nodig heeft gaat mee. Zonder deze stap belandt ook .git
+      # met de hele historie op de webserver, en dat hoort daar niet.
+      - name: Site klaarzetten
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html _site/index.html
+          ls -l _site
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
@@ -51,8 +65,48 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # De hele storing was dat "groen" niets zei: de deploy stond als geslaagd in de
+  # historie terwijl de site plat lag. Deze job haalt de gepubliceerde pagina echt
+  # op en laat de run falen als er iets anders terugkomt dan GymWave.
+  #
+  # Hij hangt aan de deploy met always(), zodat hij ook draait als die is
+  # overgeslagen. Daardoor kun je met een handmatige dispatch op elke branch
+  # nagaan of de site het nog doet, zonder iets te deployen.
+  controle:
+    needs: deploy
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gepubliceerde pagina ophalen
+        run: |
+          set -uo pipefail
+          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "Controleren: $URL"
+          pogingen=5
+          code=000
+          for poging in $(seq 1 $pogingen); do
+            # curl schrijft zelf al 000 bij een mislukte verbinding; niet nog eens
+            # een 000 aanplakken, anders staat er straks "status: 000000" in de fout.
+            code=$(curl -sS -o pagina.html -w '%{http_code}' -L --max-time 30 "$URL" || true)
+            code=${code:-000}
+            if [ "$code" = "200" ] && grep -q "GymWave" pagina.html; then
+              echo "OK — http $code, en GymWave staat op de pagina."
+              grep -o 'const APP_VERSION = "[^"]*"' pagina.html \
+                || echo "Let op: geen versieregel gevonden op de live pagina."
+              exit 0
+            fi
+            if [ "$poging" -lt "$pogingen" ]; then
+              echo "Poging $poging gaf http $code — tien seconden wachten."
+              sleep 10
+            else
+              echo "Poging $poging gaf http $code."
+            fi
+          done
+          echo "::error::De site kwam niet goed terug (laatste status: $code). Kijk op $URL"
+          exit 1
