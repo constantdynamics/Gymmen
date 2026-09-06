@@ -37,12 +37,14 @@
   --line-strong: rgba(255, 255, 255, 0.18); /* rand op knoppen/velden */
   --inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  /* ---- Paarstrap: één familie, drie stappen ---- */
-  /* Eén paarse schaal in vijf stappen, donker naar licht. De lichtste stap
-     stopt bij #9042f2: daarboven zakt witte tekst onder 4,5:1. */
+  /* ---- Paarstrap: één familie, zes stappen ---- */
+  /* Eén paarse schaal in zes stappen, donker naar licht. De lichtste stap
+     stopt bij #9042f2: daarboven zakt witte tekst onder 4,5:1. Squats kregen
+     daarom een stap tússen calf en push in plaats van een zesde erbovenop. */
   --gym-a: #1c0450;   --gym-b: #33108f;
   --home-a: #2b0a75;  --home-b: #4a17b4;
   --calf-a: #3d12a0;  --calf-b: #6224d8;
+  --squat-a: #4816b1; --squat-b: #6e2ce3;
   --push-a: #521bc2;  --push-b: #7b34ee;
   --situp-a: #6825da; --situp-b: #9042f2;
 
@@ -201,6 +203,8 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .hero-btn.hero-home .hero-ic { background: rgba(255,255,255,0.18); }
 .hero-btn.hero-calf { background: linear-gradient(135deg, var(--calf-a), var(--calf-b)); box-shadow: 0 12px 30px rgba(61, 18, 160, 0.52), inset 0 1px 0 rgba(255,255,255,0.3); }
 .hero-btn.hero-calf .hero-ic { background: rgba(255,255,255,0.2); }
+.hero-btn.hero-squat { background: linear-gradient(135deg, var(--squat-a), var(--squat-b)); box-shadow: 0 12px 30px rgba(72, 22, 177, 0.48), inset 0 1px 0 rgba(255,255,255,0.3); }
+.hero-btn.hero-squat .hero-ic { background: rgba(255,255,255,0.2); }
 .hero-btn.hero-push { background: linear-gradient(135deg, var(--push-a), var(--push-b)); box-shadow: 0 12px 30px rgba(82, 27, 194, 0.46), inset 0 1px 0 rgba(255,255,255,0.3); }
 .hero-btn.hero-push .hero-ic { background: rgba(255,255,255,0.2); }
 .hero-btn.hero-situp { background: linear-gradient(135deg, var(--situp-a), var(--situp-b)); box-shadow: 0 12px 30px rgba(104, 37, 218, 0.42), inset 0 1px 0 rgba(255,255,255,0.32); }
@@ -228,9 +232,9 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .last-session { font-size: 1rem; color: var(--text-body); margin-bottom: 12px; font-weight: 600; }
 /* De losse calf-ghostknop is vervangen door de derde hero-rij; hij blijft in de
    DOM staan met zijn handler, net als de verborgen nav-knoppen (§3.2). */
-#open-calf, #open-pushup, #open-situp, #open-gym, #open-homeworkout { display: none; }
+#open-calf, #open-squat, #open-pushup, #open-situp, #open-gym, #open-homeworkout { display: none; }
 /* …behalve als je de bijbehorende hero hebt uitgezet: dan is dit je ingang (§ Startscherm) */
-#open-calf.as-fallback, #open-pushup.as-fallback, #open-situp.as-fallback,
+#open-calf.as-fallback, #open-squat.as-fallback, #open-pushup.as-fallback, #open-situp.as-fallback,
 #open-gym.as-fallback, #open-homeworkout.as-fallback { display: block; }
 
 /* ============================================================
@@ -976,19 +980,21 @@ label { color: var(--text-body); opacity: 1; }
 .rep-dot.prev-mark { border-color: #7bd4ff; border-width: 2px; }
 .rep-dot.pr-mark { border-color: #ffd75e; border-width: 2px; box-shadow: 0 0 10px rgba(255,215,94,0.4); }
 .rep-dot.goal-mark { border-color: #4dffa6; border-width: 2px; box-shadow: 0 0 10px rgba(77,255,166,0.35); }
-/* Push-ups en sit-ups gebruiken hetzelfde tracker-blok als calf raises; alleen
-   de accentkleur verschilt. De wrapper zet twee lokale variabelen, de rest
+/* Squats, push-ups en sit-ups gebruiken hetzelfde tracker-blok als calf raises;
+   alleen de accentkleur verschilt. De wrapper zet twee lokale variabelen, de rest
    van de regels erft daarvan. */
+.rt-squat { --rt-a: var(--squat-a); --rt-b: var(--squat-b); --rt-glow: 72, 22, 177; }
 .rt-push { --rt-a: var(--push-a); --rt-b: var(--push-b); --rt-glow: 82, 27, 194; }
 .rt-situp { --rt-a: var(--situp-a); --rt-b: var(--situp-b); --rt-glow: 104, 37, 218; }
-.rt-push .calf-readout, .rt-situp .calf-readout { background: rgba(var(--rt-glow), 0.12); }
-.rt-push .cr-num, .rt-situp .cr-num { text-shadow: 0 0 30px rgba(var(--rt-glow), 0.6); }
+.rt-squat .calf-readout, .rt-push .calf-readout, .rt-situp .calf-readout { background: rgba(var(--rt-glow), 0.12); }
+.rt-squat .cr-num, .rt-push .cr-num, .rt-situp .cr-num { text-shadow: 0 0 30px rgba(var(--rt-glow), 0.6); }
+.rt-squat .calf-steppers .btn:not(.ghost),
 .rt-push .calf-steppers .btn:not(.ghost),
 .rt-situp .calf-steppers .btn:not(.ghost) {
   background: linear-gradient(135deg, var(--rt-a), var(--rt-b));
   box-shadow: 0 6px 22px rgba(var(--rt-glow), 0.4);
 }
-.rt-push .rep-dot.done, .rt-situp .rep-dot.done {
+.rt-squat .rep-dot.done, .rt-push .rep-dot.done, .rt-situp .rep-dot.done {
   background: linear-gradient(135deg, var(--rt-a), var(--rt-b)); border-color: var(--rt-b);
 }
 /* ---- Waffle van afgeronde series -------------------------------
@@ -1211,6 +1217,7 @@ body::after { content: none; }
 <symbol id="i-biceps" viewBox="0 0 24 24"><path d="M4.5 18.5h6a5 5 0 0 0 5-5V9.6" stroke-width="3"></path><path d="M15.5 9.2V6.4a2.3 2.3 0 0 1 4.6 0V9a2.4 2.4 0 0 1-2.4 2.4h-2.2" stroke-width="1.6"></path><path d="M5.2 16.2c1-3.8 6-4.3 7-.6" stroke-width="1.5"></path></symbol>
 <symbol id="i-kettlebell" viewBox="0 0 24 24"><path d="M8.6 9.4a3.4 3.4 0 0 1 6.8 0" stroke-width="1.6"></path><path d="M7.2 11.1c0-.9.8-1.7 1.7-1.7h6.2c1 0 1.7.8 1.7 1.7a5.3 5.3 0 0 1-4.8 6.2h-.1a5.3 5.3 0 0 1-4.7-6.2z" stroke-width="1.7"></path><path d="M6.5 19.4h11" stroke-width="1.5" opacity=".5"></path></symbol>
 <symbol id="i-calf" viewBox="0 0 24 24"><path d="M12.4 4.2v8.8" stroke-width="3.2"></path><path d="M12.4 13.1l4 4.4" stroke-width="3.2"></path><path d="M11.6 6.4C7.8 8.2 7.4 12.2 10.7 14.1" stroke-width="1.5"></path><path d="M7.6 19.6h9.4" stroke-width="1.3" opacity=".5"></path></symbol>
+<symbol id="i-squat" viewBox="0 0 24 24"><circle cx="8.6" cy="5.2" r="1.9"></circle><path d="M9.4 7.1 11.4 11.6M11.4 11.6 6.8 12.4M6.8 12.4 7.6 18.6M10.6 9.2 15.2 8.4M2.5 18.6h19"></path></symbol>
 <symbol id="i-pushup" viewBox="0 0 24 24"><circle cx="18" cy="8.4" r="1.9"></circle><path d="M16.2 9.6 8.4 13.2M12.3 11.4v5.2M8.4 13.2 4.2 16.2M2.5 18.6h19"></path></symbol>
 <symbol id="i-situp" viewBox="0 0 24 24"><circle cx="7.2" cy="8.8" r="1.9"></circle><path d="M8.8 10.1 13.6 14.2M13.6 14.2 17.4 11.2M17.4 11.2 19 17.6M2.5 18.6h19"></path></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></symbol>
@@ -1304,6 +1311,7 @@ body::after { content: none; }
     <button class="btn ghost full" id="open-gym" style="margin-top:18px;">Gym-sessie starten</button>
     <button class="btn ghost full" id="open-homeworkout" style="margin-top:10px;">Thuis-workout starten</button>
     <button class="btn ghost full" id="open-calf" style="margin-top:18px;">Calf raises-tracker</button>
+    <button class="btn ghost full" id="open-squat" style="margin-top:10px;">Squats-tracker</button>
     <button class="btn ghost full" id="open-pushup" style="margin-top:10px;">Push-ups-tracker</button>
     <button class="btn ghost full" id="open-situp" style="margin-top:10px;">Sit-ups-tracker</button>
     <button class="btn ghost full" id="open-checklist" style="margin-top:10px;"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bag"></use></svg>Meenemen-checklist</button>
@@ -1356,6 +1364,8 @@ body::after { content: none; }
     <div id="snacks-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-calf"></use></svg>Calf raises-tracker</div>
     <div id="calf-box"></div>
+    <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-squat"></use></svg>Squats-tracker</div>
+    <div id="squat-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-pushup"></use></svg>Push-ups-tracker</div>
     <div id="pushup-box"></div>
     <div class="section-title"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-situp"></use></svg>Sit-ups-tracker</div>
@@ -2316,6 +2326,8 @@ const store = {
   setIncentives: (v) => { localStorage.setItem("gymwave_incentives", JSON.stringify(v)); touch(); },
   calf: () => { const v = jget("gymwave_calf", "[]"); return Array.isArray(v) ? v : []; },
   setCalf: (c) => { localStorage.setItem("gymwave_calf", JSON.stringify(c)); touch(); },
+  squats: () => { const v = jget("gymwave_squats", "[]"); return Array.isArray(v) ? v : []; },
+  setSquats: (c) => { localStorage.setItem("gymwave_squats", JSON.stringify(c)); touch(); },
   pushups: () => { const v = jget("gymwave_pushups", "[]"); return Array.isArray(v) ? v : []; },
   setPushups: (c) => { localStorage.setItem("gymwave_pushups", JSON.stringify(c)); touch(); },
   situps: () => { const v = jget("gymwave_situps", "[]"); return Array.isArray(v) ? v : []; },
@@ -2326,7 +2338,7 @@ const store = {
   // weergavevoorkeuren, o.a. welke hero-rijen op Home zichtbaar zijn
   prefs: () => {
     const raw = jget("gymwave_prefs", "{}") || {};
-    return Object.assign({}, raw, { heroes: Object.assign({ gym: true, home: true, calf: true, push: true, situp: true }, raw.heroes || {}) });
+    return Object.assign({}, raw, { heroes: Object.assign({ gym: true, home: true, calf: true, squat: true, push: true, situp: true }, raw.heroes || {}) });
   },
   setPrefs: (p) => { localStorage.setItem("gymwave_prefs", JSON.stringify(p)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
@@ -3240,8 +3252,8 @@ function buildHeroRows() {
   const rowHome = mkRow("row-home", home);
   wrap.insertBefore(rowGym, extra);
   wrap.insertBefore(rowHome, extra);
-  // calf, push-ups en sit-ups delen dezelfde vorm; alleen de kleur verschilt
-  [["calf", "open-calf"], ["push", "open-pushup"], ["situp", "open-situp"]].forEach(([kind, ghost]) => {
+  // calf, squats, push-ups en sit-ups delen dezelfde vorm; alleen de kleur verschilt
+  [["calf", "open-calf"], ["squat", "open-squat"], ["push", "open-pushup"], ["situp", "open-situp"]].forEach(([kind, ghost]) => {
     const btn = document.createElement("button");
     btn.className = "hero-btn hero-" + kind;
     btn.id = "enter-" + kind;
@@ -3255,7 +3267,7 @@ function buildHeroRows() {
    ghost-knop onderaan — zo wordt het scherm kalmer zonder dat je iets kwijtraakt.
    De hero-knoppen zelf blijven in de DOM zodat alle bestaande verwijzingen
    (#enter-gym, #enter-home, …) blijven werken. */
-const HERO_FALLBACK = { gym: "open-gym", home: "open-homeworkout", calf: "open-calf", push: "open-pushup", situp: "open-situp" };
+const HERO_FALLBACK = { gym: "open-gym", home: "open-homeworkout", calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp" };
 function applyHeroVisibility() {
   const heroes = store.prefs().heroes;
   Object.keys(HERO_FALLBACK).forEach(k => {
@@ -3312,8 +3324,8 @@ function renderHeroRows(sessions, homeSess) {
   calfBtn.parentElement.querySelector(".hero-side").innerHTML =
     waitChipHtml(daysSinceISO(lastCalf), 1) + heroCountsHtml("series", calf.length, "reps pr", calfPr);
 
-  // --- rij 4 en 5: push-ups en sit-ups, zelfde opbouw zonder standen ---
-  [["push", "pushup", "Push-ups"], ["situp", "situp", "Sit-ups"]].forEach(([kind, key, title]) => {
+  // --- rij 4, 5 en 6: squats, push-ups en sit-ups, zelfde opbouw zonder standen ---
+  [["squat", "squat", "Squats"], ["push", "pushup", "Push-ups"], ["situp", "situp", "Sit-ups"]].forEach(([kind, key, title]) => {
     const btn = document.getElementById("enter-" + kind);
     if (!btn) return;
     const list = REP_TRACKERS[key].read();
@@ -3330,7 +3342,7 @@ function renderHeroRows(sessions, homeSess) {
   const jump = (row, scope) => row.querySelectorAll(".hero-count").forEach(b => {
     b.onclick = (ev) => {
       ev.stopPropagation();
-      const ghost = { calf: "open-calf", push: "open-pushup", situp: "open-situp" }[scope];
+      const ghost = { calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp" }[scope];
       if (ghost) { document.getElementById(ghost).click(); return; }
       statScope = scope;
       document.querySelectorAll("#stat-scope button").forEach(x => x.classList.toggle("active", x.dataset.scope === scope));
@@ -3339,7 +3351,7 @@ function renderHeroRows(sessions, homeSess) {
   });
   jump(gym.parentElement, "gym");
   jump(home.parentElement, "thuis");
-  ["push", "situp"].forEach(k => {
+  ["squat", "push", "situp"].forEach(k => {
     const b = document.getElementById("enter-" + k);
     if (b) jump(b.parentElement, k);
   });
@@ -3442,7 +3454,7 @@ function renderHomeBestTime() {
   </div></details>`;
 }
 document.getElementById("open-checklist").addEventListener("click", () => route("checklist"));
-[["open-calf", "calf-box"], ["open-pushup", "pushup-box"], ["open-situp", "situp-box"]].forEach(([btn, target]) => {
+[["open-calf", "calf-box"], ["open-squat", "squat-box"], ["open-pushup", "pushup-box"], ["open-situp", "situp-box"]].forEach(([btn, target]) => {
   document.getElementById(btn).addEventListener("click", () => {
     route("thuis");
     setTimeout(() => { const el = document.getElementById(target); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
@@ -5116,7 +5128,7 @@ function toggleSnackDone(name) {
   names = names.includes(name) ? names.filter(n => n !== name) : [...names, name];
   localStorage.setItem("gymwave_snack_done", JSON.stringify({ date: todayISO(), names }));
 }
-function renderThuis() { renderSnacksBox(); renderCalfBox(); renderRepTracker("pushup"); renderRepTracker("situp"); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
+function renderThuis() { renderSnacksBox(); renderCalfBox(); renderRepTracker("squat"); renderRepTracker("pushup"); renderRepTracker("situp"); renderUnilateralBox(); renderPhotosBox(); renderEquipmentBox(); renderThuisProgress(); }
 /* ============================================================
    BELONINGEN (incentives): 10 sterren sparen per beloning
    ============================================================ */
@@ -5444,6 +5456,12 @@ function renderCalfBox() {
    zonder standenrij: één teller en één PR per oefening.
    ============================================================ */
 const REP_TRACKERS = {
+  squat: {
+    box: "squat-box", accent: "rt-squat", icon: "squat", noun: "squat",
+    read: () => store.squats(), write: v => store.setSquats(v),
+    prompt: "Tik aan hoeveel squats je haalt — versla je vorige poging!",
+    hint: "Voeten op schouderbreedte, tenen licht naar buiten. Zak alsof je op een stoel gaat zitten, houd je knieën in lijn met je tenen en duw vanuit je hakken weer omhoog.",
+  },
   pushup: {
     box: "pushup-box", accent: "rt-push", icon: "pushup", noun: "push-up",
     read: () => store.pushups(), write: v => store.setPushups(v),
@@ -5457,7 +5475,7 @@ const REP_TRACKERS = {
     hint: "Knieën gebogen, voeten plat. Rol je romp op vanuit je buik in plaats van te trekken aan je nek, en zak rustig terug.",
   },
 };
-const repCurrent = { pushup: 0, situp: 0 };
+const repCurrent = { squat: 0, pushup: 0, situp: 0 };
 
 /* ============================================================
    WAFFLE VAN AFGERONDE SERIES
@@ -6695,7 +6713,7 @@ document.getElementById("reset-checklist").addEventListener("click", () => {
 function renderSettings() { renderThemeGrid(); renderHeroSettings(); renderManageMachines(); renderCoachSettings(); renderLocationSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
 /* Welke snelknoppen (hero-rijen) op Home staan. Uitzetten haalt de rij weg; via de
    balk onderin blijft alles bereikbaar. */
-const HERO_KINDS = [["gym", "De Gym In"], ["home", "Thuis Gymmen"], ["calf", "Calf raises"], ["push", "Push-ups"], ["situp", "Sit-ups"]];
+const HERO_KINDS = [["gym", "De Gym In"], ["home", "Thuis Gymmen"], ["calf", "Calf raises"], ["squat", "Squats"], ["push", "Push-ups"], ["situp", "Sit-ups"]];
 function renderHeroSettings() {
   const box = document.getElementById("hero-settings");
   if (!box) return;
@@ -6984,7 +7002,7 @@ function exportData() {
     setupDone: store.setupDone(), theme: store.theme(),
     machines: store.machines().map(m => { const c = {...m}; delete c._editing; return c; }),
     sessions: store.sessions(), checklist: store.checklist(),
-    goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(), pushups: store.pushups(), situps: store.situps(),
+    goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(), squats: store.squats(), pushups: store.pushups(), situps: store.situps(),
     currentSession: store.currentSession(), homeWorkout: store.homeWorkout(),
     homeSessions: store.homeSessions(),
   };
@@ -7019,6 +7037,7 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       if (data.profile) store.setProfile(data.profile);
       if (data.home) store.setHome(data.home);
       if (Array.isArray(data.calf)) store.setCalf(data.calf);
+      if (Array.isArray(data.squats)) store.setSquats(data.squats);
       if (Array.isArray(data.pushups)) store.setPushups(data.pushups);
       if (Array.isArray(data.situps)) store.setSitups(data.situps);
       if (data.theme && THEMES[data.theme]) applyTheme(data.theme);
@@ -7039,7 +7058,7 @@ document.getElementById("reset-data").addEventListener("click", () => {
   showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies, doelen, foto's en instellingen op dit apparaat. Cloud-sync wordt eerst uitgeschakeld, zodat je andere apparaten niets kwijtraken. Dit kan niet ongedaan worden gemaakt.", () => {
     cloud.disable(); // eerst sync los, anders wordt de lege staat naar de cloud gepusht
     ["gymwave_machines","gymwave_sessions","gymwave_setup_done","gymwave_theme","gymwave_checklist",
-     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_chat",
+     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_chat",
      "gymwave_api_key","gymwave_snack_salt","gymwave_snack_done","gymwave_current_session","gymwave_last_modified"].forEach(k => localStorage.removeItem(k));
     photoDB.clear().catch(() => {});
     currentSession = null; expandedMachineId = null; obMachines = []; applyTheme("Synthwave"); boot();
@@ -7076,7 +7095,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions","gymwave_machine_answers","gymwave_prefs"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions","gymwave_machine_answers","gymwave_prefs"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 
