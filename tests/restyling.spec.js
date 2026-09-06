@@ -100,16 +100,16 @@ test.describe('§3.1 home: activiteitsrijen met wachttijd-kleur', () => {
   test('elke activiteit heeft een rij met chip en twee tellers', async ({ page }) => {
     await openApp(page);
     await seedHistory(page);
-    await expect(page.locator('.hero-row')).toHaveCount(5);
-    await expect(page.locator('.wait-chip')).toHaveCount(5);
-    await expect(page.locator('.hero-count')).toHaveCount(10);
+    await expect(page.locator('.hero-row')).toHaveCount(6);
+    await expect(page.locator('.wait-chip')).toHaveCount(6);
+    await expect(page.locator('.hero-count')).toHaveCount(12);
     // per chip zes segmenten in de ramp
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       await expect(page.locator('.wait-chip').nth(i).locator('.wait-ramp span')).toHaveCount(6);
     }
     const labels = await page.locator('.hc-lbl').allTextContents();
     expect(labels).toEqual(['sessies', 'kg pr', 'sessies', 'kg pr', 'series', 'reps pr',
-      'series', 'reps pr', 'series', 'reps pr']);
+      'series', 'reps pr', 'series', 'reps pr', 'series', 'reps pr']);
   });
 
   test('rampIndex: gym en thuis 3 dagen per stap, calf 1 dag', async ({ page }) => {

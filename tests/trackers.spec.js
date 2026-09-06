@@ -2,8 +2,9 @@ const { test, expect } = require('@playwright/test');
 const { openApp, goto, visibleGlyphs } = require('./helpers');
 
 /* ============================================================
-   Push-ups en sit-ups — zelfde tracker als calf raises,
-   zonder standenrij, als vierde en vijfde stap van de paarse schaal.
+   Squats, push-ups en sit-ups — zelfde tracker als calf raises,
+   zonder standenrij, als vierde, vijfde en zesde stap van de
+   paarse schaal.
    ============================================================ */
 
 /** Vult een paar pogingen zodat PR's en wachttijd-kleuren data hebben. */
@@ -11,6 +12,7 @@ async function seedReps(page) {
   await page.evaluate(() => {
     const d = n => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
     store.setCalf([{ date: d(3), mode: 'L', reps: 20 }]);
+    store.setSquats([{ date: d(6), reps: 22 }]);
     store.setPushups([{ date: d(5), reps: 18 }, { date: d(2), reps: 24 }]);
     store.setSitups([{ date: d(1), reps: 30 }]);
     renderHome();
@@ -18,18 +20,18 @@ async function seedReps(page) {
   await page.waitForTimeout(250);
 }
 
-test.describe('Home: vijf activiteitsrijen', () => {
-  test('vijf rijen in de juiste volgorde, elk met chip en tellers', async ({ page }) => {
+test.describe('Home: zes activiteitsrijen', () => {
+  test('zes rijen in de juiste volgorde, elk met chip en tellers', async ({ page }) => {
     await openApp(page);
     await seedReps(page);
-    await expect(page.locator('.hero-row')).toHaveCount(5);
+    await expect(page.locator('.hero-row')).toHaveCount(6);
     expect(await page.locator('.hero-title').allTextContents())
-      .toEqual(['De Gym In', 'Thuis Gymmen', 'Calf raises', 'Push-ups', 'Sit-ups']);
-    await expect(page.locator('.wait-chip')).toHaveCount(5);
-    await expect(page.locator('.hero-count')).toHaveCount(10);
+      .toEqual(['De Gym In', 'Thuis Gymmen', 'Calf raises', 'Squats', 'Push-ups', 'Sit-ups']);
+    await expect(page.locator('.wait-chip')).toHaveCount(6);
+    await expect(page.locator('.hero-count')).toHaveCount(12);
   });
 
-  test('de vijf rijen vormen een paarse schaal van donker naar licht', async ({ page }) => {
+  test('de zes rijen vormen een paarse schaal van donker naar licht', async ({ page }) => {
     await openApp(page);
     const lum = c => {
       const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
@@ -37,7 +39,7 @@ test.describe('Home: vijf activiteitsrijen', () => {
     };
     const steps = await page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement);
-      return ['gym', 'home', 'calf', 'push', 'situp'].map(k => ({
+      return ['gym', 'home', 'calf', 'squat', 'push', 'situp'].map(k => ({
         a: cs.getPropertyValue('--' + k + '-a').trim(),
         b: cs.getPropertyValue('--' + k + '-b').trim(),
       }));
@@ -82,7 +84,7 @@ test.describe('Home: vijf activiteitsrijen', () => {
   test('de hero opent zijn tracker via de bestaande ghost-knop', async ({ page }) => {
     await openApp(page);
     // ghost-knoppen blijven in de DOM maar zijn onzichtbaar, net als bij calf
-    for (const id of ['open-calf', 'open-pushup', 'open-situp']) {
+    for (const id of ['open-calf', 'open-squat', 'open-pushup', 'open-situp']) {
       await expect(page.locator('#' + id)).toHaveCount(1);
       await expect(page.locator('#' + id)).toBeHidden();
     }
@@ -93,10 +95,10 @@ test.describe('Home: vijf activiteitsrijen', () => {
 });
 
 test.describe('Tracker-blokken in Thuis', () => {
-  test('beide trackers hebben readout, steppers en rep-rondjes', async ({ page }) => {
+  test('alle drie de trackers hebben readout, steppers en rep-rondjes', async ({ page }) => {
     await openApp(page);
     await goto(page, 'thuis');
-    for (const key of ['pushup', 'situp']) {
+    for (const key of ['squat', 'pushup', 'situp']) {
       const box = page.locator(`#${key}-box`);
       await expect(box.locator('.calf-readout')).toHaveCount(1);
       await expect(box.locator(`[data-rt-inc="${key}"]`)).toHaveCount(1);
@@ -105,6 +107,7 @@ test.describe('Tracker-blokken in Thuis', () => {
       expect(await box.locator('.rep-dot').count()).toBeGreaterThan(10);
     }
     // geen standenrij: die hoort alleen bij calf raises
+    await expect(page.locator('#squat-box .calf-modes')).toHaveCount(0);
     await expect(page.locator('#pushup-box .calf-modes')).toHaveCount(0);
     await expect(page.locator('#situp-box .calf-modes')).toHaveCount(0);
     await expect(page.locator('#calf-box .calf-modes')).toHaveCount(1);
@@ -128,6 +131,30 @@ test.describe('Tracker-blokken in Thuis', () => {
     expect(data.p[0].mode).toBeUndefined();   // geen standen
     expect(data.s.length).toBe(0);
     await expect(page.locator('#pushup-box .cr-num')).toHaveText('0');
+  });
+
+  test('squats slaan op in hun eigen sleutel en laten de buren met rust', async ({ page }) => {
+    await openApp(page);
+    await goto(page, 'thuis');
+    for (let i = 0; i < 6; i++) await page.click('[data-rt-inc="squat"]');
+    await page.waitForTimeout(200);
+    await expect(page.locator('#squat-box .cr-num')).toHaveText('6');
+    // de andere twee blijven ongemoeid
+    await expect(page.locator('#pushup-box .cr-num')).toHaveText('0');
+    await expect(page.locator('#situp-box .cr-num')).toHaveText('0');
+
+    await page.click('[data-rt-save="squat"]');
+    await page.waitForTimeout(400);
+    const data = await page.evaluate(() => ({
+      sq: JSON.parse(localStorage.getItem('gymwave_squats') || '[]'),
+      p: store.pushups(), s: store.situps(),
+    }));
+    expect(data.sq.length).toBe(1);
+    expect(data.sq[0].reps).toBe(6);
+    expect(data.sq[0].mode).toBeUndefined();   // geen standen
+    expect(data.p.length).toBe(0);
+    expect(data.s.length).toBe(0);
+    await expect(page.locator('#squat-box .cr-num')).toHaveText('0');
   });
 
   test('een rondje aantikken zet de teller op dat aantal', async ({ page }) => {
@@ -247,32 +274,35 @@ test.describe('Waffle van de beste serie', () => {
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell')).toHaveCount(9);
   });
 
-  test('alle drie de trackers hebben er een, in hun eigen tint', async ({ page }) => {
+  test('alle vier de trackers hebben er een, in hun eigen tint', async ({ page }) => {
     await openApp(page);
     await page.evaluate(() => {
       const d = i => new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
       store.setCalf(Array.from({ length: 5 }, (_, i) => ({ date: d(5 - i), mode: 'L', reps: 10 + i })));
+      store.setSquats(Array.from({ length: 4 }, (_, i) => ({ date: d(4 - i), reps: 13 + i })));
       store.setPushups(Array.from({ length: 9 }, (_, i) => ({ date: d(9 - i), reps: 10 + i })));
       store.setSitups(Array.from({ length: 2 }, (_, i) => ({ date: d(2 - i), reps: 20 + i })));
       route('thuis');
     });
     await page.waitForTimeout(500);
     const shots = {};
-    for (const box of ['calf-box', 'pushup-box', 'situp-box']) {
+    for (const box of ['calf-box', 'squat-box', 'pushup-box', 'situp-box']) {
       const w = page.locator(`#${box} .sess-waffle`);
       await expect(w).toHaveCount(1);
       shots[box] = await w.locator('.sw-cell.done').first()
         .evaluate(el => getComputedStyle(el).backgroundImage);
     }
     expect(shots['calf-box']).toContain('rgb(61, 18, 160)');
+    expect(shots['squat-box']).toContain('rgb(72, 22, 177)');
     expect(shots['pushup-box']).toContain('rgb(82, 27, 194)');
     expect(shots['situp-box']).toContain('rgb(104, 37, 218)');
-    // alle drie tonen hun eigen beste serie: 14, 18 en 21
+    // elk toont zijn eigen beste serie: 14, 16, 18 en 21
     await expect(page.locator('#calf-box .sess-waffle .sw-cell.done')).toHaveCount(14);
+    await expect(page.locator('#squat-box .sess-waffle .sw-cell.done')).toHaveCount(16);
     await expect(page.locator('#pushup-box .sess-waffle .sw-cell.done')).toHaveCount(18);
     await expect(page.locator('#situp-box .sess-waffle .sw-cell.done')).toHaveCount(21);
-    // en alle drie dezelfde kop
-    for (const box of ['calf-box', 'pushup-box', 'situp-box']) {
+    // en alle vier dezelfde kop
+    for (const box of ['calf-box', 'squat-box', 'pushup-box', 'situp-box']) {
       await expect(page.locator(`#${box} .sw-title`)).toHaveText('beste serie');
     }
   });
@@ -373,9 +403,9 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
     expect(await visibleGlyphs(page)).toEqual([]);
   });
 
-  test('de push-up- en sit-up-iconen bestaan in de sprite', async ({ page }) => {
+  test('de squat-, push-up- en sit-up-iconen bestaan in de sprite', async ({ page }) => {
     await openApp(page);
-    for (const n of ['pushup', 'situp']) {
+    for (const n of ['squat', 'pushup', 'situp']) {
       await expect(page.locator(`#icon-sprite symbol#i-${n}`)).toHaveCount(1);
     }
     const dangling = await page.evaluate(() => {
@@ -409,7 +439,7 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
     expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5);
   });
 
-  test('vijf rijen passen nog steeds binnen 360 px', async ({ page }) => {
+  test('zes rijen passen nog steeds binnen 360 px', async ({ page }) => {
     await openApp(page);
     await seedReps(page);
     for (const v of ['home', 'thuis']) {
@@ -431,11 +461,24 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
   test('export en import nemen de nieuwe oefeningen mee', async ({ page }) => {
     await openApp(page);
     await page.evaluate(() => {
+      store.setSquats([{ date: '2026-07-19', reps: 16 }]);
       store.setPushups([{ date: '2026-07-20', reps: 12 }]);
       store.setSitups([{ date: '2026-07-21', reps: 22 }]);
     });
     const keys = await page.evaluate(() => SYNC_KEYS);
+    expect(keys).toContain('gymwave_squats');
     expect(keys).toContain('gymwave_pushups');
     expect(keys).toContain('gymwave_situps');
+    // en de export draagt ze ook echt mee: het bestand zelf nakijken,
+    // niet alleen de sync-lijst
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.evaluate(() => exportData()),
+    ]);
+    const fs = require('fs');
+    const dump = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
+    expect(dump.squats).toEqual([{ date: '2026-07-19', reps: 16 }]);
+    expect(dump.pushups[0].reps).toBe(12);
+    expect(dump.situps[0].reps).toBe(22);
   });
 });

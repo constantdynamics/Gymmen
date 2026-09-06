@@ -696,8 +696,8 @@ test.describe("Hero's aan- en uitzetten", () => {
     await expect(page.locator('.view.active')).toHaveAttribute('id', 'view-home');
     await expect(page.locator('.hero-row:visible')).toHaveCount(0);
     await expect(page.locator('#home-last')).toBeVisible();
-    // alle vijf de ingangen staan er nog, als rustige knop
-    for (const id of ['open-gym', 'open-homeworkout', 'open-calf', 'open-pushup', 'open-situp']) {
+    // alle zes de ingangen staan er nog, als rustige knop
+    for (const id of ['open-gym', 'open-homeworkout', 'open-calf', 'open-squat', 'open-pushup', 'open-situp']) {
       await expect(page.locator('#' + id)).toBeVisible();
     }
     expect(errors).toEqual([]);
