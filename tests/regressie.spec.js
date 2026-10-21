@@ -87,12 +87,13 @@ test('sets aftikken houdt de voortgang bij', async ({ page }) => {
 test('thuis-workout: voorstel genereren en een oefening afvinken', async ({ page }) => {
   await openApp(page);
   await goto(page, 'homeworkout');
-  const cards = page.locator('.snack-card');
-  expect(await cards.count()).toBeGreaterThan(0);
-  await page.locator('.hw-check').first().click();
+  const cards = page.locator('#hw-plan .hw-card');
+  expect(await cards.count()).toBeGreaterThan(1);
+  await page.locator('#hw-plan .hw-card:not(.hw-warm) .mc-header').first().click();
+  await page.locator('#hw-plan .hw-card.open .done-btn').click();
   await page.waitForTimeout(400);
-  await expect(page.locator('.snack-card.hw-done')).toHaveCount(1);
-  await expect(page.locator('.hw-summary')).toContainText('1 van');
+  await expect(page.locator('#hw-plan .hw-card.done')).toHaveCount(1);
+  await expect(page.locator('#hw-progress')).toContainText('1 /');
 });
 
 test('thuis-workout: ander voorstel geeft een ander programma', async ({ page }) => {
@@ -105,19 +106,15 @@ test('thuis-workout: ander voorstel geeft een ander programma', async ({ page })
   expect(after).not.toEqual(before);
 });
 
-test('reeks-speler loopt de oefeningen af', async ({ page }) => {
+test('thuis-workout: afgevinkt zakt naar onderen, de volgende staat bovenaan', async ({ page }) => {
   await openApp(page);
   await goto(page, 'homeworkout');
-  await page.click('#hw-play');
+  const first = await page.locator('#hw-plan .hw-card:not(.hw-warm) .m-name').first().textContent();
+  await page.locator('#hw-plan .hw-card:not(.hw-warm) .mc-header').first().click();
+  await page.locator('#hw-plan .hw-card.open .done-btn').click();
   await page.waitForTimeout(500);
-  await expect(page.locator('#hwp-done')).toHaveCount(1);
-  await page.click('#hwp-done');
-  await page.waitForTimeout(500);
-  // speler blijft staan en is naar de volgende oefening geschoven
-  await expect(page.locator('#hwp-done')).toHaveCount(1);
-  await page.click('#hwp-stop');
-  await page.waitForTimeout(400);
-  await expect(page.locator('.snack-card').first()).toBeVisible();
+  await expect(page.locator('#hw-plan .hw-card .m-name').last()).toHaveText(first);
+  await expect(page.locator('#hw-plan .hw-card.open')).toHaveCount(0);
 });
 
 test('sterrenwinkel: saldo loopt op na een afgeronde sessie', async ({ page }) => {

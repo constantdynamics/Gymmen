@@ -9,7 +9,7 @@ Briefing voor een designronde om de app mooier te maken. Dit document beschrijft
 GymWave is een persoonlijke fitness-tracker voor één gebruiker, gebouwd als **één zelfstandig HTML-bestand** (`index.html`, geen build-stap, geen frameworks). De app draait op de telefoon (mobile-first, ~360 px breed) en begeleidt twee soorten trainingen:
 
 - **Gym-sessies**: vaste apparaten met gewichten, standen-instellingen, een audio-coach (spraak), rusttimers en een drukte-meter.
-- **Thuis-workouts**: een gegenereerd programma uit ~100 oefeningen op basis van beschikbare tijd + materiaal, met een reeks-speler, demo-video's (MuscleWiki), gewicht/reps-voorstellen en een beloningssysteem met sterren.
+- **Thuis-workouts**: een gegenereerd programma uit ~100 oefeningen op basis van beschikbare tijd + materiaal, in dezelfde kaartenlijst als de gym, met een warming-up, niveaus en alternatieven per oefening, demo-video's (MuscleWiki), gewicht/reps-voorstellen en een beloningssysteem met sterren.
 
 De huidige stijl is "synthwave/neon": donkere achtergronden, felle glow-kleuren, Orbitron-koppen, emoji als iconen. Dat mag mooier, strakker en volwassener — maar de energie en het gevoel van voortgang ("gains") moeten blijven.
 
@@ -72,11 +72,14 @@ De huidige stijl is "synthwave/neon": donkere achtergronden, felle glow-kleuren,
 - **🦿 Trainen met één been**, **📸 Benchmark-foto's**, **🧰 Wat heb je thuis?** (materiaal-checkboxes)
 - **📈 Voortgang thuis-workouts**: waffle-blokjes per oefening (zie 4.9)
 
-### 4.7 Thuis-workout (`#view-homeworkout`)
-- Setup-kaart: tijd-stepper (min), "🎲 Ander voorstel", samenvattingsregel, materiaal-uitklapper, **"▶️ Start workout — oefeningen achter elkaar"**
-- **Oefeningkaarten** (`.snack-card`), per kaart: naam + dosering (~min), focus/materiaal-tags, 🎥 Demo-video + 🔎 Video zoeken-knoppen, uitklapper "📋 Uitvoering, do's & don'ts" (3 bullet-secties + 🔊-voorleesknoppen), **🎯 Voorstel** ("3×10 @ 16 kg") met reps/kg-steppers, invoervelden reps/sec + kg, 5-kleuren gevoelsschaal, "Vorige: …"-regel met PR, duim-knoppen (👍 Vaker / ⭐ Elke keer / 👎 Niet meer), Afvinken-knop
-- Voortgang-kaart onderaan ("3 van 8 afgevinkt"), "Workout afronden 🏁", "Workout wissen"
-- **Reeks-speler** (vervangt de lijst na ▶️): kop "Oefening 3 van 8" + 🔊/🔇-knop, één grote oefeningkaart (zelfde elementen, uitvoering opengeklapt, ⏱-timer met countdown bij seconden-oefeningen), knoppen "✓ Klaar — volgende" / "⏭ Overslaan" / "⏹ Stop reeks"; eindkaart "🏁 Reeks klaar!"
+### 4.7 Thuis-workout (`#view-homeworkout`) — zelfde opbouw als de gym-sessie
+- Kop zoals de gym: naamveld, 🔊/🔇 audio-coach-knop, voortgangstag "3 / 9" (+ "· 1 overgeslagen"), rusttimer-banner
+- Instellingen-uitklapper (open tot de eerste kaart is afgevinkt): tijd-stepper (min), "🎲 Ander voorstel", warming-up 0 / 3 / 5 min, samenvattingsregel, materiaal-uitklapper
+- **Kaartenlijst** (`.hw-card`, dezelfde ticketkaart als `.machine-card`): alles dicht, hooguit één open; te doen bovenaan, overgeslagen daaronder, afgevinkt onderaan; na Klaar/Overslaan/Terug scrolt het scherm naar boven
+  - Dichtgeklapt: naam, gewichtsvierkantje (kg, of reps/sec zonder gewicht; rand = gevoel van vorige keer), sets×reps, ✓ / overgeslagen
+  - Opengeklapt: niveaulabel (Novice / Beginner / Intermediate / Advanced, groen → rood, aantikbaar om te corrigeren), focus/materiaal-tags, dosering, "in plaats van …"-regel bij een alternatief, geschiedenis-strip met 🏆, advies-badge met "Zet op …", demo-video-knoppen, uitvoering/do's & don'ts, groot cijfer met −/+ en slider (kettlebell als stapel), ⏱-timer bij seconden-oefeningen, sets & reps met set-rondjes, gevoelsschaal, 👍 Vaker / ⭐ Elke keer / 👎 Niet meer, brede knop "Alternatief" (kies niveau → de app wisselt meteen, daarna "alleen vandaag of voortaan?"), actierij Terug · Zwaarder · Klaar · Overslaan
+- **Warming-up-kaart** bovenaan: 6 (3 min) of 10 (5 min) bewegingen van 30 sec, mix afgestemd op de oefeningen van die dag, begeleide timer met voorlezen, per beweging een wisselknop
+- "Workout afronden 🏁" en "Workout weggooien" onderaan
 
 ### 4.8 Stats (`#view-stats`)
 - **🏋️ GYM / 🏠 THUIS**-schakelaar (filter-pills)
@@ -120,9 +123,10 @@ De huidige stijl is "synthwave/neon": donkere achtergronden, felle glow-kleuren,
 | Gevoelsschaal | `.feel-row` + `.feel-scale` + `.feel-btn` (5 kleuren) | sessie + thuis |
 | Uitklapper | `details.tip` / `.inline-tip` | overal |
 | Voorleesrij | `.speak-row` | sessie, thuis, tips |
-| Oefeningkaart thuis | `.snack-card` (+ `.hw-done`) | thuis-workout, Thuis-tab |
-| 🎯 Voorstel | `.hw-target` | thuis-workout |
-| Timer | `.hw-timer-big` | reeks-speler |
+| Oefeningkaart thuis | `.hw-card` (+ `.open`, `.done`, `.skipped`, `.hw-warm`) | thuis-workout |
+| Beweegsnack-kaart | `.snack-card` (+ `.sn-done`) | Thuis-tab |
+| Niveaulabel + keuze | `.lvl-badge`, `.lvl-chip` | thuis-workout |
+| Timer | `.hw-timer-big` | thuis-workout (seconden, warming-up) |
 | Beloning-chips + sterren | `.inc-chip`, `.inc-stars`, `.inc-star.full` | Thuis |
 | Staafgrafiek | `.wave-chart` + `.wave-bar` | Stats |
 | Waffle-voortgang | `.waffle` + `.waffle-cell` + `.star` | Stats, Thuis |

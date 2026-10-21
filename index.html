@@ -247,7 +247,7 @@ input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow
 .coach-mute-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--primary); background: rgba(0,0,0,0.4); font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px color-mix(in srgb, var(--glow) 50%, transparent); }
 .coach-mute-btn.off { border-color: rgba(120,120,140,0.5); box-shadow: none; opacity: 0.6; filter: grayscale(0.5); }
 .m-name { font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); }
-.machine-card { padding: 0; }
+.machine-card, .hw-card { padding: 0; }
 .mc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; cursor: pointer; }
 .mc-header .m-name { font-size: 1.25rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 14px color-mix(in srgb, var(--glow) 55%, transparent); margin: 0; }
 .mc-header .m-hint { display: flex; align-items: center; gap: 10px; font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 0.95rem; opacity: 0.7; flex-shrink: 0; }
@@ -263,7 +263,7 @@ input.session-name-input:focus { border-bottom-color: var(--primary); box-shadow
 .w-badge.none { border-style: dashed; color: var(--text-body); }
 .mc-header .m-sr { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.85rem; color: var(--text-label); }
 .mc-header .chev { font-size: 1.1rem; transition: transform 0.3s ease; opacity: 0.8; }
-.machine-card.open .mc-header .chev { transform: rotate(180deg); color: var(--primary); }
+.machine-card.open .mc-header .chev, .hw-card.open .mc-header .chev { transform: rotate(180deg); color: var(--primary); }
 .mc-body { padding: 0 18px 18px; animation: slideIn 0.3s ease; }
 .m-note { font-size: 1rem; opacity: 0.78; font-weight: 600; line-height: 1.35; margin-bottom: 14px; border-left: 3px solid color-mix(in srgb, var(--accent) 70%, transparent); padding-left: 12px; }
 
@@ -282,10 +282,10 @@ input[type="range"] { touch-action: pan-y; }
 
 /* Klaar = matte kaart met groen vinkje; géén grayscale meer, dat maakte de
    tekst onleesbaar (§3.3). Geskipt = streepjesrand op 22% wit. */
-.machine-card.done { background: var(--surface-2); border-color: var(--line); box-shadow: none; animation: flipDone 0.5s ease; }
-.machine-card.done .m-name { color: var(--text-body); }
-.machine-card.skipped { background: rgba(0,0,0,0.35); border: 1px dashed rgba(255,255,255,0.22); box-shadow: none; }
-.machine-card.skipped .m-name { color: var(--text-label); }
+.machine-card.done, .hw-card.done { background: var(--surface-2); border-color: var(--line); box-shadow: none; animation: flipDone 0.5s ease; }
+.machine-card.done .m-name, .hw-card.done .m-name { color: var(--text-body); }
+.machine-card.skipped, .hw-card.skipped { background: rgba(0,0,0,0.35); border: 1px dashed rgba(255,255,255,0.22); box-shadow: none; }
+.machine-card.skipped .m-name, .hw-card.skipped .m-name { color: var(--text-label); }
 .skip-tag { font-family: "Orbitron", sans-serif; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
 .photo-banner { font-size: 0.9rem; font-weight: 600; line-height: 1.4; opacity: 0.85; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
 .photo-ask { font-size: 0.92rem; font-weight: 600; line-height: 1.4; margin-bottom: 12px; padding: 8px 12px; border-radius: var(--field-radius); border: 1.5px dashed color-mix(in srgb, var(--accent) 60%, transparent); background: rgba(0,0,0,0.25); }
@@ -793,18 +793,18 @@ label { color: var(--text-body); opacity: 1; }
 
 /* ---- §3.3 Machine-/oefeningkaart: ticket-vormtaal ---------- */
 /* Alleen deze twee kaarten krijgen de afgeschuinde hoek; de rest blijft rond. */
-.machine-card, .snack-card {
+.machine-card, .hw-card, .snack-card {
   background: var(--surface-2); border: 1px solid var(--line);
   border-radius: 0; clip-path: var(--ticket-clip); padding: 0; overflow: hidden;
 }
-.machine-card.open, .snack-card {
+.machine-card.open, .hw-card.open, .snack-card {
   border-color: rgba(123,47,255,0.5); box-shadow: 0 0 34px rgba(123,47,255,0.2);
 }
 .mc-header, .snack-card .sn-head {
   padding: 12px 15px; gap: 10px;
   background: linear-gradient(90deg, rgba(123,47,255,0.34), rgba(255,45,120,0.14));
 }
-.machine-card:not(.open) .mc-header { background: transparent; }
+.machine-card:not(.open) .mc-header, .hw-card:not(.open) .mc-header { background: transparent; }
 .mc-header .m-name, .snack-card .sn-name {
   font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 13px; line-height: 1.25;
   letter-spacing: 0.8px; color: #fff; text-shadow: none;
@@ -817,7 +817,7 @@ label { color: var(--text-body); opacity: 1; }
 .mc-header .m-hint { flex-shrink: 0; max-width: 55%; justify-content: flex-end; flex-wrap: wrap; }
 .mc-header .m-hint { gap: 8px; font-size: 0.85rem; color: var(--text-body); opacity: 1; }
 .mc-header .chev { display: flex; align-items: center; transition: transform 0.3s ease; }
-.machine-card.open .mc-header .chev { transform: rotate(180deg); color: #c78bff; }
+.machine-card.open .mc-header .chev, .hw-card.open .mc-header .chev { transform: rotate(180deg); color: #c78bff; }
 .done-collapsed .chk, .mc-header .chk { display: inline-flex; align-items: center; color: #4dffa6; }
 .skip-tag { display: inline-flex; align-items: center; gap: 7px; font-family: "Rajdhani", sans-serif; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-label); opacity: 1; }
 .mc-body { padding: 15px 15px 0; }
@@ -1172,6 +1172,66 @@ input[type="range"].weight-slider::-webkit-slider-thumb,
 .rep-key { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid currentColor; vertical-align: -1px; }
 .li-tri { position: absolute; left: 2px; top: 13px; border-left: 5px solid #9d55ff; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
 
+/* ---- Thuis-workout: dezelfde ticketkaart als de gym (.hw-card naast .machine-card) ---- */
+.hw-card .mc-body > .snack-tags:first-child { margin-top: 0; }
+.hw-meta { align-items: center; }
+.lvl-badge {
+  display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 14px;
+  border-radius: 22px; border: 1.5px solid var(--lvl); background: color-mix(in srgb, var(--lvl) 18%, transparent);
+  color: #fff; font-family: "Rajdhani", sans-serif; font-weight: 800; font-size: 0.85rem;
+  letter-spacing: 0.8px; text-transform: uppercase; cursor: pointer;
+}
+/* .snack-tags span geeft tags een pil-vorm; het bolletje in het niveaulabel houdt zijn eigen vorm */
+.hw-meta .lvl-badge .lvl-dot { width: 10px; height: 10px; padding: 0; border-radius: 50%; background: var(--lvl); box-shadow: 0 0 8px var(--lvl); flex-shrink: 0; }
+.hw-dose { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--text-body); margin: 8px 0 6px; }
+.hw-lvl-pick, .hw-alt-panel { margin: 4px 0 14px; padding: 12px; border: 1px dashed var(--line-strong); background: rgba(0,0,0,0.25); }
+.hw-pick-q { font-weight: 800; font-size: 0.95rem; color: #fff; margin-bottom: 10px; }
+.hw-pick-note { font-size: 0.85rem; font-weight: 600; line-height: 1.4; color: var(--text-body); margin-top: 10px; }
+.lvl-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lvl-chip {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 54px; padding: 6px 4px; border-radius: 12px; border: 2px solid var(--lvl);
+  background: color-mix(in srgb, var(--lvl) 20%, transparent); color: #fff; cursor: pointer;
+  font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 0.74rem; letter-spacing: 0.4px;
+}
+.lvl-chip.sel { background: var(--lvl); color: #120626; box-shadow: 0 0 14px color-mix(in srgb, var(--lvl) 60%, transparent); }
+.lvl-chip:disabled { opacity: 0.4; border-style: dashed; cursor: not-allowed; }
+.lvl-chip .lvl-n { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.3px; }
+.hw-alt-btn { margin: 2px 0 12px; }
+.hw-swap-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 0 12px; padding: 9px 12px; border: 1px dashed rgba(123,47,255,0.55); background: rgba(123,47,255,0.1); font-size: 0.92rem; font-weight: 600; color: var(--text-body); }
+.hw-swap-line > span { flex: 1 1 150px; min-width: 0; }
+.hw-swap-line b { color: #fff; }
+.hw-card .hw-rate-row { margin: 4px 0 12px; }
+.hw-card .feel-row { margin-top: 2px; }
+.hw-card .hw-timer-big:empty { display: none; }
+.hw-setup-box .sr-row { margin-top: 0; }
+.hw-warm-pick { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 12px 0 10px; }
+.hw-warm-pick .st-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: var(--head-font); color: var(--text-label); }
+.hw-warm-pick .unit-toggle { margin-top: 0; }
+.hw-warm-pick .unit-toggle button { min-height: 44px; padding: 0 14px; font-size: 0.85rem; }
+.hw-setup-sum { font-weight: 600; font-size: 0.92rem; line-height: 1.4; }
+.hw-setup-note { margin: 8px 0 12px; text-align: left; }
+.hw-footer { margin-top: 4px; }
+/* Warming-up: één kaart met de bewegingen als genummerde rij en de timer erboven */
+.hw-warm-now { text-align: center; margin: 0 0 12px; padding: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(123,47,255,0.1); }
+.hw-warm-cur { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 1rem; line-height: 1.3; color: #fff; min-height: 1.3em; }
+.hw-warm-now .hw-timer-big { margin: 4px 0; }
+.hw-warm-step { font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-label); }
+.hw-warm-ctrl { margin: 8px 0 14px; }
+.hw-warm-ctrl .btn { flex: 1 1 0; }
+.hw-warm-list { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.hw-warm-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 10px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); }
+.hw-warm-item.cur { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.hw-warm-item.done { opacity: 0.72; }
+.hw-warm-n { flex: 0 0 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255,255,255,0.08); color: #fff; font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 0.8rem; margin-top: 2px; }
+.hw-warm-item.done .hw-warm-n, .hw-warm-item.cur .hw-warm-n { background: #7b2fff; }
+.hw-warm-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.hw-warm-txt b { font-weight: 800; font-size: 1rem; color: #fff; }
+.hw-warm-txt > span { font-size: 0.9rem; font-weight: 600; line-height: 1.35; color: var(--text-body); }
+.hw-warm-txt .hw-warm-was { font-size: 0.82rem; color: var(--text-label); }
+.hw-warm-swap { flex: 0 0 44px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: #c78bff; cursor: pointer; }
+.hw-warm-swap:active { transform: scale(0.94); }
+
 /* Dim-states van afgeronde items: nooit onder 66% helderheid (§2). */
 .snack-card.sn-done { opacity: 0.72; }
 .goal-card.done-goal { opacity: 0.72; }
@@ -1224,6 +1284,7 @@ body::after { content: none; }
 <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M4 10h3l4-3v10l-4-3H4zM15.5 10l4.5 4M20 10l-4.5 4"></path></symbol>
 <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M7 20L12 3.6 17 20zM5.5 20h13M12 8.6v7.2M9.4 14.4h5.2" stroke-width="1.5"></path></symbol>
 <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6.8 6.8h10.4v10.4H6.8z"></path></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.6 6v12M15.4 6v12"></path></symbol>
 <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 19.6C7 16.1 4 13.1 4 9.9A3.9 3.9 0 0 1 12 7.7 3.9 3.9 0 0 1 20 9.9c0 3.2-3 6.2-8 9.7z"></path></symbol>
 <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.2 18.5h9.6a3.6 3.6 0 0 0 .3-7.2 5.2 5.2 0 0 0-9.9-1.3 3.7 3.7 0 0 0 0 8.5z"></path></symbol>
 <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M12 4.2a2.1 2.1 0 0 1 2.1 2.1v7.3a3.7 3.7 0 1 1-4.2 0V6.3A2.1 2.1 0 0 1 12 4.2z"></path><path d="M12 9.5v5.6" stroke-width="1.5"></path></symbol>
@@ -1382,8 +1443,12 @@ body::after { content: none; }
 
   <!-- ============ THUIS-WORKOUT ============ -->
   <section id="view-homeworkout" class="view">
-    <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:6px;">Thuis-workout</h2>
-    <p class="reset-note">Jouw materiaal + jouw tijd geven elke keer een vers, gevarieerd programma.</p>
+    <div class="session-header">
+      <input type="text" id="hw-name" class="session-name-input" placeholder="Naam je workout…" maxlength="40" />
+      <button class="coach-mute-btn" id="hw-coach-toggle" title="Audio-coach aan/uit"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sound"></use></svg></button>
+      <div class="progress-tag" id="hw-progress">0 / 0</div>
+    </div>
+    <div class="rest-banner" id="hw-rest-banner"></div>
     <div id="hw-setup"></div>
     <div id="hw-plan"></div>
   </section>
@@ -2123,6 +2188,143 @@ const EXERCISE_STEPS = {
   "Heel taps": ["Lig op je rug met je knieën gebogen boven je heupen", "Druk je onderrug in de mat en houd hem daar", "Tik om en om één hiel rustig op de mat", "Adem uit bij elke tik en houd het tempo laag"],
   "Incline shoulder taps": ["Zet je handen op een stoel of verhoging en loop naar achteren tot plank-houding", "Zet je voeten iets breder voor extra balans", "Tik met één hand je tegenovergestelde schouder aan terwijl je heupen stil blijven", "Zet de hand terug en wissel van kant"],
 };
+/* ============================================================
+   NIVEAUS — dezelfde vier namen als MuscleWiki bij de demo-video's
+   MuscleWiki is vanuit de app niet uit te lezen, dus dit zijn inschattingen in
+   dezelfde stijl: novice = eenvoudig en stabiel, intermediate = meer balans,
+   coördinatie of gewicht, advanced = zwaar én technisch. Beginner zit ertussenin.
+   Klopt er een niet, dan tik je in de kaart op het niveau; jouw keuze wint altijd.
+   ============================================================ */
+const LEVELS = ["novice", "beginner", "intermediate", "advanced"];
+const LEVEL_LABELS = { novice: "Novice", beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" };
+const LEVEL_COLORS = { novice: "#22c55e", beginner: "#eab308", intermediate: "#f97316", advanced: "#ef4444" };
+const SNACK_LEVELS = {
+  "Staande calf raise (twee benen)": "novice",
+  "Seated calf raise met kettlebell": "novice",
+  "Squat (lichaamsgewicht)": "novice",
+  "Chair squat (opstaan-zitten)": "novice",
+  "Wall sit": "novice",
+  "Glute bridge": "novice",
+  "Clamshell": "novice",
+  "Squat met band": "novice",
+  "Glute kickback met band": "novice",
+  "Sumo squat": "novice",
+  "Heel taps": "novice",
+  "Dead bug": "novice",
+  "Bird dog": "novice",
+  "Plank": "novice",
+  "Standing knee raise + twist": "novice",
+  "Dumbbell side bend": "novice",
+  "Superman": "novice",
+  "Good morning (lichaamsgewicht)": "novice",
+  "Reverse snow angels": "novice",
+  "Band pull-apart": "novice",
+  "Row met weerstandsband": "novice",
+  "Dumbbell shrug": "novice",
+  "Chest-supported row (schuine bank)": "novice",
+  "Wall push-up": "novice",
+  "Biceps curl met weerstandsband": "novice",
+  "Hammer curl": "novice",
+  "Concentration curl": "novice",
+  "Seated dumbbell curl (bank)": "novice",
+  "Triceps pushdown met band": "novice",
+  "Overhead press met band": "novice",
+  "Dumbbell floor press": "novice",
+  "Kettlebell deadlift": "novice",
+  "Farmer's walk (dumbbells)": "novice",
+  "Marcheren met hoge knieën": "novice",
+  "Jumping jacks": "novice",
+  "Knee-to-wall enkelmobilisatie": "novice",
+  "Kuitstretch tegen de muur": "novice",
+  "Calf raise met dumbbells": "beginner",
+  "Zijwaartse bandwandeling (monster walk)": "beginner",
+  "Squat pulse": "beginner",
+  "Marching glute bridge": "beginner",
+  "Single-leg glute bridge": "beginner",
+  "Goblet squat": "beginner",
+  "Step-up": "beginner",
+  "Step-up op de bank": "beginner",
+  "Hip thrust (fitnessbank)": "beginner",
+  "Band pull-through": "beginner",
+  "Statische dumbbell lunge": "beginner",
+  "Split squat (voet op bank optioneel)": "beginner",
+  "Reverse crunch": "beginner",
+  "Bicycle crunch": "beginner",
+  "Russian twist": "beginner",
+  "Side plank": "beginner",
+  "Pallof press": "beginner",
+  "Band woodchopper": "beginner",
+  "Suitcase carry": "beginner",
+  "Kettlebell around-the-body pass": "beginner",
+  "Incline shoulder taps": "beginner",
+  "Swimmer": "beginner",
+  "Face pull met band": "beginner",
+  "Kettlebell row (steunend)": "beginner",
+  "One-arm dumbbell row (fitnessbank)": "beginner",
+  "Incline push-up": "beginner",
+  "Triceps kickback": "beginner",
+  "Overhead triceps extension": "beginner",
+  "Side raise + front raise combo": "beginner",
+  "Staande dumbbell shoulder press": "beginner",
+  "Seated shoulder press (fitnessbank)": "beginner",
+  "Dumbbell upright row": "beginner",
+  "Dumbbell bench press (fitnessbank)": "beginner",
+  "Kettlebell halo": "beginner",
+  "Kettlebell floor press": "beginner",
+  "Band biceps curl 21s": "beginner",
+  "Kettlebell front rack carry": "beginner",
+  "March met dumbbells (loaded march)": "beginner",
+  "Schaduwboksen": "beginner",
+  "World's greatest stretch": "beginner",
+  "Single-leg calf raise": "intermediate",
+  "Excentrische calf raise op een traptrede": "intermediate",
+  "Dumbbell romanian deadlift": "intermediate",
+  "Reverse lunge met dumbbells": "intermediate",
+  "Lateral lunge": "intermediate",
+  "Kettlebell goblet reverse lunge": "intermediate",
+  "Split squat met stoel": "intermediate",
+  "Kettlebell march (rack hold)": "intermediate",
+  "Bent-over dumbbell row": "intermediate",
+  "Dumbbell pullover (fitnessbank)": "intermediate",
+  "Arnold press": "intermediate",
+  "Dumbbell chest fly (fitnessbank)": "intermediate",
+  "Bench dips (fitnessbank)": "intermediate",
+  "Decline push-up (voeten op bank)": "intermediate",
+  "Dumbbell thruster": "intermediate",
+  "Kettlebell swing": "intermediate",
+  "Boks-combinaties met tempo": "intermediate",
+  "Bulgarian split squat (fitnessbank)": "advanced",
+  "Kettlebell single-leg deadlift": "advanced",
+  "Single-arm kettlebell press": "advanced",
+  "Renegade row": "advanced",
+  "Halve Turkish get-up": "advanced",
+};
+/* Warming-up voor thuis: alles past op twee vierkante meter, niets springt (ook veilig
+   bij achillesherstel). regions = de spiergroepen uit SNACK_POOL waar een beweging bij
+   past; daarop kiest de app elke keer een mix die bij de oefeningen van die dag hoort.
+   pulse = brengt je hartslag rustig omhoog en komt altijd eerst. order = van boven naar
+   beneden door je lijf. half = wat de coach halverwege de 30 seconden zegt. */
+const WARMUP_MOVES = [
+  { name: "Marcheren op de plaats", how: "Til je knieën om en om op en zwaai je armen actief mee. Zet je voeten zacht neer.", regions: ["algemeen", "benen"], pulse: true, order: 0 },
+  { name: "Knieheffen met tik", how: "Til om en om je knie tot heuphoogte en tik hem aan met je andere hand.", regions: ["algemeen", "core", "benen"], pulse: true, order: 0 },
+  { name: "Rustig schaduwboksen", how: "Stoot ontspannen om en om naar voren, knieën zacht en voeten op hun plek. Geen sprongetjes.", regions: ["algemeen", "schouders/armen"], pulse: true, order: 0 },
+  { name: "Nek losmaken", how: "Kijk rustig over je linker- en rechterschouder en knik daarna langzaam ja. Geen cirkels, geen kracht.", regions: ["schouders/armen", "rug"], order: 1 },
+  { name: "Schouders rollen", how: "Rol je schouders in grote, langzame cirkels naar achteren.", regions: ["schouders/armen", "rug"], order: 2, half: "En nu naar voren" },
+  { name: "Armen zwaaien", how: "Maak grote cirkels met gestrekte armen naar voren. Begin klein en maak ze steeds groter.", regions: ["schouders/armen", "rug"], order: 3, half: "En nu naar achteren" },
+  { name: "Armen kruisen en openen", how: "Zwaai je armen voor je borst over elkaar heen en daarna wijd open, alsof je jezelf een knuffel geeft.", regions: ["schouders/armen", "rug"], order: 3 },
+  { name: "Schouderbladen knijpen", how: "Houd je armen in een W naast je lichaam, knijp je schouderbladen naar elkaar toe en laat rustig los.", regions: ["rug", "schouders/armen"], order: 3 },
+  { name: "Polsen en handen losmaken", how: "Draai rondjes met je polsen en maak afwisselend een vuist en wijd gespreide vingers.", regions: ["schouders/armen", "core"], order: 4, half: "Andersom draaien" },
+  { name: "Romp draaien", how: "Voeten op heupbreedte, armen los. Draai je bovenlichaam rustig naar links en rechts en laat je armen meezwaaien.", regions: ["core", "rug"], order: 5 },
+  { name: "Zijwaarts reiken", how: "Reik met één arm over je hoofd naar de andere kant en wissel rustig af. Je heupen blijven stil.", regions: ["core", "rug"], order: 5 },
+  { name: "Heupcirkels", how: "Handen in je zij en draai grote, rustige cirkels met je heupen.", regions: ["benen", "core"], order: 6, half: "Andersom" },
+  { name: "Good mornings zonder gewicht", how: "Handen op je borst en knieën zacht. Buig met een rechte rug vanuit je heupen naar voren en kom rustig terug.", regions: ["rug", "benen"], order: 6 },
+  { name: "Heup openen", how: "Til je knie op en draai hem naar buiten open, alsof je over een hekje stapt. Om en om.", regions: ["benen", "core"], order: 7 },
+  { name: "Beenzwaaien voor en achter", how: "Hand tegen de muur. Zwaai één been ontspannen naar voren en naar achteren.", regions: ["benen"], order: 8, half: "Ander been" },
+  { name: "Beenzwaaien opzij", how: "Gezicht naar de muur, handen ertegen. Zwaai één been voor je langs naar links en naar rechts.", regions: ["benen"], order: 8, half: "Ander been" },
+  { name: "Halve squats", how: "Armen naar voren, zak rustig half door je knieën en kom weer omhoog. Je hielen blijven op de grond.", regions: ["benen"], order: 9 },
+  { name: "Enkelcirkels", how: "Hand tegen de muur, sta op één been en draai rondjes met je andere voet.", regions: ["kuiten", "benen"], order: 10, half: "Andere voet" },
+  { name: "Rustig op je tenen", how: "Kom langzaam op je tenen en zak gecontroleerd terug. Niet veren, gewoon rustig.", regions: ["kuiten"], order: 10 },
+];
 function exVideo(s) { return EXERCISE_VIDEOS[s.name] || null; }
 function hwStepsHtml(s, open) {
   const steps = EXERCISE_STEPS[s.name] || (s.description ? [s.description] : []);
@@ -2144,47 +2346,6 @@ function bindHwSpeak(root, s) {
   wire(".hw-speak-steps", "Zo voer je hem uit. " + steps.join(". ") + ".");
   wire(".hw-speak-dos", "De do's. " + (s.tips || []).join(". ") + ".");
   wire(".hw-speak-donts", "De don'ts, dit gaat vaak mis. " + (s.mistakes || []).join(". ") + ".");
-}
-/* Gevoelsschaal thuis (zelfde 5 kleuren als de gym): groen/donkergroen vraagt of het
-   volgende keer zwaarder mag. Omlaag gaat je doel nooit vanzelf — net als in de gym
-   bepaal je dat zelf, met de kleur van vorige keer als leidraad. */
-function hwFeelHtml(feel) {
-  return `<div class="feel-row" style="margin-top:10px;margin-bottom:4px;">
-    <span class="feel-lbl">Hoe voelde dit?</span>
-    <div class="feel-scale">${[1, 2, 3, 4, 5].map(i => `<button class="feel-btn ${feel === i ? "sel" : ""}" data-feel="${i}" style="background:${FEEL_COLORS[i]};" title="${FEEL_LABELS[i]}">${feel === i ? icon("check",17) : ""}</button>`).join("")}</div>
-    <div class="feel-caption">${feel ? FEEL_LABELS[feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)"}</div>
-  </div>`;
-}
-function bindHwFeel(root, s, metric) {
-  root.querySelectorAll("[data-feel]").forEach(fb => fb.onclick = () => {
-    const val = parseInt(fb.dataset.feel);
-    const w = store.homeWorkout(); if (!w) return;
-    const rr = Object.assign({ metric }, w.results[s.name] || {});
-    rr.feel = rr.feel === val ? null : val;
-    w.results[s.name] = rr; store.setHomeWorkout(w);
-    root.querySelectorAll("[data-feel]").forEach(b2 => { b2.classList.toggle("sel", parseInt(b2.dataset.feel) === rr.feel); b2.innerHTML = parseInt(b2.dataset.feel) === rr.feel ? icon("check",17) : ""; });
-    const cap = root.querySelector(".feel-caption");
-    if (cap) cap.textContent = rr.feel ? FEEL_LABELS[rr.feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)";
-    hwFeelFollowUp(s, rr.feel, metric);
-  });
-}
-function hwFeelFollowUp(s, feel, metric) {
-  if (!feel || feel <= 3) return; // rood en oranje doen bij het aantikken niets meer
-  const sug = hwSuggest(s);
-  const unit = metric === "sec" ? "seconden" : "herhalingen";
-  {
-    if (hwWeighted(s)) {
-      const nextKg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, sug.kg) : Math.round((sug.kg + (feel === 5 ? 1 : 0.5)) * 2) / 2;
-      if (nextKg !== sug.kg) showModal("Zwaarder de volgende keer?", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${nextKg} kg proberen (nu ${sug.kg} kg)?`, () => {
-        setHwTarget(s.name, { kg: nextKg }); toast(`Genoteerd! Volgende keer: ${nextKg} kg`);
-      });
-    } else {
-      const nextReps = sug.reps + (metric === "sec" ? 5 : 2);
-      showModal("Meer de volgende keer?", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${nextReps} ${unit} proberen (nu ${sug.reps})?`, () => {
-        setHwTarget(s.name, { reps: nextReps }); toast(`Genoteerd! Volgende keer: ${nextReps} ${unit}`);
-      });
-    }
-  }
 }
 function exVideoSearch(s) {
   const q = String(s.name).replace(/\(.*?\)/g, "").trim();
@@ -2749,19 +2910,20 @@ const restTimer = {
     // midden in de volgende set nog een aanmoediging om tot het uiterste te gaan
     clearTimeout(this._encourageT);
     this._encourageT = setTimeout(() => {
-      if (currentSession && isView("session") && expandedMachineId) voiceCoach.say("duringSet", {}, { minGap: 20000 });
+      if ((currentSession && isView("session") && expandedMachineId) || (isView("homeworkout") && hwExpanded)) voiceCoach.say("duringSet", {}, { minGap: 20000 });
     }, 15000);
   },
   stop() { clearInterval(this.interval); this.interval = null; this.left = 0; clearTimeout(this._encourageT); this.render(); },
+  // De gym en de thuis-workout hebben elk een eigen banner; we schrijven ze allebei.
   render() {
-    const b = document.getElementById("rest-banner");
-    if (!b) return;
-    if (this.left > 0) {
-      const hint = garmin.connected ? hrRestHint() : "";
-      b.classList.add("active");
-      b.innerHTML = `<span>${icon("clock",16)}Rust</span><span class="rest-time">${this.left}s</span>${hint}<button class="btn small ghost" id="rest-skip">${icon("play",14)}Sla over</button>`;
-      b.querySelector("#rest-skip").onclick = () => this.finish();
-    } else { b.classList.remove("active"); b.innerHTML = ""; }
+    document.querySelectorAll(".rest-banner").forEach(b => {
+      if (this.left > 0) {
+        const hint = garmin.connected ? hrRestHint() : "";
+        b.classList.add("active");
+        b.innerHTML = `<span>${icon("clock",16)}Rust</span><span class="rest-time">${this.left}s</span>${hint}<button class="btn small ghost rest-skip"${b.id === "rest-banner" ? ' id="rest-skip"' : ""}>${icon("play",14)}Sla over</button>`;
+        b.querySelector(".rest-skip").onclick = () => this.finish();
+      } else { b.classList.remove("active"); b.innerHTML = ""; }
+    });
   },
 };
 function hrRestHint() {
@@ -3027,6 +3189,7 @@ function route(view) {
   document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view === view));
   window.scrollTo(0, 0);
   if (view !== "session" && metronome.running) metronome.stop();
+  if (view !== "homeworkout") { if (hwWarm.running) hwWarm.paused = true; if (hwSec.name) hwSecStop(); }
   if (view === "home") renderHome();
   if (view === "session") renderSession();
   if (view === "coach") renderCoachChat();
@@ -3305,12 +3468,12 @@ function renderHeroRows(sessions, homeSess) {
 
   // --- rij 2: thuis ---
   const hwToday = store.homeWorkout();
-  const busyHome = hwToday && hwToday.date === todayISO() && (hwToday.playing || Object.keys(hwToday.results || {}).length);
+  const busyHome = hwToday && hwToday.date === todayISO() && ((hwToday.warmup && hwToday.warmup.done) || Object.keys(hwToday.results || {}).length);
   const home = document.getElementById("enter-home");
   const planN = hwToday && hwToday.plan ? hwToday.plan.length : 0;
   home.innerHTML = heroBtnHtml("house",
     busyHome ? "Verder met thuis-workout" : "Thuis Gymmen",
-    planN ? `${planN} oefeningen · ${hwPlanMinutes(hwToday)} min` : "stel je eigen workout samen");
+    planN ? `${planN} oefeningen · ${hwTotalMinutes(hwToday)} min` : "stel je eigen workout samen");
   const lastHome = homeSess.length ? homeSess[homeSess.length - 1].date : null;
   home.parentElement.querySelector(".hero-side").innerHTML =
     waitChipHtml(daysSinceISO(lastHome), 3) + heroCountsHtml("sessies", homeSess.length, "kg pr", homePr, "Zwaarste thuis-workout: alle gewichten van één workout bij elkaar opgeteld");
@@ -4549,14 +4712,16 @@ function updateProgress() {
 }
 /* Audio-coach direct vanuit de sessie aan- of uitzetten */
 function renderSessionCoachBtn() {
-  const btn = document.getElementById("sess-coach-toggle");
-  if (!btn) return;
   const on = store.coach().enabled;
-  btn.innerHTML = on ? icon("sound",20) : icon("sound-off",20);
-  btn.classList.toggle("off", !on);
-  btn.title = on ? "Audio-coach staat aan — tik om uit te zetten" : "Audio-coach staat uit — tik om aan te zetten";
+  ["sess-coach-toggle", "hw-coach-toggle"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.innerHTML = on ? icon("sound",20) : icon("sound-off",20);
+    btn.classList.toggle("off", !on);
+    btn.title = on ? "Audio-coach staat aan — tik om uit te zetten" : "Audio-coach staat uit — tik om aan te zetten";
+  });
 }
-document.getElementById("sess-coach-toggle").addEventListener("click", () => {
+function toggleCoachFromHeader() {
   const c = store.coach();
   c.enabled = !c.enabled;
   store.setCoach(c);
@@ -4564,7 +4729,9 @@ document.getElementById("sess-coach-toggle").addEventListener("click", () => {
   renderSessionCoachBtn();
   toast(c.enabled ? "Audio-coach staat aan" : "Audio-coach staat uit");
   if (c.enabled) voiceCoach.speak("Ik doe weer mee. Kom op!", { force: true, interrupt: true });
-});
+}
+document.getElementById("sess-coach-toggle").addEventListener("click", toggleCoachFromHeader);
+document.getElementById("hw-coach-toggle").addEventListener("click", toggleCoachFromHeader);
 function finishSession() {
   if (!currentSession || currentSession.entries.length === 0) { alert("Rond minstens één apparaat af voordat je de sessie afsluit!"); return; }
   if (!currentSession.name || !currentSession.name.trim()) currentSession.name = `Training ${fmtNice(currentSession.date)}`;
@@ -5684,32 +5851,124 @@ function equipLabel(e) {
     : e === "kettlebell" ? `kettlebell (${kettlebellRangeText()})`
     : e === "dumbbells" ? "dumbbells (alle gewichten)" : esc(e);
 }
-/* Voorstel per oefening: reps/seconden + kg, op basis van dosering en je vorige poging.
-   Handmatig aangepaste doelen (targets in gymwave_home) winnen altijd van het voorstel. */
-function hwSuggest(s) {
-  const metric = hwMetric(s);
+/* ============================================================
+   THUIS-WORKOUT — zelfde opbouw en bediening als de gym-sessie
+   Alle kaarten staan dicht en er is er hooguit één open. Te doen staat bovenaan in
+   de volgorde van het voorstel, daaronder wat je oversloeg, afgevinkt helemaal
+   onderaan. Na Klaar, Overslaan of Terug schuift het scherm terug naar boven, waar
+   de volgende oefening klaarstaat. De warming-up is de eerste kaart.
+   ============================================================ */
+
+/* Dosering uit de tekst: "3×10 per kant" = 3 sets van 10. Bij een bereik ("30-45 sec")
+   beginnen we onderaan, en "7+7+7" is één set van 21. */
+function hwDoseParts(s) {
+  const d = String(s.dose || "");
+  const m = d.match(/^\s*(\d+)\s*×\s*(\d+)/);
+  if (m) return { sets: parseInt(m[1]), reps: parseInt(m[2]) };
+  const plus = d.match(/^\s*\d+(?:\s*\+\s*\d+)+/);
+  if (plus) return { sets: 1, reps: plus[0].split("+").reduce((a, x) => a + (parseInt(x) || 0), 0) };
+  const n = d.match(/\d+/);
+  return { sets: 3, reps: n ? parseInt(n[0]) : (hwMetric(s) === "sec" ? 30 : 10) };
+}
+function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
+function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell" || s.equipment === "fitnessbank"; }
+function hwUnit(metric) { return metric === "sec" ? "sec" : "reps"; }
+function exByName(name) { return SNACK_POOL.find(x => x.name === name); }
+function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s = exByName(n); return t + (s ? s.minutes : 0); }, 0); }
+function hwTotalMinutes(hw) { return hwPlanMinutes(hw) + (hw && hw.warmup ? hw.warmup.min : 0); }
+let hwSessionsCache = null; // tijdens één render: de thuis-sessies maar één keer uit de opslag lezen
+function homeExerciseHistory(name) {
+  const pts = [];
+  (hwSessionsCache || store.homeSessions()).slice().sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight, feel: e.feeling, sets: e.sets }); });
+  return pts;
+}
+/* Waar het grote cijfer mee begint: wat je zelf als laatste instelde, net als het
+   gewicht in de gym. Eerst wat je in deze workout al aanpaste, dan je bewaarde
+   instelling (targets in gymwave_home), dan je vorige keer, en anders de dosering. */
+function hwStart(s, r) {
+  r = r || {};
+  const metric = hwMetric(s), weighted = hwWeighted(s), dose = hwDoseParts(s);
   const t = (store.home().targets || {})[s.name] || {};
-  const hist = homeExerciseHistory(s.name);
+  const hist = homeExerciseHistory(s.name).filter(p => (p.metric || metric) === metric);
   const last = hist.length ? hist[hist.length - 1] : null;
-  const base = hwDoseNum(s) || (metric === "sec" ? 30 : 10);
-  let reps = t.reps != null ? t.reps : base;
+  const pick = (...vals) => vals.find(v => v != null && !isNaN(v));
+  const value = pick(r.value, t.reps, last && last.value, dose.reps);
+  const sets = pick(r.sets, t.sets, last && last.sets, dose.sets);
   let kg = null;
-  if (hwWeighted(s)) {
-    kg = t.kg != null ? t.kg : (last && last.weight ? last.weight : (s.equipment === "kettlebell" ? KETTLEBELL_WEIGHTS[0] : 4));
+  if (weighted) {
+    kg = pick(r.weight, t.kg, last && last.weight, s.equipment === "kettlebell" ? KETTLEBELL_WEIGHTS[0] : 4);
+    if (s.equipment === "kettlebell") kg = snapToStack(KETTLEBELL_WEIGHTS, kg);
   }
-  // progressie-voorstel: vorige keer het doel gehaald → één stapje erbij (eerst reps, dan gewicht)
-  if (t.reps == null && last && last.value != null && (last.metric || metric) === metric && last.value >= base) {
-    if (!hwWeighted(s) || last.value < base + 5) reps = Math.min(last.value + 1, base + 8);
-    else if (t.kg == null) { kg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, kg) : Math.round((kg + 1) * 2) / 2; reps = base; }
-  }
-  const sets = (String(s.dose || "").match(/^(\d+)\s*×/) || [])[1] || null;
-  return { reps, kg, sets, txt: `${sets ? sets + "×" : ""}${reps}${metric === "sec" ? " sec" : ""}${kg != null ? ` @ ${kg} kg` : ""}` };
+  return { metric, weighted, dose, value, sets, kg };
+}
+function hwSpoken(st) { return `${st.sets} keer ${st.value}${st.metric === "sec" ? " seconden" : ""}${st.weighted ? `, met ${String(st.kg).replace(".", ",")} kilo` : ""}`; }
+/* Record op deze oefening: met gewicht het zwaarste gewicht (zoals de gym), zonder
+   gewicht de meeste reps of seconden. */
+function hwBest(s, st) {
+  return homeExerciseHistory(s.name).filter(p => (p.metric || st.metric) === st.metric)
+    .reduce((mx, p) => Math.max(mx, (st.weighted ? p.weight : p.value) || 0), 0);
 }
 function setHwTarget(name, patch) {
   const h = store.home();
   h.targets = h.targets || {};
   h.targets[name] = Object.assign({}, h.targets[name] || {}, patch);
   store.setHome(h);
+}
+/* Eén stapje zwaarder: met gewicht de volgende kettlebell of 1 kg erbij, zonder
+   gewicht twee herhalingen of vijf seconden meer (en op de zwaarste bel ook reps). */
+function hwUpStep(s, st) {
+  if (st.weighted) {
+    const kg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, st.kg) : Math.round((st.kg + 1) * 2) / 2;
+    if (kg > st.kg) return { kg, value: st.value, txt: `${kg} kg` };
+  }
+  const value = st.value + (st.metric === "sec" ? 5 : 2);
+  return { kg: st.kg, value, txt: `${value} ${hwUnit(st.metric)}` };
+}
+function hwSetNextUp(s, st, up, wid) {
+  const h = store.home();
+  h.nextUp = h.nextUp || {};
+  const kgStep = st.weighted && up.kg !== st.kg;
+  h.nextUp[s.name] = { from: { value: st.value, kg: st.kg }, to: up, fromTxt: kgStep ? `${st.kg} kg` : `${st.value} ${hwUnit(st.metric)}`, wid };
+  store.setHome(h);
+}
+function hwReachedNextUp(st, nu) {
+  const kgStep = nu.to.kg != null && nu.from && nu.from.kg != null && nu.to.kg > nu.from.kg;
+  return kgStep ? st.kg >= nu.to.kg : st.value >= nu.to.value;
+}
+/* Advies bovenaan de kaart, net als in de gym: het verzet het cijfer niet, jij tikt het
+   aan. Eerst je eigen zwaarder-vlag van een eerdere workout; anders een stapje erbij als
+   je vorige keer de dosering haalde en het niet te zwaar voelde. */
+function hwAdvice(s, st, hw) {
+  const nu = (store.home().nextUp || {})[s.name];
+  if (nu && nu.to && nu.wid !== hw.id) return { kind: "nextup", to: nu.to, txt: nu.to.txt, fromTxt: nu.fromTxt };
+  const hist = homeExerciseHistory(s.name).filter(p => (p.metric || st.metric) === st.metric);
+  const last = hist.length ? hist[hist.length - 1] : null;
+  if (!last || last.value == null || (last.feel >= 1 && last.feel <= 2)) return null;
+  const base = st.dose.reps, unit = hwUnit(st.metric);
+  if (last.value < base) return null;
+  // vanaf je startpunt zonder de aanpassingen van vandaag: na "zet op" verdwijnt het advies
+  const ref = hwStart(s, {});
+  if (st.weighted && ref.value >= base + 4) {
+    const kg = s.equipment === "kettlebell" ? stackNext(KETTLEBELL_WEIGHTS, ref.kg) : Math.round((ref.kg + 1) * 2) / 2;
+    if (kg > ref.kg) return st.kg >= kg ? null : { kind: "voorstel", to: { kg, value: base, txt: `${base} ${unit} met ${kg} kg` } };
+  }
+  const v = Math.min(ref.value + (st.metric === "sec" ? 5 : 1), base + (st.metric === "sec" ? 30 : 8));
+  return v > ref.value && st.value < v ? { kind: "voorstel", to: { kg: st.kg, value: v, txt: `${v} ${unit}` } } : null;
+}
+/* Het vierkantje in de kop: het getal (kg, of reps/sec zonder gewicht) met een dikke rand
+   in de kleur van hoe het de vorige keer voelde, of deze keer als hij al af is. */
+function hwBadgeHtml(s, st, r) {
+  const n = st.weighted ? st.kg : st.value;
+  const now = r && r.done && r.feel > 0 ? r.feel : null;
+  let feel = now, date = null;
+  if (!feel) {
+    const hist = homeExerciseHistory(s.name);
+    for (let i = hist.length - 1; i >= 0; i--) if (hist[i].feel > 0) { feel = hist[i].feel; date = hist[i].date; break; }
+  }
+  const col = feel ? FEEL_COLORS[feel] : null;
+  const tip = feel ? `${now ? "Deze keer" : "Vorige keer" + (date ? ` (${fmtNice(date)})` : "")}: ${FEEL_LABELS[feel].toLowerCase()}` : "Nog niet ingevuld hoe dit voelde";
+  return `<span class="w-badge${col ? "" : " none"}"${col ? ` style="border-color:${col};box-shadow:0 0 12px color-mix(in srgb, ${col} 55%, transparent);"` : ""} title="${esc(tip)}">${n}</span>`;
 }
 function hwVideoBtns(s) {
   const mw = exVideo(s);
@@ -5719,17 +5978,111 @@ function hwVideoBtns(s) {
       <a class="btn small ghost" href="${exVideoSearch(s)}" target="_blank" rel="noopener">${icon("search",15)}Video zoeken</a>
     </div>`;
 }
-function hwMetric(s) { return /sec|second|min\b/i.test(s.dose || "") ? "sec" : "reps"; }
-function hwWeighted(s) { return s.equipment === "dumbbells" || s.equipment === "kettlebell" || s.equipment === "fitnessbank"; }
-function hwDoseNum(s) { const m = String(s.dose || "").match(/\d+/g); return m ? parseInt(m[m.length - 1]) : null; }
-function exByName(name) { return SNACK_POOL.find(x => x.name === name); }
-function hwPlanMinutes(hw) { return (hw.plan || []).reduce((t, n) => { const s = exByName(n); return t + (s ? s.minutes : 0); }, 0); }
-function homeExerciseHistory(name) {
-  const pts = [];
-  store.homeSessions().slice().sort((a, b) => a.date.localeCompare(b.date))
-    .forEach(s => { const e = (s.entries || []).find(en => en.exerciseName === name); if (e && e.value != null) pts.push({ date: s.date, value: e.value, metric: e.metric, weight: e.weight, feel: e.feeling }); });
-  return pts;
+
+/* ---------- niveaus ---------- */
+function exLevel(s) {
+  const own = (store.home().levels || {})[s.name];
+  return LEVELS.includes(own) ? own : (SNACK_LEVELS[s.name] || "beginner");
 }
+function setHwLevel(name, lvl) {
+  const h = store.home();
+  h.levels = Object.assign({}, h.levels || {});
+  if (lvl === (SNACK_LEVELS[name] || "beginner")) delete h.levels[name]; else h.levels[name] = lvl;
+  store.setHome(h);
+  toast(`${name}: ${LEVEL_LABELS[lvl]}`);
+}
+function lvlStyle(l) { return `style="--lvl:${LEVEL_COLORS[l]};"`; }
+
+/* ---------- alternatieven ---------- */
+/* Zelfde spiergroep, jouw materiaal en het niveau dat jij kiest — maar niets dat al in je
+   voorstel staat, op "niet meer" staat of bij achillesherstel niet mag. */
+function hwAltCandidates(s, lvl, hw) {
+  const h = store.home();
+  const equip = (h.equipment && h.equipment.length) ? h.equipment : ["geen"];
+  const rehab = activeGoals().some(g => g.type === "revalidatie");
+  const ratings = h.ratings || {}, own = h.levels || {};
+  const levelOf = x => LEVELS.includes(own[x.name]) ? own[x.name] : (SNACK_LEVELS[x.name] || "beginner");
+  return SNACK_POOL.filter(x => x.name !== s.name && x.focus === s.focus && levelOf(x) === lvl
+    && equip.includes(x.equipment) && !hw.plan.includes(x.name)
+    && ratings[x.name] !== "dislike" && (!rehab || x.achillesSafe !== false));
+}
+function swapHwExercise(s, lvl) {
+  const hw = store.homeWorkout(); if (!hw) return;
+  const i = hw.plan.indexOf(s.name);
+  const cand = hwAltCandidates(s, lvl, hw);
+  if (i < 0 || !cand.length) return;
+  const ratings = store.home().ratings || {};
+  const pick = pickWeighted(cand, Math.random, x => ratings[x.name] === "super" ? 4 : ratings[x.name] === "like" ? 3 : 1);
+  hw.plan[i] = pick.name;
+  delete hw.results[s.name];
+  if (hw.skipped) delete hw.skipped[s.name];
+  hw.swaps = hw.swaps || {};
+  const root = hw.swaps[s.name] || s.name; // bij doorwisselen blijft het origineel van vandaag staan
+  delete hw.swaps[s.name];
+  if (root !== pick.name) hw.swaps[pick.name] = root;
+  store.setHomeWorkout(hw);
+  restTimer.stop(); hwSecStop();
+  hwExpanded = pick.name;
+  renderHomeWorkout();
+  hwScrollToCard(pick.name);
+  voiceCoach.speak(`${pick.name}. ${hwSpoken(hwStart(pick, {}))}.`, { interrupt: true });
+  askSwapForever("ex", s.name, pick.name);
+}
+function askSwapForever(kind, from, to) {
+  showModal("Alleen vandaag of voortaan?",
+    `Je doet nu ${to} in plaats van ${from}. Wil je dat de app dit voortaan altijd zo doet?`,
+    () => setPermanentSwap(kind, from, to),
+    { confirm: "Voortaan", cancel: "Alleen vandaag", confirmClass: "btn", onCancel: () => toast(`Alleen vandaag: ${to}`) });
+}
+/* Voortaan = het origineel komt niet meer terug zolang de vervanger kan. Ketens worden
+   kortgesloten (A→B en daarna B→C wordt A→C en B→C), en terugwisselen ruimt het op. */
+function setPermanentSwap(kind, from, to) {
+  const h = store.home();
+  const key = kind === "warm" ? "warmSwaps" : "swaps";
+  const map = Object.assign({}, h[key] || {});
+  Object.keys(map).forEach(k => { if (map[k] === from) map[k] = to; });
+  map[from] = to;
+  delete map[to];
+  Object.keys(map).forEach(k => { if (map[k] === k) delete map[k]; });
+  h[key] = map;
+  store.setHome(h);
+  toast(`Voortaan ${to} in plaats van ${from}`);
+  renderHomeWorkout();
+}
+/* Waar komt deze oefening vandaan? Vandaag gewisseld, of voortaan in plaats van een ander. */
+function hwSwapOrigin(hw, name) {
+  const perm = store.home().swaps || {};
+  const today = (hw.swaps || {})[name];
+  if (today) return { from: today, forever: perm[today] === name };
+  const k = Object.keys(perm).find(x => perm[x] === name);
+  return k ? { from: k, forever: true } : null;
+}
+function hwUndoSwap(name) {
+  const hw = store.homeWorkout(); if (!hw) return;
+  const org = hwSwapOrigin(hw, name);
+  if (!org) return;
+  if (org.forever) {
+    const h = store.home();
+    h.swaps = Object.assign({}, h.swaps || {});
+    delete h.swaps[org.from];
+    store.setHome(h);
+  }
+  const i = hw.plan.indexOf(name);
+  const back = exByName(org.from);
+  const canBack = i >= 0 && back && !hw.plan.includes(org.from);
+  if (canBack) {
+    hw.plan[i] = org.from;
+    delete hw.results[name];
+    if (hw.skipped) delete hw.skipped[name];
+    hwExpanded = org.from;
+  }
+  if (hw.swaps) delete hw.swaps[name];
+  store.setHomeWorkout(hw);
+  renderHomeWorkout();
+  if (canBack) hwScrollToCard(org.from);
+  toast(canBack ? `Terug naar ${org.from}${org.forever ? " — ook voor de volgende keer" : ""}` : `Voortaan weer ${org.from}`);
+}
+
 function pickWeighted(list, rnd, wf) {
   const total = list.reduce((s, x) => s + wf(x), 0);
   if (total <= 0) return list[Math.floor(rnd() * list.length)] || null;
@@ -5739,7 +6092,8 @@ function pickWeighted(list, rnd, wf) {
 }
 function homeWorkoutPlan(salt) {
   const h = store.home();
-  const budget = Math.max(8, h.workoutMin || 30);
+  // de warming-up heeft een eigen kaart; die minuten gaan van je gekozen tijd af
+  const budget = Math.max(3, Math.max(8, h.workoutMin || 30) - hwWarmupMin(h));
   const ratings = h.ratings || {};
   const equip = (h.equipment && h.equipment.length) ? h.equipment : ["geen"];
   const rehab = activeGoals().some(g => g.type === "revalidatie");
@@ -5748,14 +6102,14 @@ function homeWorkoutPlan(salt) {
   if (rehab) pool = pool.filter(s => s.achillesSafe !== false);
   pool = pool.filter(s => (ratings[s.name] || "") !== "dislike");
   if (!pool.length) pool = SNACK_POOL.filter(s => s.equipment === "geen");
+  // "voortaan in plaats van": het origineel valt weg zolang de vervanger erin past
+  const swaps = h.swaps || {};
+  pool = pool.filter(s => !(swaps[s.name] && pool.some(x => x.name === swaps[s.name])));
   const plan = []; let left = budget; const usedFocus = {};
   const add = s => { if (s && !plan.includes(s) && s.minutes <= left) { plan.push(s); left -= s.minutes; usedFocus[s.focus] = (usedFocus[s.focus] || 0) + 1; return true; } return false; };
-  // 1. warming-up: een mobiliteitsoefening
-  const warm = pool.filter(s => s.focus === "mobiliteit");
-  if (warm.length) add(pickWeighted(warm, rnd, () => 1));
-  // 2. superlikes eerst — "elke keer, indien haalbaar met de tijd" (klein → groot zodat er meer passen)
+  // 1. superlikes eerst — "elke keer, indien haalbaar met de tijd" (klein → groot zodat er meer passen)
   pool.filter(s => ratings[s.name] === "super").sort((a, b) => a.minutes - b.minutes).forEach(add);
-  // 3. gebalanceerd opvullen, gewogen op rating (like ×3) en variatie in spiergroep
+  // 2. gebalanceerd opvullen, gewogen op rating (like ×3) en variatie in spiergroep
   const wf = s => (ratings[s.name] === "like" ? 3 : 1) / (1 + (usedFocus[s.focus] || 0) * 1.5);
   let guard = 0;
   while (left >= 2 && guard++ < 300) {
@@ -5766,28 +6120,36 @@ function homeWorkoutPlan(salt) {
 }
 function regenerateHomeWorkout(salt) {
   const prev = store.homeWorkout();
-  const keep = (prev && prev.date === todayISO());
-  const { plan } = homeWorkoutPlan(salt);
+  const keep = !!(prev && prev.date === todayISO());
+  const names = homeWorkoutPlan(salt).plan.map(s => s.name);
+  // een afgeronde warming-up blijft staan; anders past hij zich aan het nieuwe voorstel aan
+  const warmDone = keep && prev.warmup && prev.warmup.done;
   const w = {
     id: keep && prev.id ? prev.id : uuid(),
     date: todayISO(),
     startedAt: keep && prev.startedAt ? prev.startedAt : new Date().toISOString(),
     salt: salt | 0,
-    plan: plan.map(s => s.name),
+    name: keep ? (prev.name || "") : "",
+    plan: names,
     results: keep ? (prev.results || {}) : {},
+    skipped: keep ? (prev.skipped || {}) : {},
+    swaps: {},
+    warmup: warmDone ? prev.warmup : makeWarmup(names, hwWarmupMin(), salt),
   };
   store.setHomeWorkout(w);
   return w;
 }
 function backfillHomeWorkout(hw) {
   const h = store.home();
-  const budget = Math.max(8, h.workoutMin || 30);
+  const budget = Math.max(3, Math.max(8, h.workoutMin || 30) - hwWarmupMin(h));
   const ratings = h.ratings || {};
   const equip = (h.equipment && h.equipment.length) ? h.equipment : ["geen"];
   const rehab = activeGoals().some(g => g.type === "revalidatie");
   const left = budget - hwPlanMinutes(hw);
+  const swaps = h.swaps || {};
   const cand = SNACK_POOL.filter(s => equip.includes(s.equipment) && !hw.plan.includes(s.name)
-    && (ratings[s.name] || "") !== "dislike" && (!rehab || s.achillesSafe !== false) && s.minutes <= left);
+    && (ratings[s.name] || "") !== "dislike" && (!rehab || s.achillesSafe !== false) && s.minutes <= left
+    && !(swaps[s.name] && exByName(swaps[s.name])));
   if (cand.length) hw.plan.push(cand[Math.floor(Math.random() * cand.length)].name);
 }
 function setHwRating(name, rating) {
@@ -5809,126 +6171,238 @@ function nextHwSalt() {
   localStorage.setItem("gymwave_hw_gen", String(n));
   return n;
 }
+
+/* ---------- warming-up ---------- */
+const HW_WARMUP_KEY = "__warmup";
+const HW_WARM_SEC = 30;
+function hwWarmupMin(h) { const v = (h || store.home()).warmupMin; return v === 0 || v === 5 ? v : 3; }
+function warmMoveByName(n) { return WARMUP_MOVES.find(m => m.name === n) || null; }
+/* De mix past bij wat je die dag doet: elke spiergroep uit het voorstel telt mee (full
+   body over alles verdeeld). Eerst iets voor je hartslag, daarna een mix zonder dubbele,
+   van je nek naar je enkels gesorteerd. 3 minuten = 6 bewegingen, 5 minuten = 10. */
+function makeWarmup(planNames, min, salt) {
+  if (!min) return null;
+  const n = min === 5 ? 10 : 6;
+  const swaps = store.home().warmSwaps || {};
+  const pool = WARMUP_MOVES.filter(m => !(swaps[m.name] && warmMoveByName(swaps[m.name])));
+  const w = { algemeen: 1 };
+  const bump = (k, v) => { w[k] = (w[k] || 0) + v; };
+  (planNames || []).forEach(nm => {
+    const s = exByName(nm); if (!s) return;
+    if (s.focus === "full body") ["benen", "rug", "schouders/armen", "core"].forEach(k => bump(k, 0.6));
+    else if (s.focus === "cardio" || s.focus === "mobiliteit") bump("algemeen", 1);
+    else bump(s.focus, 1);
+    if (s.focus === "kuiten") bump("benen", 0.5);
+  });
+  const rnd = mulberry32((hashStr(todayISO() + "|warm") ^ Math.imul((salt | 0) + 7, 0x85ebca6b)) | 0);
+  const score = m => 0.4 + m.regions.reduce((a, r) => a + (w[r] || 0), 0);
+  const picked = [];
+  const first = pickWeighted(pool.filter(m => m.pulse), rnd, score);
+  if (first) picked.push(first);
+  let guard = 0;
+  while (picked.length < n && guard++ < 200) {
+    let cand = pool.filter(m => !picked.includes(m) && !m.pulse);
+    if (!cand.length) cand = pool.filter(m => !picked.includes(m));
+    if (!cand.length) break;
+    // variatie: een lichaamsdeel dat al vaak aan bod kwam, telt minder zwaar mee
+    const used = {};
+    picked.forEach(m => m.regions.forEach(r => { used[r] = (used[r] || 0) + 1; }));
+    picked.push(pickWeighted(cand, rnd, m => score(m) / (1 + m.regions.reduce((a, r) => a + (used[r] || 0), 0) * 0.35)));
+  }
+  picked.sort((a, b) => a.order - b.order);
+  return { min, moves: picked.map(m => m.name), done: false, skipped: false, swaps: {} };
+}
+function hwWarmMoves(hw) { return ((hw && hw.warmup && hw.warmup.moves) || []).map(warmMoveByName).filter(Boolean); }
+function hwSwapWarm(i) {
+  const hw = store.homeWorkout(); if (!hw || !hw.warmup) return;
+  const wu = hw.warmup;
+  const cur = warmMoveByName(wu.moves[i]); if (!cur) return;
+  const free = WARMUP_MOVES.filter(m => !wu.moves.includes(m.name));
+  const near = free.filter(m => !!m.pulse === !!cur.pulse && m.regions.some(r => cur.regions.includes(r)));
+  const list = near.length ? near : free;
+  if (!list.length) { toast("Er zijn geen andere bewegingen meer over"); return; }
+  const pick = list[Math.floor(Math.random() * list.length)];
+  wu.moves[i] = pick.name;
+  wu.swaps = wu.swaps || {};
+  const root = wu.swaps[cur.name] || cur.name;
+  delete wu.swaps[cur.name];
+  if (root !== pick.name) wu.swaps[pick.name] = root;
+  store.setHomeWorkout(hw);
+  renderHomeWorkout();
+  if (hwWarm.running && hwWarm.idx === i) voiceCoach.speak(`${pick.name}.`, { interrupt: true });
+  askSwapForever("warm", cur.name, pick.name);
+}
+/* Begeleide timer: elke beweging 30 seconden, de coach zegt hem aan, halverwege
+   "andere kant" waar dat hoort, drie piepjes voor het eind. Klaar = kaart afgevinkt. */
+const hwWarm = { running: false, paused: false, idx: 0, left: HW_WARM_SEC, int: null };
+function hwWarmStart() {
+  const moves = hwWarmMoves(store.homeWorkout());
+  if (!moves.length) return;
+  if (hwWarm.running) {
+    hwWarm.paused = !hwWarm.paused;
+    if (!hwWarm.paused) voiceCoach.speak(`Verder. ${moves[hwWarm.idx].name}.`, { interrupt: true });
+    hwWarmSync();
+    return;
+  }
+  clearInterval(hwWarm.int);
+  Object.assign(hwWarm, { running: true, paused: false, idx: 0, left: HW_WARM_SEC });
+  hwWarm.int = setInterval(hwWarmTick, 1000);
+  voiceCoach.speak(`We beginnen. ${moves[0].name}. ${HW_WARM_SEC} seconden.`, { interrupt: true });
+  hwWarmSync();
+}
+function hwWarmTick() {
+  if (!hwWarm.running || hwWarm.paused) return;
+  if (!isView("homeworkout")) { hwWarm.paused = true; return; }
+  const moves = hwWarmMoves(store.homeWorkout());
+  const mv = moves[hwWarm.idx];
+  hwWarm.left--;
+  if (mv && mv.half && hwWarm.left === Math.floor(HW_WARM_SEC / 2)) { beep(880, 0.1); voiceCoach.speak(mv.half + ".", { interrupt: true }); }
+  if (hwWarm.left <= 3 && hwWarm.left > 0) beep(660, 0.1);
+  if (hwWarm.left <= 0) { hwWarmNext(true); return; }
+  hwWarmSync();
+}
+function hwWarmNext(fromTimer) {
+  const moves = hwWarmMoves(store.homeWorkout());
+  hwWarm.idx++;
+  if (hwWarm.idx >= moves.length) { hwWarmFinish(); return; }
+  hwWarm.left = HW_WARM_SEC;
+  if (fromTimer) beep(990, 0.2);
+  voiceCoach.speak(`Volgende. ${moves[hwWarm.idx].name}.`, { interrupt: true });
+  hwWarmSync();
+}
+function hwWarmStop() { clearInterval(hwWarm.int); Object.assign(hwWarm, { running: false, paused: false, idx: 0, left: HW_WARM_SEC, int: null }); }
+function hwWarmFinish() {
+  hwWarmStop();
+  beep(990, 0.35);
+  voiceCoach.speak("Warming-up klaar. Op naar je eerste oefening!", { interrupt: true });
+  completeWarmup({ quiet: true });
+}
+function fmtClock(sec) { return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; }
+/* Schrijft de timerstand in de open warming-up-kaart, zonder de lijst opnieuw te bouwen. */
+function hwWarmSync() {
+  const card = hwCardEl(HW_WARMUP_KEY);
+  if (!card || !card.classList.contains("open")) return;
+  const moves = hwWarmMoves(store.homeWorkout());
+  const run = hwWarm.running;
+  const mv = run ? moves[hwWarm.idx] : null;
+  const cur = card.querySelector(".hw-warm-cur"), time = card.querySelector(".hw-warm-time");
+  const step = card.querySelector(".hw-warm-step"), start = card.querySelector(".hw-warm-start");
+  if (cur) cur.textContent = run ? (mv ? mv.name : "") : (moves.length ? `Eerst: ${moves[0].name}` : "");
+  if (time) time.textContent = fmtClock(run ? Math.max(0, hwWarm.left) : moves.length * HW_WARM_SEC);
+  if (step) step.textContent = run ? `Beweging ${hwWarm.idx + 1} van ${moves.length}${hwWarm.paused ? " · pauze" : ""}` : `${moves.length} bewegingen van ${HW_WARM_SEC} seconden`;
+  if (start) start.innerHTML = !run ? `${icon("play",18)}Start warming-up` : hwWarm.paused ? `${icon("play",18)}Verder` : `${icon("pause",18)}Pauze`;
+  card.querySelectorAll(".hw-warm-next, .hw-warm-stop").forEach(b => { b.disabled = !run; });
+  card.querySelectorAll(".hw-warm-item").forEach((li, i) => {
+    li.classList.toggle("cur", run && i === hwWarm.idx);
+    li.classList.toggle("done", run && i < hwWarm.idx);
+  });
+}
+
+/* ---------- secondentimer bij oefeningen op tijd (plank, wall sit) ---------- */
+const hwSec = { name: null, left: 0, int: null, msg: "" };
+function hwSecPaint() {
+  const card = hwCardEl(hwExpanded);
+  if (!card) return;
+  const big = card.querySelector(".hw-timer-big"), btn = card.querySelector(".hw-timer-btn");
+  if (big) big.textContent = hwSec.name ? `${hwSec.left} sec` : hwSec.msg;
+  if (btn) btn.innerHTML = hwSec.name ? `${icon("stop",15)}Stop timer` : `${icon("clock",15)}Start ${btn.dataset.secs} sec timer`;
+}
+function hwSecStart(name, secs) {
+  hwSecStop();
+  Object.assign(hwSec, { name, left: secs, msg: "" });
+  hwSecPaint();
+  hwSec.int = setInterval(() => {
+    if (hwExpanded !== name || !isView("homeworkout")) { hwSecStop(); return; }
+    hwSec.left--;
+    if (hwSec.left <= 3 && hwSec.left > 0) beep(660, 0.1);
+    if (hwSec.left <= 0) { hwSecStop("Klaar!"); beep(990, 0.28); return; }
+    hwSecPaint();
+  }, 1000);
+}
+function hwSecStop(msg) {
+  clearInterval(hwSec.int);
+  Object.assign(hwSec, { int: null, name: null, left: 0, msg: msg || "" });
+  hwSecPaint();
+}
+function hwStopAll() { restTimer.stop(); hwSecStop(); hwWarmStop(); }
+
+/* ---------- lijst, kop en instellingen ---------- */
+let hwExpanded = null;   // naam van de open kaart (of HW_WARMUP_KEY), net als expandedMachineId
+let hwSetupOpen = null;  // null = vanzelf: open tot je de eerste kaart afvinkt
+function hwState(hw, key) {
+  if (key === HW_WARMUP_KEY) return hw.warmup && hw.warmup.done ? "done" : hw.warmup && hw.warmup.skipped ? "skipped" : "todo";
+  return (hw.results[key] || {}).done ? "done" : (hw.skipped || {})[key] ? "skipped" : "todo";
+}
+function hwKeys(hw) { return [...(hw.warmup ? [HW_WARMUP_KEY] : []), ...hw.plan.filter(n => exByName(n))]; }
+function hwCounts(hw) {
+  const keys = hwKeys(hw);
+  const n = st => keys.filter(k => hwState(hw, k) === st).length;
+  const done = n("done"), skipped = n("skipped");
+  return { total: keys.length - skipped, done, skipped, open: keys.length - done - skipped, exDone: hw.plan.filter(x => (hw.results[x] || {}).done).length };
+}
+function saveHw(mut) { const w = store.homeWorkout(); if (!w) return null; w.results = w.results || {}; mut(w); store.setHomeWorkout(w); return w; }
+function hwCardEl(key) { return key ? [...document.querySelectorAll("#hw-plan .hw-card")].find(c => c.dataset.name === key) || null : null; }
+function hwScrollToCard(key) { setTimeout(() => { const el = hwCardEl(key); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); }
+// na afvinken, overslaan of terug: naar de bovenkant, waar de volgende oefening staat
+function scrollHwToTop() { setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 80); }
+
 function renderHomeWorkout() {
   let hw = store.homeWorkout();
   if (!hw || hw.date !== todayISO()) hw = regenerateHomeWorkout(nextHwSalt()); // elke verse workout varieert
-  clearInterval(hwTimerInt);
-  if (hw.playing) { renderHwPlayer(hw); return; }
-  renderHwSetup(hw);
-  renderHwPlan(hw);
+  // workouts van vóór deze opzet: de reeks-speler is weg en de warming-up kreeg een eigen kaart
+  if ("playing" in hw || "playIdx" in hw || !("warmup" in hw)) {
+    delete hw.playing; delete hw.playIdx;
+    if (!("warmup" in hw)) hw.warmup = makeWarmup(hw.plan, hwWarmupMin(), hw.salt);
+    store.setHomeWorkout(hw);
+  }
+  hw.results = hw.results || {};
+  if (hwExpanded && !hwKeys(hw).includes(hwExpanded)) hwExpanded = null;
+  if (hwSec.name && hwSec.name !== hwExpanded) hwSecStop();
+  if (hwWarm.running && hwExpanded !== HW_WARMUP_KEY) hwWarm.paused = true; // dichtklappen = pauze
+  hwSessionsCache = store.homeSessions();
+  try {
+    renderHwHeader(hw);
+    renderHwSetup(hw);
+    renderHwPlan(hw);
+  } finally { hwSessionsCache = null; }
+  hwWarmSync();
 }
-/* Reeks-speler: werkt het voorstel oefening voor oefening af */
-let hwTimerInt = null;
-let hwAnnounced = null; // laatste voorgelezen oefening, tegen dubbel aankondigen
-function renderHwPlayer(hw) {
-  document.getElementById("hw-setup").innerHTML = "";
-  const wrap = document.getElementById("hw-plan");
-  wrap.innerHTML = "";
-  const names = hw.plan;
-  const idx = Math.max(0, Math.min(hw.playIdx || 0, names.length));
-  const doneN = names.filter(n => (hw.results[n] || {}).done).length;
-  const save = (mut) => { const w = store.homeWorkout(); if (!w) return; mut(w); store.setHomeWorkout(w); renderHomeWorkout(); };
-  // klaar met de reeks
-  if (idx >= names.length) {
-    const end = document.createElement("div");
-    end.className = "card";
-    end.innerHTML = `
-      <div class="section-title" style="margin:0 0 8px;">${icon("flag",16)}Reeks klaar!</div>
-      <p style="font-weight:600; opacity:0.85;">Je hebt ${doneN} van de ${names.length} oefeningen afgevinkt.</p>
-      <button class="btn full" id="hwp-finish" ${doneN ? "" : "disabled"} style="margin-top:10px;">${icon("flag",18)}Workout afronden</button>
-      <button class="btn ghost full small" id="hwp-back" style="margin-top:8px;">${icon("undo",15)}Terug naar de lijst</button>`;
-    wrap.appendChild(end);
-    end.querySelector("#hwp-finish").onclick = finishHomeWorkout;
-    end.querySelector("#hwp-back").onclick = () => save(w => { w.playing = false; });
-    return;
+function renderHwHeader(hw) {
+  const nameIn = document.getElementById("hw-name");
+  if (nameIn) {
+    if (nameIn.value !== (hw.name || "")) nameIn.value = hw.name || "";
+    nameIn.oninput = () => saveHw(w => { w.name = nameIn.value; });
   }
-  const s = exByName(names[idx]);
-  if (!s) { save(w => { w.playIdx = idx + 1; }); return; }
-  const metric = hwMetric(s), weighted = hwWeighted(s);
-  const sug = hwSuggest(s);
-  const r = hw.results[s.name] || {};
-  const head = document.createElement("div");
-  head.className = "card hw-summary";
-  head.innerHTML = `<span class="muted" style="font-weight:700;">Oefening ${idx + 1} van ${names.length}</span>
-    <span style="display:flex; gap:10px; align-items:center;"><span style="font-weight:800;">${doneN} ${icon("check",15)}</span><button class="coach-mute-btn" id="hwp-coach" title="Audio-coach aan/uit">${store.coach().enabled ? icon("sound",20) : icon("sound-off",20)}</button></span>`;
-  wrap.appendChild(head);
-  head.querySelector("#hwp-coach").onclick = () => {
-    const c = store.coach(); c.enabled = !c.enabled; store.setCoach(c);
-    head.querySelector("#hwp-coach").innerHTML = c.enabled ? icon("sound",20) : icon("sound-off",20);
-    toast(c.enabled ? "Audio-coach aan" : "Audio-coach uit");
-  };
-  // kondig elke nieuwe oefening aan (zoals de gym-sessie doet)
-  if (hwAnnounced !== s.name) {
-    hwAnnounced = s.name;
-    voiceCoach.speak(`${s.name}. Voorstel: ${sug.txt}.`, { interrupt: false });
-  }
-  const card = document.createElement("div");
-  card.className = "card snack-card";
-  card.innerHTML = `
-    <div class="sn-head"><div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div></div>
-    ${hwVideoBtns(s)}
-    ${hwStepsHtml(s, true)}
-    <div class="hw-target-row"><span class="ht-lbl">${icon("target",15)}voorstel</span><span class="ht-val">${esc(sug.txt)}</span></div>
-    ${metric === "sec" ? `<button class="btn ghost full small" id="hwp-timer">${icon("clock",15)}Start ${sug.reps} sec timer</button><div class="hw-timer-big" id="hwp-timer-val"></div>` : ""}
-    <div class="hw-log">
-      <label>${metric === "sec" ? "Seconden" : "Reps"}</label>
-      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${sug.reps}" />
-      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${sug.kg}" />` : ""}
-    </div>
-    ${hwFeelHtml(r.feel)}
-    <button class="btn full" id="hwp-done" style="margin-top:12px;">${icon("check",20)}Klaar — volgende</button>
-    <div class="speak-row" style="margin-top:8px;">
-      <button class="btn small ghost" id="hwp-skip">${icon("skip",15)}Overslaan</button>
-      <button class="btn small ghost" id="hwp-stop">${icon("stop",15)}Stop reeks</button>
-    </div>`;
-  wrap.appendChild(card);
-  bindHwFeel(card, s, metric);
-  bindHwSpeak(card, s);
-  const valIn = card.querySelector(".hw-val"), wtIn = card.querySelector(".hw-wt");
-  const timerBtn = card.querySelector("#hwp-timer");
-  if (timerBtn) timerBtn.onclick = () => {
-    clearInterval(hwTimerInt);
-    let left = sug.reps;
-    const out = card.querySelector("#hwp-timer-val");
-    out.textContent = left + " sec";
-    hwTimerInt = setInterval(() => {
-      left--;
-      if (left <= 3 && left > 0) beep(660, 0.1);
-      if (left <= 0) { clearInterval(hwTimerInt); out.textContent = "Klaar!"; beep(990, 0.28); if (valIn.value === "") valIn.value = sug.reps; return; }
-      out.textContent = left + " sec";
-    }, 1000);
-  };
-  card.querySelector("#hwp-done").onclick = () => {
-    clearInterval(hwTimerInt);
-    save(w => {
-      const rr = Object.assign({ metric }, w.results[s.name] || {});
-      rr.done = true;
-      rr.value = valIn.value !== "" ? parseFloat(valIn.value) : sug.reps;
-      if (weighted) rr.weight = wtIn && wtIn.value !== "" ? parseFloat(wtIn.value) : sug.kg;
-      w.results[s.name] = rr;
-      w.playIdx = idx + 1;
-    });
-    voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  card.querySelector("#hwp-skip").onclick = () => { clearInterval(hwTimerInt); save(w => { w.playIdx = idx + 1; }); window.scrollTo({ top: 0, behavior: "smooth" }); };
-  card.querySelector("#hwp-stop").onclick = () => { clearInterval(hwTimerInt); save(w => { w.playing = false; }); };
+  renderSessionCoachBtn();
+  const c = hwCounts(hw);
+  const tag = document.getElementById("hw-progress");
+  if (tag) tag.textContent = `${c.done} / ${c.total}` + (c.skipped ? ` · ${c.skipped} overgeslagen` : "");
 }
 function renderHwSetup(hw) {
   const box = document.getElementById("hw-setup");
   const h = store.home();
+  const wmin = hwWarmupMin(h);
   const total = hwPlanMinutes(hw);
   const rehab = activeGoals().some(g => g.type === "revalidatie");
+  const open = hwSetupOpen != null ? hwSetupOpen : !hwCounts(hw).done;
   box.innerHTML = `
-    <div class="card">
-      <div class="sr-row" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-        <div class="stepper"><span class="st-label">Tijd (min)</span><button data-hwmin="-5">${icon("minus",16)}</button><span class="st-val">${h.workoutMin || 30}</span><button data-hwmin="5">${icon("plus",16)}</button></div>
-        <button class="btn small ghost" id="hw-regen">${icon("shuffle",15)}Ander voorstel</button>
+    <details class="tip inline-tip hw-setup-box"${open ? " open" : ""}>
+      <summary>${icon("toolbox",16)}Workout · ${h.workoutMin || 30} min${wmin ? ` · warming-up ${wmin} min` : ""}</summary>
+      <div class="tip-body">
+        <div class="sr-row" style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          <div class="stepper"><span class="st-label">Tijd (min)</span><button data-hwmin="-5">${icon("minus",16)}</button><span class="st-val">${h.workoutMin || 30}</span><button data-hwmin="5">${icon("plus",16)}</button></div>
+          <button class="btn small ghost" id="hw-regen">${icon("shuffle",15)}Ander voorstel</button>
+        </div>
+        <div class="hw-warm-pick"><span class="st-label">Warming-up</span>
+          <div class="unit-toggle" id="hw-warm-min">${[0, 3, 5].map(v => `<button data-warm="${v}" class="${v === wmin ? "active" : ""}">${v ? v + " min" : "Geen"}</button>`).join("")}</div>
+        </div>
+        <div class="muted hw-setup-sum">Voorstel: <b>${hw.plan.length} oefening${hw.plan.length === 1 ? "" : "en"}</b> · ~${total} min${hw.warmup ? ` + ${hw.warmup.min} min warming-up` : ""} van ${h.workoutMin || 30} min${rehab ? " · veilig bij achillesherstel" : ""}</div>
+        <p class="reset-note hw-setup-note">Jouw materiaal + jouw tijd geven elke keer een vers, gevarieerd programma.</p>
+        <details class="tip inline-tip"><summary>${icon('toolbox',16)}Wat heb je thuis?</summary><div class="tip-body" id="hw-equip"></div></details>
       </div>
-      <div class="muted" style="font-weight:600; font-size:0.9rem;">Voorstel: <b>${hw.plan.length} oefening${hw.plan.length === 1 ? "" : "en"}</b> · ~${total} van ${h.workoutMin || 30} min${rehab ? " · veilig bij achillesherstel" : ""}</div>
-      <details class="tip inline-tip" style="margin-top:10px;"><summary>${icon('toolbox',16)}Wat heb je thuis?</summary><div class="tip-body" id="hw-equip"></div></details>
-      ${hw.plan.length ? `<button class="btn full" id="hw-play" style="margin-top:12px;">${icon("play",18)}Start workout — oefeningen achter elkaar</button>` : ""}
-    </div>`;
+    </details>`;
+  const det = box.querySelector(".hw-setup-box");
+  det.querySelector("summary").addEventListener("click", () => { hwSetupOpen = !det.open; });
   const eq = box.querySelector("#hw-equip");
   eq.innerHTML = EQUIPMENT_OPTIONS.map(e => `<label class="machine-check"><input type="checkbox" value="${e}" ${(h.equipment || []).includes(e) ? "checked" : ""}/> ${equipLabel(e)}</label>`).join("");
   eq.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
@@ -5946,98 +6420,17 @@ function renderHwSetup(hw) {
     regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1);
     renderHomeWorkout();
   });
-  box.querySelector("#hw-regen").onclick = () => { regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1); renderHomeWorkout(); };
-  const play = box.querySelector("#hw-play");
-  if (play) play.onclick = () => {
-    const w = store.homeWorkout(); if (!w) return;
-    hwAnnounced = null;
-    w.playing = true;
-    w.playIdx = w.plan.findIndex(n => !(w.results[n] || {}).done);
-    if (w.playIdx < 0) w.playIdx = w.plan.length;
-    store.setHomeWorkout(w);
+  // zelfde salt: wisselen tussen 3 en 5 minuten haalt hooguit een oefening weg of erbij
+  box.querySelectorAll("[data-warm]").forEach(b => b.onclick = () => {
+    const nh = store.home();
+    nh.warmupMin = parseInt(b.dataset.warm);
+    store.setHome(nh);
+    hwWarmStop();
+    regenerateHomeWorkout(store.homeWorkout().salt || 0);
     renderHomeWorkout();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-}
-function hwCard(s, hw) {
-  const r = hw.results[s.name] || {};
-  const metric = hwMetric(s);
-  const unitLbl = metric === "sec" ? "sec" : "reps";
-  const weighted = hwWeighted(s);
-  const rating = (store.home().ratings || {})[s.name] || "";
-  const hist = homeExerciseHistory(s.name);
-  const last = hist.length ? hist[hist.length - 1] : null;
-  const pr = hist.reduce((m, p) => Math.max(m, p.value || 0), 0);
-  const card = document.createElement("div");
-  card.className = "card snack-card" + (r.done ? " hw-done" : "");
-  card.innerHTML = `
-    <div class="sn-head">
-      <div><div class="sn-name">${esc(s.name)}</div><div class="sn-dose">${esc(s.dose)} · ~${s.minutes} min</div></div>
-      <button class="btn small ${r.done ? "" : "ghost"} hw-check">${r.done ? icon("check",15) + "Klaar" : "Afvinken"}</button>
-    </div>
-    <div class="snack-tags"><span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${kettlebellRangeText()}</span>` : ""}</div>
-    ${hwVideoBtns(s)}
-    ${hwStepsHtml(s)}
-    <div class="hw-target"><span class="ht-lbl">${icon("target",15)}voorstel</span> <b class="hw-target-txt">${esc(hwSuggest(s).txt)}</b>
-      <div class="hw-target-btns">
-        <div class="stepper"><span class="st-label">${metric === "sec" ? "sec" : "reps"}</span><button data-tgt="reps" data-d="-1">${icon("minus",16)}</button><span class="st-val" data-tval="reps">${hwSuggest(s).reps}</span><button data-tgt="reps" data-d="1">${icon("plus",16)}</button></div>
-        ${weighted ? `<div class="stepper"><span class="st-label">kg</span><button data-tgt="kg" data-d="-1">${icon("minus",16)}</button><span class="st-val" data-tval="kg">${hwSuggest(s).kg}</span><button data-tgt="kg" data-d="1">${icon("plus",16)}</button></div>` : ""}
-      </div>
-    </div>
-    <div class="hw-log">
-      <label>${metric === "sec" ? "Seconden" : "Reps"}</label>
-      <input type="number" min="0" inputmode="numeric" class="hw-val" value="${r.value != null ? r.value : ""}" placeholder="${hwSuggest(s).reps}" />
-      ${weighted ? `<label>kg</label><input type="number" min="0" step="0.5" inputmode="decimal" class="hw-wt" value="${r.weight != null ? r.weight : ""}" placeholder="${hwSuggest(s).kg}" />` : ""}
-    </div>
-    ${hwFeelHtml(r.feel)}
-    ${(last || pr) ? `<div class="hw-prog">${last ? `Vorige: <b>${last.value} ${last.metric === "sec" ? "sec" : "reps"}</b>${last.weight ? ` @ ${last.weight}kg` : ""}${last.feel ? ` <span class="hist-feel" style="background:${FEEL_COLORS[last.feel]};" title="${FEEL_LABELS[last.feel]}"></span>` : ""}` : ""}${pr ? `${last ? " · " : ""}<span class="hw-pr">PR: ${pr} ${unitLbl}</span>` : ""}</div>` : ""}
-    <div class="hw-rate-row">
-      <button class="hw-rate ${rating === "like" ? "sel" : ""}" data-rate="like"><span class="hw-emoji">${icon("thumb-up",17)}</span>Vaker</button>
-      <button class="hw-rate ${rating === "super" ? "sel" : ""}" data-rate="super"><span class="hw-emoji">${iconFill("star-solid",17)}</span>Elke keer</button>
-      <button class="hw-rate dis ${rating === "dislike" ? "sel dis" : ""}" data-rate="dislike"><span class="hw-emoji">${icon("thumb-down",17)}</span>Niet meer</button>
-    </div>
-    `;
-  const saveResult = (patch) => {
-    const w = store.homeWorkout(); if (!w) return;
-    const rr = Object.assign({ metric }, w.results[s.name] || {}, patch);
-    w.results[s.name] = rr; store.setHomeWorkout(w);
-  };
-  const valIn = card.querySelector(".hw-val");
-  valIn.oninput = () => saveResult({ value: valIn.value === "" ? null : parseFloat(valIn.value) });
-  const wtIn = card.querySelector(".hw-wt");
-  if (wtIn) wtIn.oninput = () => saveResult({ weight: wtIn.value === "" ? null : parseFloat(wtIn.value) });
-  card.querySelector(".hw-check").onclick = () => {
-    const w = store.homeWorkout(); if (!w) return;
-    const rr = Object.assign({ metric }, w.results[s.name] || {});
-    rr.done = !rr.done;
-    if (rr.done && rr.value == null && valIn.value !== "") rr.value = parseFloat(valIn.value);
-    w.results[s.name] = rr; store.setHomeWorkout(w);
-    renderHomeWorkout();
-    if (rr.done) { // net als in de gym: door naar de volgende openstaande oefening
-      voiceCoach.say("exerciseDone", {}, { minGap: 2000 });
-      setTimeout(() => { const nxt = document.querySelector("#hw-plan .snack-card:not(.hw-done)"); if (nxt) nxt.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
-    }
-  };
-  bindHwFeel(card, s, metric);
-  bindHwSpeak(card, s);
-  card.querySelectorAll(".hw-rate").forEach(b => b.onclick = () => setHwRating(s.name, b.dataset.rate));
-  // doel bijstellen: reps/sec en kg (kettlebell klikt op 16/20)
-  card.querySelectorAll("[data-tgt]").forEach(b => b.onclick = () => {
-    const cur = hwSuggest(s);
-    const d = parseInt(b.dataset.d);
-    if (b.dataset.tgt === "reps") setHwTarget(s.name, { reps: Math.max(1, cur.reps + d * (metric === "sec" ? 5 : 1)) });
-    else {
-      const kg = s.equipment === "kettlebell" ? (d > 0 ? stackNext(KETTLEBELL_WEIGHTS, cur.kg) : stackPrev(KETTLEBELL_WEIGHTS, cur.kg)) : Math.max(0.5, Math.round((cur.kg + d * 0.5) * 2) / 2);
-      setHwTarget(s.name, { kg });
-    }
-    const next = hwSuggest(s);
-    card.querySelector(".hw-target-txt").textContent = next.txt;
-    const rv = card.querySelector('[data-tval="reps"]'); if (rv) rv.textContent = next.reps;
-    const kv = card.querySelector('[data-tval="kg"]'); if (kv) kv.textContent = next.kg;
-    valIn.placeholder = next.reps;
-    if (wtIn) wtIn.placeholder = next.kg;
+    toast(nh.warmupMin ? `Warming-up van ${nh.warmupMin} minuten` : "Geen warming-up deze keer");
   });
-  return card;
+  box.querySelector("#hw-regen").onclick = () => { hwWarmStop(); regenerateHomeWorkout((store.homeWorkout().salt || 0) + 1); renderHomeWorkout(); };
 }
 function renderHwPlan(hw) {
   const wrap = document.getElementById("hw-plan");
@@ -6046,16 +6439,467 @@ function renderHwPlan(hw) {
     wrap.innerHTML = `<div class="empty-state">Geen oefeningen passen bij je materiaal en tijd. Vink meer materiaal aan of zet de tijd hoger.</div>`;
     return;
   }
-  hw.plan.forEach(name => { const s = exByName(name); if (s) wrap.appendChild(hwCard(s, hw)); });
-  const doneN = hw.plan.filter(n => (hw.results[n] || {}).done).length;
+  // te doen eerst (volgorde van het voorstel), dan overgeslagen, afgevinkt helemaal onderaan
+  const keys = hwKeys(hw);
+  const by = st => keys.filter(k => hwState(hw, k) === st);
+  [...by("todo"), ...by("skipped"), ...by("done")].forEach(k => wrap.appendChild(k === HW_WARMUP_KEY ? hwWarmupCard(hw) : hwCard(exByName(k), hw)));
+  const c = hwCounts(hw);
   const footer = document.createElement("div");
+  footer.className = "hw-footer";
   footer.innerHTML = `
-    <div class="card hw-summary"><span class="muted" style="font-weight:700;">${doneN} van ${hw.plan.length} afgevinkt</span>${doneN ? `<span class="hw-pr" style="font-weight:800;">lekker bezig!</span>` : ""}</div>
-    <button class="btn full" id="hw-finish" ${doneN ? "" : "disabled"} style="margin-top:8px;">${icon("flag",18)}Workout afronden</button>
-    <button class="btn ghost full small" id="hw-cancel" style="margin-top:8px;">Workout wissen</button>`;
+    <button class="btn full" id="hw-finish" ${c.exDone ? "" : "disabled"} style="margin-top:8px;">${icon("flag",20)}Workout afronden</button>
+    <button class="btn ghost full small" id="hw-cancel" style="margin-top:10px;">${icon("trash",16)}Workout weggooien</button>`;
   wrap.appendChild(footer);
   footer.querySelector("#hw-finish").onclick = finishHomeWorkout;
-  footer.querySelector("#hw-cancel").onclick = () => showModal("Workout wissen?", "Je huidige thuis-workout en ingevulde reps worden weggegooid.", () => { store.clearHomeWorkout(); route("home"); });
+  footer.querySelector("#hw-cancel").onclick = () => showModal("Workout weggooien?", "Je huidige thuis-workout en alles wat je hebt ingevuld worden weggegooid.", () => {
+    hwStopAll(); hwExpanded = null; hwSetupOpen = null;
+    store.clearHomeWorkout(); route("home");
+  });
+}
+function hwCardShell(key, title, hint, expanded, done, skipped, extraCls) {
+  const card = document.createElement("div");
+  card.className = "card hw-card" + (extraCls ? " " + extraCls : "") + (done && !expanded ? " done" : "") + (skipped && !expanded ? " skipped" : "") + (expanded ? " open" : "");
+  card.dataset.name = key;
+  const header = document.createElement("div");
+  header.className = "mc-header";
+  header.innerHTML = `<div class="m-name">${esc(title)}</div><div class="m-hint">${hint}</div>`;
+  card.appendChild(header);
+  return { card, header };
+}
+function hwActionsHtml(opts) {
+  const { done, skipped, nextUpActive, warm } = opts;
+  return `
+    <div class="exercise-actions">
+      <div class="act-row${warm ? " cols-3" : ""}">
+        <button class="act-btn act-back back-btn" title="Terug naar de lijst — je invoer blijft bewaard">${icon("undo",21)}<span class="act-lbl">Terug</span></button>
+        ${warm ? "" : `<button class="act-btn act-up nextup-btn ${nextUpActive ? "active" : ""}" title="Volgende keer zwaarder">${icon("dumbbells",21)}<span class="act-lbl">${nextUpActive ? "Genoteerd" : "Zwaarder"}</span></button>`}
+        <button class="act-btn act-done done-btn" title="${done ? "Wijziging opslaan" : "Afvinken — telt mee in je workout"}">${icon("save",21)}<span class="act-lbl">${done ? "Opslaan" : "Klaar"}</span></button>
+        <button class="act-btn act-skip skip-btn" title="${skipped ? "Toch doen — terug in de lijst" : "Deze keer overslaan"}">${icon("hop",21)}<span class="act-lbl">${skipped ? "Toch doen" : "Overslaan"}</span></button>
+      </div>
+      ${done ? `<button class="btn ghost full small undo-btn" style="margin-top:0;">${icon("undo",15)}Heropenen (vink uit)</button>` : ""}
+      <div class="action-hint">${warm ? "Start loopt de bewegingen vanzelf af, met piepjes en voorlezen. Met het wisselknopje kies je een andere beweging." : "Terug klapt alleen dicht — je invoer blijft staan. Klaar vinkt de oefening af."}</div>
+    </div>`;
+}
+function hwBindActions(body, key, opts) {
+  body.querySelector(".done-btn").onclick = opts.onDone;
+  body.querySelector(".back-btn").onclick = () => {
+    hwSecStop();
+    hwExpanded = null;
+    renderHomeWorkout();
+    scrollHwToTop();
+  };
+  const undo = body.querySelector(".undo-btn");
+  if (undo) undo.onclick = () => undoHw(key);
+  body.querySelector(".skip-btn").onclick = () => (opts.skipped ? unskipHw(key) : skipHw(key));
+}
+
+/* ---------- de warming-up-kaart ---------- */
+function hwWarmupCard(hw) {
+  const wu = hw.warmup;
+  const state = hwState(hw, HW_WARMUP_KEY);
+  const done = state === "done", skipped = state === "skipped";
+  const expanded = hwExpanded === HW_WARMUP_KEY;
+  const moves = hwWarmMoves(hw);
+  const chev = `<span class="chev">${icon("chev",16)}</span>`;
+  const sr = `<span class="m-sr">${wu.min} min · ${moves.length}×${HW_WARM_SEC}s</span>`;
+  const hint = done
+    ? `${sr}${expanded ? chev : `<span class="chk">${icon("check",18)}</span>`}`
+    : skipped ? `<span class="skip-tag">${icon("skip",15)}overgeslagen</span>${chev}` : `${sr}${chev}`;
+  const { card, header } = hwCardShell(HW_WARMUP_KEY, "Warming-up", hint, expanded, done, skipped, "hw-warm");
+  header.onclick = () => {
+    const opening = hwExpanded !== HW_WARMUP_KEY;
+    hwExpanded = opening ? HW_WARMUP_KEY : null;
+    renderHomeWorkout();
+    if (opening && !done && !hwWarm.running) voiceCoach.speak(`Warming-up. ${moves.length} rustige bewegingen van ${HW_WARM_SEC} seconden.`, { interrupt: true });
+  };
+  if (!expanded) return card;
+  const perm = store.home().warmSwaps || {};
+  const body = document.createElement("div");
+  body.className = "mc-body";
+  body.innerHTML = `
+    <div class="m-note">Rustig warm worden op twee vierkante meter, zonder springen. De bewegingen passen bij je oefeningen van vandaag.</div>
+    <div class="hw-warm-now">
+      <div class="hw-warm-cur"></div>
+      <div class="hw-timer-big hw-warm-time"></div>
+      <div class="hw-warm-step"></div>
+    </div>
+    <button class="btn full hw-warm-start">${icon("play",18)}Start warming-up</button>
+    <div class="speak-row hw-warm-ctrl">
+      <button class="btn small ghost hw-warm-next">${icon("skip",15)}Volgende</button>
+      <button class="btn small ghost hw-warm-stop">${icon("stop",15)}Stop</button>
+    </div>
+    <ol class="hw-warm-list">${moves.map((mv, i) => {
+      const was = (wu.swaps || {})[mv.name] || Object.keys(perm).find(k => perm[k] === mv.name);
+      const forever = was && perm[was] === mv.name;
+      return `
+      <li class="hw-warm-item" data-i="${i}">
+        <span class="hw-warm-n">${i + 1}</span>
+        <div class="hw-warm-txt"><b>${esc(mv.name)}</b><span>${esc(mv.how)}</span>${was ? `<span class="hw-warm-was">in plaats van ${esc(was)}${forever ? " · voortaan" : ""}</span>` : ""}</div>
+        <button class="hw-warm-swap" data-swap="${i}" title="Andere beweging kiezen" aria-label="Andere beweging kiezen">${icon("shuffle",17)}</button>
+      </li>`;
+    }).join("")}</ol>
+    ${hwActionsHtml({ done, skipped, warm: true })}`;
+  card.appendChild(body);
+  body.querySelector(".hw-warm-start").onclick = hwWarmStart;
+  body.querySelector(".hw-warm-next").onclick = () => { if (hwWarm.running) hwWarmNext(false); };
+  body.querySelector(".hw-warm-stop").onclick = () => { hwWarmStop(); hwWarmSync(); };
+  body.querySelectorAll("[data-swap]").forEach(b => b.onclick = () => hwSwapWarm(parseInt(b.dataset.swap)));
+  hwBindActions(body, HW_WARMUP_KEY, { skipped, onDone: () => completeWarmup() });
+  return card;
+}
+function completeWarmup(opts) {
+  const cur = store.homeWorkout();
+  const wasDone = !!(cur && cur.warmup && cur.warmup.done);
+  saveHw(w => { if (w.warmup) { w.warmup.done = true; w.warmup.skipped = false; } });
+  hwWarmStop();
+  hwExpanded = null;
+  if (!(opts && opts.quiet)) voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
+  renderHomeWorkout();
+  scrollHwToTop();
+  if (!wasDone) hwAfterProgress();
+}
+
+/* ---------- de oefeningkaart ---------- */
+function hwCard(s, hw) {
+  const name = s.name;
+  const r = hw.results[name] || {};
+  const state = hwState(hw, name);
+  const done = state === "done", skipped = state === "skipped";
+  const expanded = hwExpanded === name;
+  const st = hwStart(s, r);
+  const unit = hwUnit(st.metric);
+  const advice = done ? null : hwAdvice(s, st, hw);
+  const chev = `<span class="chev">${icon("chev",16)}</span>`;
+  const srTxt = () => `${st.sets}×${st.value}${st.metric === "sec" ? "s" : ""}`;
+  const badge = hwBadgeHtml(s, st, r);
+  const hint = done
+    ? `${badge}${expanded ? chev : `<span class="chk">${icon("check",18)}</span>`}`
+    : skipped
+      ? `<span class="skip-tag">${icon("skip",15)}overgeslagen</span>${badge}${chev}`
+      : `${advice && advice.kind === "nextup" ? icon("arrow",14,'style="transform:rotate(-90deg)"') : ""}${badge}<span class="m-sr">${srTxt()}</span>${chev}`;
+  const { card, header } = hwCardShell(name, name, hint, expanded, done, skipped);
+  header.onclick = () => {
+    const opening = hwExpanded !== name;
+    hwExpanded = opening ? name : null;
+    renderHomeWorkout();
+    if (opening && !done) {
+      voiceCoach.speak(`${name}. ${hwSpoken(st)}.`, { interrupt: true });
+      if (advice && advice.kind === "nextup" && st.weighted) setTimeout(() => voiceCoach.say("nextUp", {}, { minGap: 30000 }), 600);
+    }
+  };
+  if (!expanded) return card;
+
+  const lvl = exLevel(s);
+  const ownLvl = !!(store.home().levels || {})[name];
+  const kb = st.weighted && s.equipment === "kettlebell";
+  const big = st.weighted ? st.kg : st.value;
+  const pr = hwBest(s, st);
+  const prUnit = st.weighted ? "kg" : unit;
+  const origin = hwSwapOrigin(hw, name);
+  const nu = (store.home().nextUp || {})[name];
+  const rating = (store.home().ratings || {})[name] || "";
+  // geschiedenis als één regel: per keer het getal met de gevoelskleur, nieuwste vooraan
+  const hist = homeExerciseHistory(name).filter(p => (p.metric || st.metric) === st.metric).slice(-10).reverse();
+  const histHtml = hist.length ? `
+    <div class="hist-strip">
+      <div class="hs-lbl">Vorige ${hist.length}×${pr ? ` · PR ${pr} ${prUnit}` : ""}</div>
+      <div class="hs-row">
+        ${hist.map(p => {
+          const v = st.weighted && p.weight != null ? p.weight : p.value;
+          const isPr = pr && (st.weighted ? p.weight : p.value) >= pr;
+          const tip = `${fmtNice(p.date)} · ${p.sets ? p.sets + "×" : ""}${p.value} ${unit}${p.weight != null ? ` @ ${p.weight} kg` : ""}${p.feel ? ` · ${FEEL_LABELS[p.feel].toLowerCase()}` : ""}${isPr ? " · record" : ""}`;
+          return `<span class="hs-cell${isPr ? " pr" : ""}" title="${esc(tip)}"><span class="hs-w">${v}${isPr ? icon("trophy",12) : ""}</span><span class="hs-dot"${p.feel ? ` style="background:${FEEL_COLORS[p.feel]};"` : ""}></span></span>`;
+        }).join("")}
+      </div>
+    </div>` : "";
+  const adviceHtml = advice ? `
+    <div class="nextup-badge${advice.kind === "voorstel" ? " streak" : ""}">${advice.kind === "nextup"
+      ? `${icon("arrow",15,'style="transform:rotate(-90deg)"')} Vorige keer aangegeven: meer! Probeer <b>${esc(advice.txt)}</b> (was ${esc(advice.fromTxt || "")}).`
+      : `${icon("target",15)} Vorige keer haalde je de dosering — tijd voor <b>${esc(advice.to.txt)}</b>?`}
+      <button class="btn small ghost apply-suggest">${icon("check",15)}Zet op ${esc(advice.to.txt)}</button></div>` : "";
+  const setsDone0 = Math.min(r.setsDone || 0, st.sets);
+  const srSummary = (n) => `${st.weighted ? "Sets &amp; reps" : "Sets"} · ${st.sets}×${st.value}${st.metric === "sec" ? " sec" : ""}${n ? ` · ${n} gedaan` : ""}`;
+  const sliderAttrs = kb
+    ? `min="0" max="${KETTLEBELL_WEIGHTS.length - 1}" step="1" value="${KETTLEBELL_WEIGHTS.indexOf(st.kg)}"`
+    : st.weighted ? `min="0" max="${Math.max(40, Math.ceil(st.kg + 10))}" step="0.5" value="${st.kg}"`
+      : st.metric === "sec" ? `min="5" max="${Math.max(180, st.value + 60)}" step="5" value="${st.value}"`
+        : `min="1" max="${Math.max(60, st.value + 20)}" step="1" value="${st.value}"`;
+  const body = document.createElement("div");
+  body.className = "mc-body";
+  body.innerHTML = `
+    <div class="snack-tags hw-meta">
+      <button class="lvl-badge" data-lvl-toggle ${lvlStyle(lvl)} title="Niveau (${ownLvl ? "door jou aangepast" : "inschatting in MuscleWiki-stijl"}) — tik om aan te passen"><span class="lvl-dot"></span>${LEVEL_LABELS[lvl]}</button>
+      <span>${esc(s.focus)}</span><span>${esc(s.equipment)}</span>${s.equipment === "kettlebell" ? `<span>${kettlebellRangeText()}</span>` : ""}
+    </div>
+    <div class="hw-dose">${esc(s.dose)} · ~${s.minutes} min</div>
+    <div class="hw-lvl-pick" hidden>
+      <div class="hw-pick-q">Klopt het niveau niet? Kies het juiste:</div>
+      <div class="lvl-chips">${LEVELS.map(l => `<button class="lvl-chip${l === lvl ? " sel" : ""}" data-setlvl="${l}" ${lvlStyle(l)}>${LEVEL_LABELS[l]}${l === (SNACK_LEVELS[name] || "beginner") ? `<span class="lvl-n">inschatting</span>` : ""}</button>`).join("")}</div>
+    </div>
+    ${origin ? `<div class="hw-swap-line">${icon("compare",16)}<span>${origin.forever && !(hw.swaps || {})[name] ? "Vervangt voortaan" : "In plaats van"} <b>${esc(origin.from)}</b>${origin.forever && (hw.swaps || {})[name] ? " · voortaan" : ""}</span><button class="btn small ghost hw-swap-undo">${icon("undo",14)}Terugzetten</button></div>` : ""}
+    ${histHtml}
+    ${adviceHtml}
+    ${hwVideoBtns(s)}
+    ${hwStepsHtml(s)}
+    <div class="weight-readout">
+      <div class="wr-val"><span class="wr-num">${big}</span><span class="wr-unit">${st.weighted ? "kg" : unit}</span></div>
+      ${kb ? `<div class="stack-row">${stackSegsHtml(KETTLEBELL_WEIGHTS, st.kg)}</div>
+      <div class="stack-label">kettlebell ${KETTLEBELL_WEIGHTS.indexOf(st.kg) + 1} van ${KETTLEBELL_WEIGHTS.length}</div>`
+        : `<div class="stack-label">${st.weighted ? "stap 0.5 kg per klik" : st.metric === "sec" ? "seconden per set · stap 5" : "herhalingen per set"}</div>`}
+      ${pr ? `<div class="wr-pr">${icon("trophy",14)}<span>Record op deze oefening: <b>${pr} ${prUnit}</b></span></div>` : ""}
+    </div>
+    <div class="weight-ctrl">
+      <button class="wbtn wmin" data-act="dec">${icon("minus",20)}</button>
+      <input type="hidden" class="weight-display" value="${big}" />
+      <button class="wbtn wplus" data-act="inc">${icon("plus",20)}</button>
+    </div>
+    <input type="range" class="weight-slider" ${sliderAttrs} />
+    ${st.metric === "sec" ? `<button class="btn ghost full small hw-timer-btn" data-secs="${st.value}" style="margin-top:12px;">${icon("clock",15)}Start ${st.value} sec timer</button><div class="hw-timer-big"></div>` : ""}
+    <details class="tip inline-tip hw-sr" style="margin-top:12px;"><summary>${srSummary(setsDone0)}</summary><div class="tip-body">
+      <div class="sr-row">
+        <div class="stepper"><span class="st-label">Sets</span><button data-sr="sets" data-d="-1">${icon("minus",16)}</button><span class="st-val" data-val="sets">${st.sets}</span><button data-sr="sets" data-d="1">${icon("plus",16)}</button></div>
+        ${st.weighted ? `<div class="stepper"><span class="st-label">${st.metric === "sec" ? "Sec" : "Reps"}</span><button data-sr="reps" data-d="-1">${icon("minus",16)}</button><span class="st-val" data-val="reps">${st.value}</span><button data-sr="reps" data-d="1">${icon("plus",16)}</button></div>` : ""}
+      </div>
+      <div class="set-track"></div>
+      <div class="set-track-label">Tik een rondje aan als je set klaar is — coach &amp; rusttimer doen de rest.</div>
+    </div></details>
+    <div class="feel-row">
+      <span class="feel-lbl">Hoe voelde het?</span>
+      <div class="feel-scale">${[1, 2, 3, 4, 5].map(i => `<button class="feel-btn ${r.feel === i ? "sel" : ""}" data-feel="${i}" style="background:${FEEL_COLORS[i]};" title="${FEEL_LABELS[i]}">${r.feel === i ? icon("check",17) : ""}</button>`).join("")}</div>
+      <div class="feel-caption">${r.feel ? FEEL_LABELS[r.feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)"}</div>
+    </div>
+    <div class="hw-rate-row">
+      <button class="hw-rate ${rating === "like" ? "sel" : ""}" data-rate="like"><span class="hw-emoji">${icon("thumb-up",17)}</span>Vaker</button>
+      <button class="hw-rate ${rating === "super" ? "sel" : ""}" data-rate="super"><span class="hw-emoji">${iconFill("star-solid",17)}</span>Elke keer</button>
+      <button class="hw-rate dis ${rating === "dislike" ? "sel dis" : ""}" data-rate="dislike"><span class="hw-emoji">${icon("thumb-down",17)}</span>Niet meer</button>
+    </div>
+    ${done ? "" : `
+    <button class="btn ghost full hw-alt-btn">${icon("compare",17)}Alternatief</button>
+    <div class="hw-alt-panel" hidden>
+      <div class="hw-pick-q">Welk niveau wil je als alternatief?</div>
+      <div class="lvl-chips">${LEVELS.map(l => { const n = hwAltCandidates(s, l, hw).length; return `<button class="lvl-chip" data-alt="${l}" ${lvlStyle(l)} ${n ? "" : "disabled"}>${LEVEL_LABELS[l]}<span class="lvl-n">${n ? `${n} ${n === 1 ? "optie" : "opties"}` : "geen"}</span></button>`; }).join("")}</div>
+      <div class="hw-pick-note">Zelfde spiergroep (${esc(s.focus)}) en jouw materiaal. Deze oefening is nu ${LEVEL_LABELS[lvl]}.</div>
+    </div>`}
+    ${hwActionsHtml({ done, skipped, nextUpActive: !!nu })}`;
+  card.appendChild(body);
+
+  const persist = (patch) => saveHw(w => { w.results[name] = Object.assign({ metric: st.metric }, w.results[name] || {}, patch); });
+  const setsDoneNow = () => Math.min(((store.homeWorkout() || { results: {} }).results[name] || {}).setsDone || 0, st.sets);
+  const syncTexts = () => {
+    const srEl = header.querySelector(".m-sr"); if (srEl) srEl.textContent = srTxt();
+    const sum = body.querySelector(".hw-sr > summary"); if (sum) sum.innerHTML = srSummary(setsDoneNow());
+    const tb = body.querySelector(".hw-timer-btn"); if (tb) { tb.dataset.secs = st.value; if (hwSec.name !== name) tb.innerHTML = `${icon("clock",15)}Start ${st.value} sec timer`; }
+  };
+  // groot cijfer: −/+ en de slider schrijven allemaal via setNum
+  const wInput = body.querySelector(".weight-display");
+  const slider = body.querySelector(".weight-slider");
+  const step = st.weighted ? 0.5 : (st.metric === "sec" ? 5 : 1);
+  const setNum = (v) => {
+    if (kb) v = snapToStack(KETTLEBELL_WEIGHTS, v);
+    else v = Math.max(st.weighted ? 0 : step, Math.round(Math.round((v || 0) / step) * step * 10) / 10);
+    wInput.value = v;
+    if (slider) slider.value = kb ? KETTLEBELL_WEIGHTS.indexOf(v) : Math.min(v, +slider.max);
+    body.querySelector(".wr-num").textContent = v;
+    if (kb) {
+      body.querySelector(".stack-row").innerHTML = stackSegsHtml(KETTLEBELL_WEIGHTS, v);
+      body.querySelector(".stack-label").textContent = `kettlebell ${KETTLEBELL_WEIGHTS.indexOf(v) + 1} van ${KETTLEBELL_WEIGHTS.length}`;
+    }
+    const b = header.querySelector(".w-badge"); if (b) b.textContent = v;
+    if (st.weighted) { st.kg = v; persist({ weight: v }); }
+    else { st.value = v; persist({ value: v }); }
+    syncTexts();
+  };
+  body.querySelector('[data-act="dec"]').onclick = () => setNum(kb ? stackPrev(KETTLEBELL_WEIGHTS, st.kg) : (parseFloat(wInput.value) || 0) - step);
+  body.querySelector('[data-act="inc"]').onclick = () => setNum(kb ? stackNext(KETTLEBELL_WEIGHTS, st.kg) : (parseFloat(wInput.value) || 0) + step);
+  if (slider) slider.oninput = () => setNum(kb ? KETTLEBELL_WEIGHTS[+slider.value] : parseFloat(slider.value));
+  // sets (en bij gewicht ook reps) in de uitklapper, net als in de gym
+  body.querySelectorAll("[data-sr]").forEach(btn => btn.onclick = () => {
+    const d = parseInt(btn.dataset.d);
+    if (btn.dataset.sr === "sets") {
+      st.sets = Math.max(1, Math.min(12, st.sets + d));
+      body.querySelector('[data-val="sets"]').textContent = st.sets;
+      persist({ sets: st.sets, setsDone: setsDoneNow() });
+      buildDots();
+    } else {
+      const stp = st.metric === "sec" ? 5 : 1;
+      st.value = Math.max(stp, Math.min(st.metric === "sec" ? 600 : 100, st.value + d * stp));
+      body.querySelector('[data-val="reps"]').textContent = st.value;
+      persist({ value: st.value });
+    }
+    syncTexts();
+  });
+  // set-rondjes: tik = set klaar (piepje, coach, rusttimer), tik op de laatste = ongedaan
+  const buildDots = () => {
+    const track = body.querySelector(".set-track");
+    const cur = setsDoneNow();
+    track.innerHTML = Array.from({ length: st.sets }, (_, i) => `<button class="set-dot ${i < cur ? "done" : ""}" data-set="${i}">${i + 1}</button>`).join("");
+    track.querySelectorAll(".set-dot").forEach(dot => dot.onclick = () => {
+      const i = parseInt(dot.dataset.set);
+      const before = setsDoneNow();
+      const now = Math.max(0, Math.min(st.sets, (i + 1 === before) ? i : i + 1));
+      persist({ setsDone: now });
+      track.querySelectorAll(".set-dot").forEach((d2, j) => d2.classList.toggle("done", j < now));
+      syncTexts();
+      if (now > before && !done) {
+        beep(880, 0.12);
+        voiceCoach.say("setDone", { n: now, total: st.sets }, { minGap: 0, interrupt: true });
+        if (now < st.sets) restTimer.start(store.coach().restSec, now === st.sets - 1);
+        else restTimer.stop();
+      }
+    });
+  };
+  buildDots();
+  const timerBtn = body.querySelector(".hw-timer-btn");
+  if (timerBtn) {
+    if (hwSec.name === name) hwSecPaint();
+    timerBtn.onclick = () => (hwSec.name === name ? hwSecStop() : hwSecStart(name, st.value));
+  }
+  // gevoel: rood/oranje haalt het zwaarder-advies weg, groen vraagt of het zwaarder mag
+  body.querySelectorAll("[data-feel]").forEach(fb => fb.onclick = () => {
+    const val = parseInt(fb.dataset.feel);
+    const w = saveHw(w2 => { const rr = Object.assign({ metric: st.metric }, w2.results[name] || {}); rr.feel = rr.feel === val ? null : val; w2.results[name] = rr; });
+    const feel = w ? (w.results[name] || {}).feel : null;
+    body.querySelectorAll("[data-feel]").forEach(b2 => { const on = parseInt(b2.dataset.feel) === feel; b2.classList.toggle("sel", on); b2.innerHTML = on ? icon("check",17) : ""; });
+    body.querySelector(".feel-caption").textContent = feel ? FEEL_LABELS[feel] : "van veel te zwaar (donkerrood) naar veel te licht (donkergroen)";
+    const nuBtn2 = body.querySelector(".nextup-btn");
+    const h = store.home();
+    if (feel >= 1 && feel <= 2 && (h.nextUp || {})[name]) {
+      delete h.nextUp[name];
+      store.setHome(h);
+      if (nuBtn2) { nuBtn2.classList.remove("active"); nuBtn2.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Zwaarder</span>`; }
+      toast("Dit voelde te zwaar — het zwaarder-advies is eraf gehaald");
+    }
+    // kleur ingevuld = klaar met deze oefening: breng de knoppenrij meteen in beeld
+    if (feel) { const acts = body.querySelector(".exercise-actions"); if (acts) setTimeout(() => acts.scrollIntoView({ behavior: "smooth", block: "center" }), 80); }
+    if (feel >= 4 && !(store.home().nextUp || {})[name]) {
+      const up = hwUpStep(s, st);
+      showModal("Zwaarder de volgende keer?", `Dit voelde ${FEEL_LABELS[feel].toLowerCase()}. Wil je volgende keer ${up.txt} proberen (nu ${st.weighted && up.kg !== st.kg ? st.kg + " kg" : st.value + " " + unit})?`, () => {
+        hwSetNextUp(s, st, up, hw.id);
+        toast(`Genoteerd! Volgende keer: ${up.txt}`);
+        if (nuBtn2) { nuBtn2.classList.add("active"); nuBtn2.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Genoteerd</span>`; }
+      });
+    }
+  });
+  // Volgende keer zwaarder: noteert het vlaggetje én vinkt meteen af, zoals in de gym.
+  // Stond hij al genoteerd, dan haal je hem hier weg en blijft de kaart open.
+  const nuBtn = body.querySelector(".nextup-btn");
+  nuBtn.onclick = () => {
+    const h = store.home();
+    if ((h.nextUp || {})[name]) {
+      delete h.nextUp[name];
+      store.setHome(h);
+      toast("Oké — gewoon zo aanhouden");
+      nuBtn.classList.remove("active");
+      nuBtn.innerHTML = icon("dumbbells",21) + `<span class="act-lbl">Zwaarder</span>`;
+      return;
+    }
+    const up = hwUpStep(s, st);
+    hwSetNextUp(s, st, up, hw.id);
+    toast(`Genoteerd! Volgende keer: ${up.txt}`);
+    if (st.weighted) voiceCoach.say("nextUp", {}, { minGap: 0 });
+    completeHw(s);
+  };
+  // advies wordt pas een keuze als jij op de knop drukt
+  const ap = body.querySelector(".apply-suggest");
+  if (ap && advice) ap.onclick = (ev) => {
+    ev.stopPropagation();
+    const patch = { value: advice.to.value };
+    if (st.weighted && advice.to.kg != null) patch.weight = advice.to.kg;
+    persist(patch);
+    renderHomeWorkout();
+    const ro = hwCardEl(name) && hwCardEl(name).querySelector(".weight-readout");
+    if (ro) setTimeout(() => ro.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
+    toast(`Op ${advice.to.txt} gezet`);
+  };
+  // niveau: tik op het label om het te corrigeren
+  const lvlPick = body.querySelector(".hw-lvl-pick");
+  body.querySelector("[data-lvl-toggle]").onclick = () => { lvlPick.hidden = !lvlPick.hidden; };
+  body.querySelectorAll("[data-setlvl]").forEach(b => b.onclick = () => { setHwLevel(name, b.dataset.setlvl); renderHomeWorkout(); });
+  // alternatief: eerst het niveau, dan wisselt de app meteen
+  const altBtn = body.querySelector(".hw-alt-btn"), altPanel = body.querySelector(".hw-alt-panel");
+  if (altBtn) altBtn.onclick = () => {
+    altPanel.hidden = !altPanel.hidden;
+    if (!altPanel.hidden) setTimeout(() => altPanel.scrollIntoView({ behavior: "smooth", block: "nearest" }), 40);
+  };
+  body.querySelectorAll("[data-alt]").forEach(b => b.onclick = () => swapHwExercise(s, b.dataset.alt));
+  const su = body.querySelector(".hw-swap-undo");
+  if (su) su.onclick = () => hwUndoSwap(name);
+  bindHwSpeak(body, s);
+  body.querySelectorAll(".hw-rate").forEach(b => b.onclick = () => setHwRating(name, b.dataset.rate));
+  hwBindActions(body, name, { skipped, onDone: () => completeHw(s) });
+  return card;
+}
+
+/* ---------- afvinken, overslaan, heropenen ---------- */
+function completeHw(s) {
+  const hw = store.homeWorkout(); if (!hw) return;
+  const name = s.name;
+  const r = Object.assign({}, hw.results[name] || {});
+  const wasDone = !!r.done;
+  const st = hwStart(s, r);
+  const best = hwBest(s, st);
+  const now = st.weighted ? st.kg : st.value;
+  const isPr = !wasDone && best > 0 && now > best;
+  Object.assign(r, { metric: st.metric, value: st.value, sets: st.sets, done: true });
+  if (st.weighted) r.weight = st.kg;
+  r.setsDone = r.setsDone > 0 ? Math.min(r.setsDone, st.sets) : st.sets;
+  hw.results[name] = r;
+  if (hw.skipped) delete hw.skipped[name]; // afgerond wint van overgeslagen
+  store.setHomeWorkout(hw);
+  // jouw instelling is het startpunt voor de volgende keer, zoals lastWeight in de gym
+  setHwTarget(name, Object.assign({ reps: st.value, sets: st.sets }, st.weighted ? { kg: st.kg } : {}));
+  // de zwaarder-vlag ruimen we op als je hem haalde of als het te zwaar voelde
+  const h = store.home(); const nu = (h.nextUp || {})[name];
+  if (nu && nu.to && nu.wid !== hw.id && (hwReachedNextUp(st, nu) || (r.feel >= 1 && r.feel <= 2))) { delete h.nextUp[name]; store.setHome(h); }
+  restTimer.stop(); hwSecStop();
+  hwExpanded = null; // klap in en schuif naar onderen
+  if (isPr) {
+    voiceCoach.say("pr", {}, { minGap: 0, interrupt: true });
+    celebrate();
+    toast(`Nieuw record: ${now} ${st.weighted ? "kg" : hwUnit(st.metric)}!`);
+  } else {
+    voiceCoach.say("exerciseDone", {}, { minGap: 1500 });
+  }
+  renderHomeWorkout();
+  scrollHwToTop();
+  if (!wasDone) hwAfterProgress();
+}
+/* Op de helft zegt de coach het, en als alles erop staat vraagt de app of je afrondt. */
+function hwAfterProgress() {
+  const hw = store.homeWorkout(); if (!hw) return;
+  const c = hwCounts(hw);
+  if (!c.open && c.exDone) {
+    setTimeout(() => { if (isView("homeworkout") && store.homeWorkout()) showModal("Workout afronden?", "Alles staat erop. Wil je de workout nu afronden?", finishHomeWorkout, { confirm: "Afronden", cancel: "Nog niet", confirmClass: "btn" }); }, 900);
+    return;
+  }
+  if (c.total > 3 && c.done === Math.ceil(c.total / 2) && c.done < c.total) setTimeout(() => voiceCoach.say("halfway", {}, { minGap: 0 }), 1800);
+}
+function skipHw(key) {
+  saveHw(w => {
+    if (key === HW_WARMUP_KEY) { if (w.warmup) { w.warmup.skipped = true; w.warmup.done = false; } return; }
+    if (w.results[key]) w.results[key].done = false;
+    w.skipped = w.skipped || {};
+    w.skipped[key] = true;
+  });
+  restTimer.stop(); hwSecStop();
+  if (key === HW_WARMUP_KEY) hwWarmStop();
+  hwExpanded = null;
+  renderHomeWorkout();
+  scrollHwToTop();
+  toast(`${key === HW_WARMUP_KEY ? "Warming-up" : key} overgeslagen — telt niet mee als gedaan`);
+  hwAfterProgress();
+}
+function unskipHw(key) {
+  saveHw(w => { if (key === HW_WARMUP_KEY) { if (w.warmup) w.warmup.skipped = false; } else if (w.skipped) delete w.skipped[key]; });
+  hwExpanded = key; // meteen open als actieve oefening
+  renderHomeWorkout();
+  hwScrollToCard(key); // de kaart springt terug naar zijn plek bovenin
+  toast(`${key === HW_WARMUP_KEY ? "Warming-up" : key} staat weer in de lijst`);
+}
+function undoHw(key) {
+  saveHw(w => { if (key === HW_WARMUP_KEY) { if (w.warmup) w.warmup.done = false; } else if (w.results[key]) w.results[key].done = false; });
+  hwExpanded = key; // blijf open als actieve oefening
+  renderHomeWorkout();
 }
 function finishHomeWorkout() {
   const hw = store.homeWorkout();
@@ -6063,11 +6907,15 @@ function finishHomeWorkout() {
   const entries = hw.plan.map(name => {
     const s = exByName(name); const r = hw.results[name] || {};
     if (!r.done) return null;
-    return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg", feeling: r.feel != null ? r.feel : null };
+    return { exerciseName: name, focus: s ? s.focus : "", equipment: s ? s.equipment : "", metric: r.metric || (s ? hwMetric(s) : "reps"), value: r.value != null ? r.value : null, weight: r.weight != null ? r.weight : null, unit: "kg", feeling: r.feel != null ? r.feel : null, sets: r.sets != null ? r.sets : null, setsDone: r.setsDone != null ? r.setsDone : null, level: s ? exLevel(s) : null };
   }).filter(Boolean);
   if (!entries.length) { alert("Vink minstens één oefening af voordat je de workout afrondt!"); return; }
+  hwStopAll();
+  hwExpanded = null; hwSetupOpen = null;
   // Thuis-workouts staan apart van je gym-sessies (eigen opslag, eigen voortgang in Thuis)
-  const session = { id: hw.id || uuid(), date: todayISO(), name: `Thuis-workout ${fmtNice(todayISO())}`, location: "thuis", entries, startedAt: hw.startedAt || new Date().toISOString(), endedAt: new Date().toISOString() };
+  const own = (hw.name || "").trim();
+  const session = { id: hw.id || uuid(), date: todayISO(), name: own || `Thuis-workout ${fmtNice(todayISO())}`, location: "thuis", entries, startedAt: hw.startedAt || new Date().toISOString(), endedAt: new Date().toISOString() };
+  if (hw.warmup && hw.warmup.done) session.warmup = { min: hw.warmup.min, moves: hw.warmup.moves.slice() };
   const hs = store.homeSessions(); hs.push(session); store.setHomeSessions(hs);
   store.clearHomeWorkout();
   incentiveAddStar(); // elke afgeronde workout telt richting je beloning
@@ -6101,7 +6949,7 @@ function homeBoardHtml(fin, opts) {
   };
   return `
     <div class="ss-kg">${curN} oefening${curN === 1 ? "" : "en"}</div>
-    <div class="ss-sub">${datumInSub ? esc(fmtNice(fin.date)) : "Thuis-workout"}${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
+    <div class="ss-sub">${datumInSub ? esc(fmtNice(fin.date)) : "Thuis-workout"}${fin.warmup ? ` · warming-up ${fin.warmup.min} min` : ""}${curKg ? ` · ${curKg} kg totaal getild` : ""}${fmtDur(fin.startedAt, fin.endedAt) ? ` · ${fmtDur(fin.startedAt, fin.endedAt)}` : ""}</div>
     ${intensityBlockHtml(fin)}
     ${ster ? incentiveSummaryHtml() : ""}
     <div class="ss-chart-wrap">
@@ -7072,11 +7920,18 @@ let modalConfirmCb = null;
 // Soms betekent "Annuleren" niet niets-doen maar een tweede keuze (bijv. wel bewaren,
 // niet toepassen). Zet modalCancelCb dan direct ná showModal; hij geldt voor één modal.
 let modalCancelCb = null;
-function showModal(title, body, onConfirm) {
+// opts (optioneel): confirm/cancel = knopteksten, confirmClass = stijl van de bevestigknop
+// (standaard rood), onCancel = wat "Annuleren" doet als het een eigen keuze is.
+function showModal(title, body, onConfirm, opts) {
+  opts = opts || {};
   document.getElementById("modal-title").textContent = title;
   document.getElementById("modal-body").textContent = body;
+  const ok = document.getElementById("modal-confirm"), no = document.getElementById("modal-cancel");
+  ok.textContent = opts.confirm || "Bevestigen";
+  no.textContent = opts.cancel || "Annuleren";
+  ok.className = opts.confirmClass || "btn warn";
   modalConfirmCb = onConfirm;
-  modalCancelCb = null;
+  modalCancelCb = opts.onCancel || null;
   document.getElementById("modal").classList.add("show");
 }
 document.getElementById("modal-cancel").onclick = () => {
