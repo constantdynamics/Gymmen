@@ -47,6 +47,9 @@
   --squat-a: #4816b1; --squat-b: #6e2ce3;
   --push-a: #521bc2;  --push-b: #7b34ee;
   --situp-a: #6825da; --situp-b: #9042f2;
+  /* Zwemmen valt bewust buiten de paarse trap: water-blauw. Witte tekst haalt op
+     het lichtste punt (#1366b8) nog 5,8:1. */
+  --swim-a: #0b3f78;  --swim-b: #1366b8;
 
   /* ---- Wachttijd / herstel-ramp (lineair, 6 stappen) ---- */
   --ramp-0: #35d07f; --ramp-1: #9ede3a; --ramp-2: #ffd75e;
@@ -210,6 +213,8 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .hero-btn.hero-situp { background: linear-gradient(135deg, var(--situp-a), var(--situp-b)); box-shadow: 0 12px 30px rgba(104, 37, 218, 0.42), inset 0 1px 0 rgba(255,255,255,0.32); }
 .hero-btn.hero-situp .hero-ic { background: rgba(255,255,255,0.26); }
 .hero-btn.hero-situp .hero-ic { background: rgba(255,255,255,0.22); }
+.hero-btn.hero-swim { background: linear-gradient(135deg, var(--swim-a), var(--swim-b)); box-shadow: 0 12px 30px rgba(11, 63, 120, 0.55), inset 0 1px 0 rgba(255,255,255,0.28); }
+.hero-btn.hero-swim .hero-ic { background: rgba(255,255,255,0.2); }
 
 /* Rechterkolom: wachttijd-chip + twee tellers, allebei 44 px hoog */
 .hero-side { flex: 0 0 120px; display: flex; flex-direction: column; gap: 6px; }
@@ -228,14 +233,15 @@ input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 16px
 .hero-row.row-calf .hero-count { border-color: rgba(98,36,216,0.7); background: rgba(61,18,160,0.36); }
 .hero-row.row-push .hero-count { border-color: rgba(123,52,238,0.7); background: rgba(82,27,194,0.32); }
 .hero-row.row-situp .hero-count { border-color: rgba(144,66,242,0.7); background: rgba(104,37,218,0.28); }
+.hero-row.row-swim .hero-count { border-color: rgba(19,102,184,0.75); background: rgba(11,63,120,0.42); }
 
 .last-session { font-size: 1rem; color: var(--text-body); margin-bottom: 12px; font-weight: 600; }
 /* De losse calf-ghostknop is vervangen door de derde hero-rij; hij blijft in de
    DOM staan met zijn handler, net als de verborgen nav-knoppen (§3.2). */
-#open-calf, #open-squat, #open-pushup, #open-situp, #open-gym, #open-homeworkout { display: none; }
+#open-calf, #open-squat, #open-pushup, #open-situp, #open-gym, #open-homeworkout, #open-swim { display: none; }
 /* …behalve als je de bijbehorende hero hebt uitgezet: dan is dit je ingang (§ Startscherm) */
 #open-calf.as-fallback, #open-squat.as-fallback, #open-pushup.as-fallback, #open-situp.as-fallback,
-#open-gym.as-fallback, #open-homeworkout.as-fallback { display: block; }
+#open-gym.as-fallback, #open-homeworkout.as-fallback, #open-swim.as-fallback { display: block; }
 
 /* ============================================================
    SESSIE
@@ -1232,6 +1238,34 @@ input[type="range"].weight-slider::-webkit-slider-thumb,
 .hw-warm-swap { flex: 0 0 44px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: #c78bff; cursor: pointer; }
 .hw-warm-swap:active { transform: scale(0.94); }
 
+/* ---- Zwemmen ---- */
+.check-item.ci-sub { margin-left: 26px; min-height: 48px; padding: 10px 14px; }
+.check-item.ci-sub .ci-label { font-size: 1.05rem; }
+.check-item .ci-count { margin-left: auto; font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--text-body); }
+.check-item .ci-del { margin-left: auto; flex: 0 0 44px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: #ff8bb8; cursor: pointer; }
+.swim-add { display: flex; gap: 8px; align-items: stretch; margin: 0 0 12px; }
+.swim-add input { flex: 1; min-width: 0; }
+.swim-add .btn { flex-shrink: 0; }
+.swim-list-actions { margin: 6px 0 4px; }
+.swim-list-actions .btn { flex: 1 1 0; }
+.swim-log label { margin-top: 0; }
+.swim-log .weight-readout { margin-top: 12px; }
+.swim-pace-readout { margin-top: 18px !important; }
+.swim-dur { text-align: center; font-family: "Rajdhani", sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--text-body); margin: 6px 0 14px; }
+.swim-chart { padding: 14px; }
+.swim-chart-title { font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.6px; color: #fff; margin-bottom: 10px; }
+.swim-chart .wave-chart { padding-right: 12px; }
+.swim-dist .wave-chart { padding-right: 74px; }
+.swim-chart .wave-bar.pr:not(.newest) { background: linear-gradient(180deg, #ffd75e, rgba(255,215,94,0.35)); }
+.swim-pr-line { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 8px 0 4px; font-weight: 800; color: #ffd75e; }
+.swim-hist { padding: 4px 14px; }
+.swim-hist-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.swim-hist-row:last-child { border-bottom: none; }
+.swim-hist-row .sh-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 700; color: var(--text-body); }
+.swim-hist-row .sh-main b { color: #fff; }
+.swim-hist-row .sh-date { font-family: "Rajdhani", sans-serif; font-weight: 600; font-size: 0.85rem; color: var(--text-label); }
+.swim-hist-row .sh-del { flex: 0 0 44px; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid var(--line-strong); background: rgba(255,255,255,0.05); color: #ff8bb8; cursor: pointer; }
+
 /* Dim-states van afgeronde items: nooit onder 66% helderheid (§2). */
 .snack-card.sn-done { opacity: 0.72; }
 .goal-card.done-goal { opacity: 0.72; }
@@ -1280,6 +1314,7 @@ body::after { content: none; }
 <symbol id="i-squat" viewBox="0 0 24 24"><circle cx="8.6" cy="5.2" r="1.9"></circle><path d="M9.4 7.1 11.4 11.6M11.4 11.6 6.8 12.4M6.8 12.4 7.6 18.6M10.6 9.2 15.2 8.4M2.5 18.6h19"></path></symbol>
 <symbol id="i-pushup" viewBox="0 0 24 24"><circle cx="18" cy="8.4" r="1.9"></circle><path d="M16.2 9.6 8.4 13.2M12.3 11.4v5.2M8.4 13.2 4.2 16.2M2.5 18.6h19"></path></symbol>
 <symbol id="i-situp" viewBox="0 0 24 24"><circle cx="7.2" cy="8.8" r="1.9"></circle><path d="M8.8 10.1 13.6 14.2M13.6 14.2 17.4 11.2M17.4 11.2 19 17.6M2.5 18.6h19"></path></symbol>
+<symbol id="i-swim" viewBox="0 0 24 24"><circle cx="16.8" cy="6.6" r="1.9"></circle><path d="M4.2 12.6 9 9.4l3.4 2.4 3.4-2.2M2.6 16.4c1.6 1.3 3.2 1.3 4.8 0s3.2-1.3 4.8 0 3.2 1.3 4.8 0 3.2-1.3 4.8 0M2.6 20c1.6 1.3 3.2 1.3 4.8 0s3.2-1.3 4.8 0 3.2 1.3 4.8 0 3.2-1.3 4.8 0"></path></symbol>
 <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></symbol>
 <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M4 10h3l4-3v10l-4-3H4zM15.5 10l4.5 4M20 10l-4.5 4"></path></symbol>
 <symbol id="i-metronome" viewBox="0 0 24 24"><path d="M7 20L12 3.6 17 20zM5.5 20h13M12 8.6v7.2M9.4 14.4h5.2" stroke-width="1.5"></path></symbol>
@@ -1375,6 +1410,7 @@ body::after { content: none; }
     <button class="btn ghost full" id="open-squat" style="margin-top:10px;">Squats-tracker</button>
     <button class="btn ghost full" id="open-pushup" style="margin-top:10px;">Push-ups-tracker</button>
     <button class="btn ghost full" id="open-situp" style="margin-top:10px;">Sit-ups-tracker</button>
+    <button class="btn ghost full" id="open-swim" style="margin-top:10px;">Zwemmen</button>
     <button class="btn ghost full" id="open-checklist" style="margin-top:10px;"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bag"></use></svg>Meenemen-checklist</button>
   </section>
 
@@ -1501,6 +1537,17 @@ body::after { content: none; }
     <p class="reset-note">Reset elke dag automatisch naar geen vinkjes.</p>
     <div id="checklist-content"></div>
     <button class="btn ghost full small" id="reset-checklist" style="margin-top:6px;">Vinkjes nu wissen</button>
+  </section>
+
+  <!-- ============ ZWEMMEN ============ -->
+  <section id="view-swim" class="view">
+    <h2 style="text-align:center; font-size:1.6rem; font-weight:900; margin-bottom:6px;">Zwemmen</h2>
+    <p class="reset-note">De afvinklijst is elke dag weer leeg. Afstand en pace vul je na het zwemmen in.</p>
+    <div id="swim-checklist"></div>
+    <div class="section-title" id="swim-log-title">Zwembeurt invullen</div>
+    <div id="swim-log"></div>
+    <div class="section-title" id="swim-stats-title">Voortgang</div>
+    <div id="swim-stats"></div>
   </section>
 
   <!-- ============ INSTELLINGEN ============ -->
@@ -1689,6 +1736,13 @@ const TIPS = [
 const CHECKLIST = {
   "Mee": ["Handdoek", "Haarbandje", "Ademend shirt :)", "Earpods", "Bidon", "Schoenen", "Telefoon met rijbewijs"],
   "Verder": ["Overige spullen in kluisje", "Geen pet of ander hoofddeksel op"],
+};
+/* Zwemmen: wat je vooraf doet en meeneemt. Omkleden heeft een vinkje per kledingstuk;
+   het hoofdvinkje gaat vanzelf aan als ze allemaal af zijn. In de app aan te passen. */
+const SWIM_LIST_DEFAULT = {
+  omkleden: ["Zwembroek", "Onderbroek", "Mogans", "Trainingsbroek"],
+  doen: ["Trouwring thuis"],
+  mee: ["AH-tasje", "Koptelefoon", "Oordropjes", "Zwembril", "Haarband", "Tasje voor goodies", "Surfponcho", "Zwempasje", "Zwembroek", "Slippers", "Theedoek", "Onderbroek", "Fris shirt", "Sokken"],
 };
 
 /* ============================================================
@@ -2493,13 +2547,24 @@ const store = {
   setPushups: (c) => { localStorage.setItem("gymwave_pushups", JSON.stringify(c)); touch(); },
   situps: () => { const v = jget("gymwave_situps", "[]"); return Array.isArray(v) ? v : []; },
   setSitups: (c) => { localStorage.setItem("gymwave_situps", JSON.stringify(c)); touch(); },
+  swims: () => { const v = jget("gymwave_swims", "[]"); return Array.isArray(v) ? v : []; },
+  setSwims: (s) => { localStorage.setItem("gymwave_swims", JSON.stringify(s)); touch(); },
+  // eigen lijst; zolang je niets aanpast geldt de standaardlijst
+  swimList: () => {
+    const v = jget("gymwave_swim_list", "null");
+    const ok = v && SWIM_SECTIONS.every(k => Array.isArray(v[k]));
+    return JSON.parse(JSON.stringify(ok ? v : SWIM_LIST_DEFAULT));
+  },
+  setSwimList: (l) => { localStorage.setItem("gymwave_swim_list", JSON.stringify(l)); touch(); },
+  swimChecklist: () => jget("gymwave_swim_checklist", "null"),
+  setSwimChecklist: (c) => { localStorage.setItem("gymwave_swim_checklist", JSON.stringify(c)); touch(); },
   // antwoorden op de openstaande apparaat-vragen (foto-id, tekst, en of hij afgehandeld is)
   answers: () => { const v = jget("gymwave_machine_answers", "{}"); return v && typeof v === "object" ? v : {}; },
   setAnswers: (a) => { localStorage.setItem("gymwave_machine_answers", JSON.stringify(a)); touch(); },
   // weergavevoorkeuren, o.a. welke hero-rijen op Home zichtbaar zijn
   prefs: () => {
     const raw = jget("gymwave_prefs", "{}") || {};
-    return Object.assign({}, raw, { heroes: Object.assign({ gym: true, home: true, calf: true, squat: true, push: true, situp: true }, raw.heroes || {}) });
+    return Object.assign({}, raw, { heroes: Object.assign({ gym: true, home: true, calf: true, squat: true, push: true, situp: true, swim: true }, raw.heroes || {}) });
   },
   setPrefs: (p) => { localStorage.setItem("gymwave_prefs", JSON.stringify(p)); touch(); },
   chat: () => { const v = jget("gymwave_chat", "[]"); return Array.isArray(v) ? v : []; },
@@ -3200,6 +3265,7 @@ function route(view) {
   if (view === "tips") renderTips();
   if (view === "shop") renderShop();
   if (view === "checklist") renderChecklist();
+  if (view === "swim") renderSwim();
   if (view === "settings") renderSettings();
   document.getElementById("nav-session").disabled = !currentSession;
 }
@@ -3358,10 +3424,14 @@ function muscleRecovery() {
     const when = s.endedAt || (s.date ? s.date + "T18:00:00" : null);
     if (!when) return;
     (s.entries || []).forEach(e => {
-      const ex = exByName(e.name);
+      const ex = exByName(e.exerciseName || e.name);
       const keys = ex && FOCUS_MUSCLES[ex.focus];
       if (keys) note(keys, when);
     });
+  });
+  store.swims().forEach(s => {
+    const when = s.endedAt || (s.date ? s.date + "T12:00:00" : null);
+    if (when) note(SWIM_MUSCLES, when);
   });
   return MUSCLE_GROUPS.map(g => {
     const hrs = lastHit[g.key];
@@ -3424,13 +3494,19 @@ function buildHeroRows() {
     // zelfde route als de (verborgen) ghost-knop op Home — geen nieuwe route
     btn.onclick = () => document.getElementById(ghost).click();
   });
+  // zwemmen: eigen scherm en een eigen waterblauw, buiten de paarse trap
+  const swim = document.createElement("button");
+  swim.className = "hero-btn hero-swim";
+  swim.id = "enter-swim";
+  wrap.insertBefore(mkRow("row-swim", swim), extra);
+  swim.onclick = () => route("swim");
   wrap.dataset.rows = "1";
 }
 /* Een uitgezette hero-rij verdwijnt van Home en komt terug als de gewone, rustige
    ghost-knop onderaan — zo wordt het scherm kalmer zonder dat je iets kwijtraakt.
    De hero-knoppen zelf blijven in de DOM zodat alle bestaande verwijzingen
    (#enter-gym, #enter-home, …) blijven werken. */
-const HERO_FALLBACK = { gym: "open-gym", home: "open-homeworkout", calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp" };
+const HERO_FALLBACK = { gym: "open-gym", home: "open-homeworkout", calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp", swim: "open-swim" };
 function applyHeroVisibility() {
   const heroes = store.prefs().heroes;
   Object.keys(HERO_FALLBACK).forEach(k => {
@@ -3501,11 +3577,23 @@ function renderHeroRows(sessions, homeSess) {
       waitChipHtml(daysSinceISO(lastDate), 1) + heroCountsHtml("series", list.length, "reps pr", best);
   });
 
+  // --- rij 7: zwemmen ---
+  const swimBtn = document.getElementById("enter-swim");
+  if (swimBtn) {
+    const swims = swimsSorted();
+    const lastSwim = swims[swims.length - 1];
+    swimBtn.innerHTML = heroBtnHtml("swim", "Zwemmen",
+      lastSwim ? `${lastSwim.meters} m · ${fmtPace(lastSwim.pace)} /100 m` : "afvinklijst en je zwembeurten");
+    const longest = swims.reduce((mx, s) => Math.max(mx, s.meters || 0), 0);
+    swimBtn.parentElement.querySelector(".hero-side").innerHTML =
+      waitChipHtml(daysSinceISO(lastSwim ? lastSwim.date : null), 3) + heroCountsHtml("sessies", swims.length, "m pr", fmtMetersShort(longest), "Langste zwembeurt in meters");
+  }
+
   // tellers aantikbaar: aantal → geschiedenis van dat type, PR → Stats
   const jump = (row, scope) => row.querySelectorAll(".hero-count").forEach(b => {
     b.onclick = (ev) => {
       ev.stopPropagation();
-      const ghost = { calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp" }[scope];
+      const ghost = { calf: "open-calf", squat: "open-squat", push: "open-pushup", situp: "open-situp", swim: "open-swim" }[scope];
       if (ghost) { document.getElementById(ghost).click(); return; }
       statScope = scope;
       document.querySelectorAll("#stat-scope button").forEach(x => x.classList.toggle("active", x.dataset.scope === scope));
@@ -3519,13 +3607,14 @@ function renderHeroRows(sessions, homeSess) {
     if (b) jump(b.parentElement, k);
   });
   jump(calfBtn.parentElement, "calf");
+  if (swimBtn) jump(swimBtn.parentElement, "swim");
 }
 
 function renderHome() {
   document.getElementById("home-date").textContent = fmtBigDate(new Date());
   const sessions = store.sessions();
   const homeSess = store.homeSessions();
-  document.getElementById("stat-sessions").textContent = sessions.length + homeSess.length; // gym + thuis tellen allebei mee
+  document.getElementById("stat-sessions").textContent = sessions.length + homeSess.length + store.swims().length; // gym, thuis en zwemmen tellen allemaal mee
   let totalKg = 0;
   sessions.forEach(s => s.entries.forEach(e => totalKg += (parseFloat(e.weight) || 0)));
   homeSess.forEach(s => (s.entries || []).forEach(e => totalKg += (parseFloat(e.weight) || 0)));
@@ -4856,6 +4945,8 @@ function scrollSummaryBars(box) {
 document.getElementById("summary-close").addEventListener("click", () => {
   document.getElementById("summary-modal").classList.remove("show");
   if (summaryToast) toast(summaryToast);
+  const next = summaryAfterClose; summaryAfterClose = null;
+  if (next) next();
 });
 
 /* ============================================================
@@ -7556,12 +7647,367 @@ document.getElementById("reset-checklist").addEventListener("click", () => {
 });
 
 /* ============================================================
+   ZWEMMEN
+   Eén scherm: bovenaan de afvinklijst (elke dag weer leeg), daaronder het
+   invulblok voor afstand en pace (dat vul je na het zwemmen in) en onderaan je
+   voortgang. Opslaan geeft een ster en het bekende bord, maar dan in meters.
+   ============================================================ */
+const SWIM_SECTIONS = ["omkleden", "doen", "mee"];
+const SWIM_MUSCLES = ["schoud", "rug"]; // zwemmen belast vooral schouders en rug
+const MONTHS_LONG = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+let swimEditing = false; // lijst-aanpassen aan of uit
+let swimDraft = null;    // wat je aan het invullen bent: { date, meters, pace }
+
+function fmtPace(sec) { return fmtClock(Math.round(sec)); }
+function swimsSorted() {
+  return store.swims().slice().sort((a, b) => (a.date + (a.savedAt || "")).localeCompare(b.date + (b.savedAt || "")));
+}
+function swimMinutes(s) { return Math.round(s.meters / 100 * s.pace / 60); }
+// tellers op Home zijn smal: vanaf 10 km schrijven we kilometers
+function fmtMetersShort(m) { return m >= 10000 ? `${Math.round(m / 100) / 10}k` : String(m); }
+function swimWeekStart(iso) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // maandag als eerste dag
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+/* Records: langste afstand, snelste pace, en de meeste meters in één week en in één maand. */
+function swimRecords(list) {
+  const all = list || swimsSorted();
+  if (!all.length) return null;
+  const longest = all.reduce((b, s) => (s.meters > b.meters ? s : b), all[0]);
+  const fastest = all.reduce((b, s) => (s.pace < b.pace ? s : b), all[0]);
+  const sumBy = keyOf => {
+    const t = {};
+    all.forEach(s => { const k = keyOf(s.date); t[k] = (t[k] || 0) + s.meters; });
+    return Object.entries(t).reduce((b, [k, v]) => (v > b.v ? { k, v } : b), { k: null, v: 0 });
+  };
+  return { longest, fastest, week: sumBy(swimWeekStart), month: sumBy(d => d.slice(0, 7)) };
+}
+
+/* ---------- de afvinklijst ---------- */
+function swimChecklistState() {
+  let s = store.swimChecklist();
+  const today = todayISO();
+  if (!s || s.date !== today || !s.checked) { s = { date: today, checked: {} }; store.setSwimChecklist(s); }
+  return s;
+}
+// zwembroek en onderbroek staan zowel bij omkleden als bij mee: de sleutel houdt ze uit elkaar
+function swimKey(sec, item) { return sec + "|" + item; }
+function renderSwimChecklist() {
+  const wrap = document.getElementById("swim-checklist");
+  if (!wrap) return;
+  const list = store.swimList();
+  const st = swimChecklistState();
+  const on = (sec, item) => !!st.checked[swimKey(sec, item)];
+  const all = SWIM_SECTIONS.flatMap(sec => list[sec].map(item => on(sec, item)));
+  const allDone = all.length > 0 && all.every(Boolean);
+  const omkN = list.omkleden.filter(i => on("omkleden", i)).length;
+  const omkDone = list.omkleden.length > 0 && omkN === list.omkleden.length;
+  const row = (sec, item, i, sub) => `
+    <div class="check-item${on(sec, item) ? " checked" : ""}${sub ? " ci-sub" : ""}" data-sec="${sec}" data-i="${i}">
+      <div class="box">${on(sec, item) ? icon("check",18) : ""}</div><div class="ci-label">${esc(item)}</div>
+      ${swimEditing ? `<button class="ci-del" data-del="${sec}" data-i="${i}" title="Weghalen" aria-label="${esc(item)} weghalen">${icon("trash",16)}</button>` : ""}
+    </div>`;
+  // niet-afgevinkt eerst, afgevinkt onderaan — behalve bij omkleden, dat blijft in vaste volgorde
+  const ordered = sec => {
+    const idx = list[sec].map((item, i) => ({ item, i }));
+    return [...idx.filter(x => !on(sec, x.item)), ...idx.filter(x => on(sec, x.item))];
+  };
+  const addRow = (sec, ph) => swimEditing ? `
+    <div class="swim-add"><input type="text" maxlength="40" data-add="${sec}" placeholder="${ph}" /><button class="btn small" data-addbtn="${sec}">${icon("plus",16)}Toevoegen</button></div>` : "";
+  wrap.innerHTML = `
+    ${allDone ? `<div class="goodtogo">You're good to go!</div>` : ""}
+    <div class="section-title" style="margin-top:0;">Doen</div>
+    ${list.omkleden.length ? `
+    <div class="check-item ci-parent${omkDone ? " checked" : ""}" data-parent="omkleden">
+      <div class="box">${omkDone ? icon("check",18) : ""}</div><div class="ci-label">Omkleden</div><span class="ci-count">${omkN}/${list.omkleden.length}</span>
+    </div>
+    ${list.omkleden.map((item, i) => row("omkleden", item, i, true)).join("")}` : ""}
+    ${addRow("omkleden", "Kledingstuk bij omkleden…")}
+    ${ordered("doen").map(x => row("doen", x.item, x.i)).join("")}
+    ${addRow("doen", "Iets om te doen…")}
+    <div class="section-title">Mee</div>
+    ${ordered("mee").map(x => row("mee", x.item, x.i)).join("")}
+    ${addRow("mee", "Iets om mee te nemen…")}
+    <div class="speak-row swim-list-actions">
+      <button class="btn ghost small" id="swim-edit">${icon(swimEditing ? "check" : "gear",15)}${swimEditing ? "Klaar met aanpassen" : "Lijst aanpassen"}</button>
+      <button class="btn ghost small" id="swim-reset">${icon("refresh",15)}Vinkjes wissen</button>
+    </div>`;
+  const toggle = (sec, item, val) => {
+    const s = swimChecklistState();
+    const k = swimKey(sec, item);
+    if (val == null ? !s.checked[k] : val) s.checked[k] = true; else delete s.checked[k];
+    store.setSwimChecklist(s);
+  };
+  wrap.querySelectorAll(".check-item[data-sec]").forEach(el => el.onclick = () => {
+    const sec = el.dataset.sec, item = list[sec][parseInt(el.dataset.i)];
+    if (item == null) return;
+    toggle(sec, item);
+    renderSwimChecklist();
+  });
+  // het hoofdvinkje zet alle kledingstukken in één keer aan of uit
+  const parent = wrap.querySelector("[data-parent]");
+  if (parent) parent.onclick = () => {
+    list.omkleden.forEach(item => toggle("omkleden", item, !omkDone));
+    renderSwimChecklist();
+  };
+  wrap.querySelectorAll("[data-del]").forEach(b => b.onclick = (ev) => {
+    ev.stopPropagation();
+    const sec = b.dataset.del, l = store.swimList();
+    const item = l[sec][parseInt(b.dataset.i)];
+    if (item == null) return;
+    l[sec].splice(parseInt(b.dataset.i), 1);
+    store.setSwimList(l);
+    toggle(sec, item, false);
+    renderSwimChecklist();
+    toast(`${item} staat niet meer op je lijst`);
+  });
+  const add = (sec) => {
+    const inp = wrap.querySelector(`[data-add="${sec}"]`);
+    const txt = (inp && inp.value || "").trim();
+    if (!txt) return;
+    const l = store.swimList();
+    if (l[sec].some(x => x.toLowerCase() === txt.toLowerCase())) { toast("Die staat er al op"); return; }
+    l[sec].push(txt);
+    store.setSwimList(l);
+    renderSwimChecklist();
+    const again = document.querySelector(`#swim-checklist [data-add="${sec}"]`);
+    if (again) again.focus();
+  };
+  wrap.querySelectorAll("[data-addbtn]").forEach(b => b.onclick = () => add(b.dataset.addbtn));
+  wrap.querySelectorAll("[data-add]").forEach(inp => inp.onkeydown = (ev) => { if (ev.key === "Enter") add(inp.dataset.add); });
+  wrap.querySelector("#swim-edit").onclick = () => { swimEditing = !swimEditing; renderSwimChecklist(); };
+  wrap.querySelector("#swim-reset").onclick = () => {
+    store.setSwimChecklist({ date: todayISO(), checked: {} });
+    renderSwimChecklist();
+  };
+}
+
+/* ---------- zwembeurt invullen ---------- */
+function swimDefaults() {
+  const all = swimsSorted();
+  const last = all[all.length - 1];
+  return { date: todayISO(), meters: last ? last.meters : 1000, pace: last ? last.pace : 150 };
+}
+function renderSwimLog() {
+  const box = document.getElementById("swim-log");
+  if (!box) return;
+  if (!swimDraft) swimDraft = swimDefaults();
+  const d = swimDraft;
+  box.innerHTML = `
+    <div class="card swim-log">
+      <label for="swim-date">Datum</label>
+      <input type="date" id="swim-date" value="${esc(d.date)}" max="${todayISO()}" />
+      <div class="weight-readout">
+        <div class="wr-val"><span class="wr-num" id="swim-m">${d.meters}</span><span class="wr-unit">m</span></div>
+        <div class="stack-label">afstand · stap 25 m, één baan</div>
+      </div>
+      <div class="weight-ctrl">
+        <button class="wbtn wmin" data-swim="meters" data-d="-1" aria-label="25 meter minder">${icon("minus",20)}</button>
+        <button class="wbtn wplus" data-swim="meters" data-d="1" aria-label="25 meter meer">${icon("plus",20)}</button>
+      </div>
+      <input type="range" class="weight-slider" data-slider="meters" min="0" max="5000" step="25" value="${Math.min(d.meters, 5000)}" />
+      <div class="weight-readout swim-pace-readout">
+        <div class="wr-val"><span class="wr-num" id="swim-p">${fmtPace(d.pace)}</span><span class="wr-unit">/100 m</span></div>
+        <div class="stack-label">gemiddelde pace · stap 1 sec</div>
+      </div>
+      <div class="weight-ctrl">
+        <button class="wbtn wmin" data-swim="pace" data-d="-1" aria-label="1 seconde sneller">${icon("minus",20)}</button>
+        <button class="wbtn wplus" data-swim="pace" data-d="1" aria-label="1 seconde trager">${icon("plus",20)}</button>
+      </div>
+      <input type="range" class="weight-slider" data-slider="pace" min="60" max="300" step="1" value="${Math.min(Math.max(d.pace, 60), 300)}" />
+      <div class="swim-dur" id="swim-dur"></div>
+      <button class="btn full" id="swim-save">${icon("flag",20)}Zwembeurt opslaan</button>
+    </div>`;
+  const paint = () => {
+    box.querySelector("#swim-m").textContent = d.meters;
+    box.querySelector("#swim-p").textContent = fmtPace(d.pace);
+    box.querySelector('[data-slider="meters"]').value = Math.min(d.meters, 5000);
+    box.querySelector('[data-slider="pace"]').value = Math.min(Math.max(d.pace, 60), 300);
+    box.querySelector("#swim-dur").textContent = d.meters > 0
+      ? `Ongeveer ${swimMinutes(d)} minuten in het water` : "Zet de afstand op je aantal meters";
+  };
+  const set = (k, v) => {
+    d[k] = k === "meters" ? Math.max(0, Math.min(20000, Math.round(v / 25) * 25)) : Math.max(30, Math.min(600, Math.round(v)));
+    paint();
+  };
+  box.querySelectorAll("[data-swim]").forEach(b => b.onclick = () => {
+    const k = b.dataset.swim;
+    set(k, d[k] + parseInt(b.dataset.d) * (k === "meters" ? 25 : 1));
+  });
+  box.querySelectorAll("[data-slider]").forEach(sl => sl.oninput = () => set(sl.dataset.slider, parseFloat(sl.value)));
+  box.querySelector("#swim-date").onchange = (ev) => {
+    const v = ev.target.value;
+    d.date = v && v <= todayISO() ? v : todayISO();
+    ev.target.value = d.date;
+  };
+  box.querySelector("#swim-save").onclick = saveSwim;
+  paint();
+}
+function saveSwim() {
+  const d = swimDraft;
+  if (!d || !(d.meters > 0) || !(d.pace > 0)) { toast("Zet eerst je afstand op het aantal meters"); return; }
+  const date = d.date && d.date <= todayISO() ? d.date : todayISO();
+  const before = swimRecords();
+  const now = new Date().toISOString();
+  // alleen de datum is bekend; voor vandaag is "nu" een goede schatting voor het spierherstel
+  const swim = { id: uuid(), date, meters: d.meters, pace: d.pace, savedAt: now, endedAt: date === todayISO() ? now : date + "T12:00:00" };
+  const all = store.swims(); all.push(swim); store.setSwims(all);
+  incentiveAddStar(); // elke zwembeurt telt richting je beloning
+  const pr = { dist: !!before && swim.meters > before.longest.meters, pace: !!before && swim.pace < before.fastest.pace };
+  swimDraft = null;
+  celebrate();
+  voiceCoach.speak(`Zwembeurt opgeslagen: ${swim.meters} meter.${pr.dist ? " Je langste ooit!" : ""}${pr.pace ? " En je snelste pace!" : ""} Sterk gezwommen!`, { interrupt: true });
+  renderSwim();
+  showSwimSummary(swim, pr);
+}
+
+/* ---------- het bord na het opslaan ---------- */
+function swimBoardHtml(fin, opts) {
+  const all = swimsSorted();
+  const idx = all.findIndex(s => s.id === fin.id);
+  const prev = idx > 0 ? all[idx - 1] : null;
+  const avgOf = l => Math.round(l.reduce((a, s) => a + s.meters, 0) / Math.max(1, l.length));
+  const avgAll = avgOf(all);
+  const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const last30 = all.filter(s => s.date >= cutoff);
+  const avg30 = last30.length ? avgOf(last30) : avgAll;
+  const H = 200;
+  const maxVal = Math.max(1, ...all.map(s => s.meters), avgAll, avg30, prev ? prev.meters : 0) * 1.12;
+  const y = v => Math.round(v / maxVal * H);
+  const deltaTag = (ref) => {
+    const dd = fin.meters - ref;
+    if (!dd) return `<span class="ss-delta">± 0 m</span>`;
+    return `<span class="ss-delta ${dd > 0 ? "up" : "down"}">${dd > 0 ? icon("arrow",13,'style="transform:rotate(-90deg)"') + " +" : icon("arrow",13,'style="transform:rotate(90deg)"') + " -"}${Math.abs(dd)} m</span>`;
+  };
+  // bij pace is lager beter: sneller krijgt de groene pijl omhoog
+  const paceTag = (ref) => {
+    const dd = fin.pace - ref;
+    if (!dd) return `<span class="ss-delta">zelfde tempo</span>`;
+    return `<span class="ss-delta ${dd < 0 ? "up" : "down"}">${dd < 0 ? icon("arrow",13,'style="transform:rotate(-90deg)"') : icon("arrow",13,'style="transform:rotate(90deg)"')} ${Math.abs(dd)} s ${dd < 0 ? "sneller" : "trager"}</span>`;
+  };
+  const pr = (opts && opts.pr) || {};
+  return `
+    <div class="ss-kg">${fin.meters} m</div>
+    <div class="ss-sub">${esc(fmtNice(fin.date))} · ${fmtPace(fin.pace)} /100 m · ongeveer ${swimMinutes(fin)} min</div>
+    ${pr.dist || pr.pace ? `<div class="swim-pr-line">${icon("trophy",16)}<span>Nieuw record: ${[pr.dist ? "langste afstand" : "", pr.pace ? "snelste pace" : ""].filter(Boolean).join(" én ")}!</span></div>` : ""}
+    ${opts && opts.ster ? incentiveSummaryHtml() : ""}
+    <div class="ss-chart-wrap">
+      <div class="ss-bars">${all.map(s => `<div class="ss-bar ${s.id === fin.id ? "cur" : ""}" style="height:${Math.max(3, y(s.meters))}px" title="${esc(s.date)}: ${s.meters} m"></div>`).join("")}</div>
+      <div class="ss-line avg" style="bottom:${y(avgAll)}px;"></div>
+      <div class="ss-line d30" style="bottom:${y(avg30)}px;"></div>
+      ${prev ? `<div class="ss-line prev" style="bottom:${y(prev.meters)}px;"></div>` : ""}
+    </div>
+    ${all.length > 1 ? `
+    <div class="ss-legend">
+      <div class="row"><span class="ss-swatch avg"></span> Gemiddeld: <b>${avgAll} m</b> ${deltaTag(avgAll)}</div>
+      <div class="row"><span class="ss-swatch d30"></span> Gemiddeld 30 dagen: <b>${avg30} m</b> ${deltaTag(avg30)}</div>
+      ${prev ? `<div class="row"><span class="ss-swatch prev"></span> Vorige keer: <b>${prev.meters} m</b> ${deltaTag(prev.meters)}</div>
+      <div class="row">Pace vorige keer: <b>${fmtPace(prev.pace)} /100 m</b> ${paceTag(prev.pace)}</div>` : ""}
+    </div>` : `<div class="ss-sub" style="margin-top:8px;">Je eerste zwembeurt staat op het bord. Vanaf nu zie je hier hoe je vooruitgaat!</div>`}`;
+}
+let summaryAfterClose = null; // eenmalige vervolgstap na het sluiten van het bord
+function showSwimSummary(fin, pr) {
+  const box = document.getElementById("summary-content");
+  const modal = document.getElementById("summary-modal");
+  if (!box || !modal) return;
+  const closeBtn = document.getElementById("summary-close");
+  if (closeBtn) closeBtn.innerHTML = icon("chart",18) + "Bekijk je voortgang";
+  const titel = modal.querySelector("h3");
+  if (titel) titel.textContent = "Zwembeurt opgeslagen!";
+  summaryToast = "";
+  summaryAfterClose = () => {
+    const el = document.getElementById("swim-stats-title");
+    if (el && isView("swim")) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  };
+  box.innerHTML = swimBoardHtml(fin, { ster: true, pr });
+  modal.classList.add("show");
+  scrollSummaryBars(box);
+}
+
+/* ---------- voortgang op het zwemscherm ---------- */
+function renderSwimStats() {
+  const wrap = document.getElementById("swim-stats");
+  if (!wrap) return;
+  const all = swimsSorted();
+  if (!all.length) {
+    wrap.innerHTML = `<div class="empty-state">Nog geen zwembeurten. Vul na het zwemmen je afstand en pace in, dan zie je hier je voortgang.</div>`;
+    return;
+  }
+  const rec = swimRecords(all);
+  const md = iso => iso.slice(5).replace("-", "/");
+  const lastIdx = all.length - 1;
+  // afstand: hoe langer, hoe hoger
+  const maxM = Math.max(...all.map(s => s.meters), 1);
+  const distBars = all.map((s, i) => {
+    const newest = i === lastIdx, isPr = s.id === rec.longest.id;
+    return `<div class="wave-bar${newest ? " newest" : ""}${isPr ? " pr" : ""}" style="height:0%;" data-h="${Math.max(6, s.meters / maxM * 100)}" title="${esc(s.date)}: ${s.meters} m${isPr ? " · langste" : ""}">${newest || isPr ? `<span class="bar-val">${isPr ? iconFill("star-solid",11) : ""}${s.meters}</span>` : ""}<span class="bar-date">${md(s.date)}</span></div>`;
+  }).join("");
+  // pace: lager is sneller, dus de balk wordt hoger naarmate je sneller zwom
+  const paces = all.map(s => s.pace);
+  const minP = Math.min(...paces), maxP = Math.max(...paces);
+  const paceH = p => maxP > minP ? 25 + 75 * (maxP - p) / (maxP - minP) : 85;
+  const paceBars = all.map((s, i) => {
+    const newest = i === lastIdx, isPr = s.id === rec.fastest.id;
+    return `<div class="wave-bar${newest ? " newest" : ""}${isPr ? " pr" : ""}" style="height:0%;" data-h="${paceH(s.pace)}" title="${esc(s.date)}: ${fmtPace(s.pace)} /100 m${isPr ? " · snelste" : ""}">${newest || isPr ? `<span class="bar-val">${isPr ? iconFill("star-solid",11) : ""}${fmtPace(s.pace)}</span>` : ""}<span class="bar-date">${md(s.date)}</span></div>`;
+  }).join("");
+  const [my, mm] = rec.month.k.split("-").map(Number);
+  wrap.innerHTML = `
+    <div class="card swim-chart swim-dist">
+      <div class="swim-chart-title">Afstand per zwembeurt</div>
+      <div class="chart-wrap">${refLinesHtml(all.map(s => s.meters), maxM, "m")}<div class="wave-chart">${distBars}</div></div>
+      <div class="legend" style="margin-top:8px;">Meters per zwembeurt · ster = je langste afstand</div>
+    </div>
+    <div class="card swim-chart swim-pace">
+      <div class="swim-chart-title">Pace per zwembeurt</div>
+      <div class="chart-wrap"><div class="wave-chart">${paceBars}</div></div>
+      <div class="legend" style="margin-top:8px;">Hoe hoger de balk, hoe sneller je zwom (lagere pace). Ster = je snelste pace: <b>${fmtPace(rec.fastest.pace)} /100 m</b>.</div>
+    </div>
+    <div class="section-title">Records</div>
+    <div class="card"><div class="rec-list">
+      <div class="rec-row"><span class="rec-name">Langste afstand</span><span class="rec-val">${icon("trophy",14)}${rec.longest.meters} m</span><span class="rec-date">${esc(fmtNice(rec.longest.date))}</span></div>
+      <div class="rec-row"><span class="rec-name">Snelste pace</span><span class="rec-val">${icon("trophy",14)}${fmtPace(rec.fastest.pace)} /100 m</span><span class="rec-date">${esc(fmtNice(rec.fastest.date))}</span></div>
+      <div class="rec-row"><span class="rec-name">Meeste meters in een week</span><span class="rec-val">${icon("trophy",14)}${rec.week.v} m</span><span class="rec-date">week van ${esc(fmtNice(rec.week.k).toLowerCase())}</span></div>
+      <div class="rec-row"><span class="rec-name">Meeste meters in een maand</span><span class="rec-val">${icon("trophy",14)}${rec.month.v} m</span><span class="rec-date">${MONTHS_LONG[mm - 1]} ${my}</span></div>
+    </div></div>
+    <div class="section-title">Je zwembeurten</div>
+    <div class="card swim-hist">${all.slice().reverse().map(s => `
+      <div class="swim-hist-row">
+        <div class="sh-main"><span><b>${s.meters} m</b> · ${fmtPace(s.pace)} /100 m</span><span class="sh-date">${esc(fmtNice(s.date))}</span></div>
+        <button class="sh-del" data-del-swim="${esc(s.id)}" title="Zwembeurt verwijderen" aria-label="Zwembeurt van ${esc(fmtNice(s.date))} verwijderen">${icon("trash",16)}</button>
+      </div>`).join("")}
+    </div>`;
+  wrap.querySelectorAll("[data-del-swim]").forEach(b => b.onclick = () => {
+    const s = store.swims().find(x => x.id === b.dataset.delSwim);
+    if (!s) return;
+    showModal("Zwembeurt verwijderen?", `${s.meters} m op ${fmtNice(s.date)} verdwijnt uit je voortgang.`, () => {
+      store.setSwims(store.swims().filter(x => x.id !== s.id));
+      renderSwim();
+      toast("Zwembeurt verwijderd");
+    });
+  });
+  requestAnimationFrame(() => {
+    wrap.querySelectorAll(".swim-chart").forEach(card => {
+      scrollChartToNewest(card);
+      thinBarDates(card);
+      card.querySelectorAll(".wave-bar").forEach((b, i) => setTimeout(() => { b.style.height = b.dataset.h + "%"; }, i * 50));
+    });
+  });
+}
+function renderSwim() {
+  renderSwimChecklist();
+  renderSwimLog();
+  renderSwimStats();
+}
+document.getElementById("open-swim").addEventListener("click", () => route("swim"));
+
+/* ============================================================
    INSTELLINGEN
    ============================================================ */
 function renderSettings() { renderThemeGrid(); renderHeroSettings(); renderManageMachines(); renderCoachSettings(); renderLocationSettings(); renderGarminSettings(); renderAiSettings(); renderCloud(); }
 /* Welke snelknoppen (hero-rijen) op Home staan. Uitzetten haalt de rij weg; via de
    balk onderin blijft alles bereikbaar. */
-const HERO_KINDS = [["gym", "De Gym In"], ["home", "Thuis Gymmen"], ["calf", "Calf raises"], ["squat", "Squats"], ["push", "Push-ups"], ["situp", "Sit-ups"]];
+const HERO_KINDS = [["gym", "De Gym In"], ["home", "Thuis Gymmen"], ["calf", "Calf raises"], ["squat", "Squats"], ["push", "Push-ups"], ["situp", "Sit-ups"], ["swim", "Zwemmen"]];
 function renderHeroSettings() {
   const box = document.getElementById("hero-settings");
   if (!box) return;
@@ -7851,6 +8297,7 @@ function exportData() {
     machines: store.machines().map(m => { const c = {...m}; delete c._editing; return c; }),
     sessions: store.sessions(), checklist: store.checklist(),
     goals: store.goals(), coach: store.coach(), profile: store.profile(), home: store.home(), calf: store.calf(), squats: store.squats(), pushups: store.pushups(), situps: store.situps(),
+    swims: store.swims(), swimList: store.swimList(), swimChecklist: store.swimChecklist(),
     currentSession: store.currentSession(), homeWorkout: store.homeWorkout(),
     homeSessions: store.homeSessions(),
   };
@@ -7888,6 +8335,9 @@ document.getElementById("import-file").addEventListener("change", (e) => {
       if (Array.isArray(data.squats)) store.setSquats(data.squats);
       if (Array.isArray(data.pushups)) store.setPushups(data.pushups);
       if (Array.isArray(data.situps)) store.setSitups(data.situps);
+      if (Array.isArray(data.swims)) store.setSwims(data.swims);
+      if (data.swimList && SWIM_SECTIONS.every(k => Array.isArray(data.swimList[k]))) store.setSwimList(data.swimList);
+      if (data.swimChecklist) store.setSwimChecklist(data.swimChecklist);
       if (data.theme && THEMES[data.theme]) applyTheme(data.theme);
       store.setSetupDone(true);
       currentSession = null; expandedMachineId = null;
@@ -7906,7 +8356,7 @@ document.getElementById("reset-data").addEventListener("click", () => {
   showModal("Alle data wissen?", "Dit verwijdert permanent al je apparaten, sessies, doelen, foto's en instellingen op dit apparaat. Cloud-sync wordt eerst uitgeschakeld, zodat je andere apparaten niets kwijtraken. Dit kan niet ongedaan worden gemaakt.", () => {
     cloud.disable(); // eerst sync los, anders wordt de lege staat naar de cloud gepusht
     ["gymwave_machines","gymwave_sessions","gymwave_setup_done","gymwave_theme","gymwave_checklist",
-     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_chat",
+     "gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_swims","gymwave_swim_list","gymwave_swim_checklist","gymwave_chat",
      "gymwave_api_key","gymwave_snack_salt","gymwave_snack_done","gymwave_current_session","gymwave_last_modified"].forEach(k => localStorage.removeItem(k));
     photoDB.clear().catch(() => {});
     currentSession = null; expandedMachineId = null; obMachines = []; applyTheme("Synthwave"); boot();
@@ -7950,7 +8400,7 @@ document.getElementById("modal-confirm").onclick = () => {
    ============================================================ */
 const SUPABASE_URL = "https://wmdopfocqufsquzvemka.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0vzeEC0FttISlsEiDaFCnw_N7bjjNym"; // publieke (publishable) sleutel — veilig in de client
-const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_home_workout","gymwave_home_sessions","gymwave_machine_answers","gymwave_prefs"];
+const SYNC_KEYS = ["gymwave_machines","gymwave_sessions","gymwave_theme","gymwave_setup_done","gymwave_checklist","gymwave_current_session","gymwave_goals","gymwave_coach","gymwave_profile","gymwave_home","gymwave_calf","gymwave_squats","gymwave_pushups","gymwave_situps","gymwave_swims","gymwave_swim_list","gymwave_swim_checklist","gymwave_home_workout","gymwave_home_sessions","gymwave_machine_answers","gymwave_prefs"];
 
 const cloudState = { client: null, applyingRemote: false, pushTimer: null, lastStatus: "" };
 

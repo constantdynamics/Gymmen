@@ -20,15 +20,15 @@ async function seedReps(page) {
   await page.waitForTimeout(250);
 }
 
-test.describe('Home: zes activiteitsrijen', () => {
-  test('zes rijen in de juiste volgorde, elk met chip en tellers', async ({ page }) => {
+test.describe('Home: zeven activiteitsrijen', () => {
+  test('zeven rijen in de juiste volgorde, elk met chip en tellers', async ({ page }) => {
     await openApp(page);
     await seedReps(page);
-    await expect(page.locator('.hero-row')).toHaveCount(6);
+    await expect(page.locator('.hero-row')).toHaveCount(7);
     expect(await page.locator('.hero-title').allTextContents())
-      .toEqual(['De Gym In', 'Thuis Gymmen', 'Calf raises', 'Squats', 'Push-ups', 'Sit-ups']);
-    await expect(page.locator('.wait-chip')).toHaveCount(6);
-    await expect(page.locator('.hero-count')).toHaveCount(12);
+      .toEqual(['De Gym In', 'Thuis Gymmen', 'Calf raises', 'Squats', 'Push-ups', 'Sit-ups', 'Zwemmen']);
+    await expect(page.locator('.wait-chip')).toHaveCount(7);
+    await expect(page.locator('.hero-count')).toHaveCount(14);
   });
 
   test('de zes rijen vormen een paarse schaal van donker naar licht', async ({ page }) => {
@@ -439,7 +439,7 @@ test.describe('Randvoorwaarden voor de nieuwe rijen', () => {
     expect((hi + 0.05) / (lo + 0.05)).toBeGreaterThanOrEqual(4.5);
   });
 
-  test('zes rijen passen nog steeds binnen 360 px', async ({ page }) => {
+  test('zeven rijen passen nog steeds binnen 360 px', async ({ page }) => {
     await openApp(page);
     await seedReps(page);
     for (const v of ['home', 'thuis']) {
