@@ -47,6 +47,7 @@ De huidige stijl is "synthwave/neon": donkere achtergronden, felle glow-kleuren,
 - Twee stat-pills: SESSIES TOTAAL en KG GETILD TOTAAL (gym + thuis samen)
 - Herstel-tijdlijn (spierherstel na de laatste sessie), doelen-blok, "beste tijdstip"-blok, weer-widget (via postcode)
 - Ghost-knoppen naar calf raises-tracker en meenemen-checklist
+- Zevende rij **Zwemmen** (`.hero-swim`, waterblauw, bewust buiten de paarse trap): laatste zwembeurt, wachttijd-chip, tellers sessies en langste afstand (m pr); opent het zwemscherm
 
 ### 4.3 Gym-sessie (`#view-session`) — het meest gebruikte scherm
 - Header: sessienaam-invoerveld, 🔊/🔇 audio-coach-knop, voortgangstag "3 / 9"
@@ -92,6 +93,12 @@ De huidige stijl is "synthwave/neon": donkere achtergronden, felle glow-kleuren,
 
 ### 4.10 Meenemen (`#view-checklist`)
 - Checklist-items met vinkjes (reset dagelijks), "Vinkjes nu wissen"
+
+### 4.10b Zwemmen (`#view-swim`)
+- Afvinklijst **Doen** (Omkleden met een vinkje per kledingstuk dat vanzelf aangaat als ze allemaal af zijn, trouwring thuis) en **Mee**; elke dag weer leeg, knop "Vinkjes wissen", en via "Lijst aanpassen" items toevoegen of weghalen
+- **Zwembeurt invullen**: datum (standaard vandaag, ook eerder), afstand als groot cijfer met −/+ per 25 m en slider, gemiddelde pace per 100 m met −/+ per seconde en slider, "ongeveer x minuten in het water", knop "Zwembeurt opslaan"
+- Na opslaan het samenvattingsbord in meters (balken, lijnen gemiddeld / 30 dagen / vorige keer, pace-verschil met vorige keer, records-regel, ster)
+- **Voortgang**: grafiek afstand per zwembeurt, grafiek pace per zwembeurt (hogere balk = sneller), records (langste afstand, snelste pace, meeste meters in een week en in een maand) en de lijst met zwembeurten (verwijderen kan)
 
 ### 4.11 Instellingen (`#view-settings`)
 - Thema-grid (5 thema-previews), apparaten beheren (lijst + bewerken + "+ toevoegen" + standaardschema herladen), audio-coach (aan/uit, intensiteit rustig/fanatiek/beest, 1×/2× voorlezen), 📍 sportschool (postcode voor het weer), Garmin & hartslag, AI-coach-instellingen, data export/import, cloud-sync, gevarenzone (alles wissen, rode stijl)
